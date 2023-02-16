@@ -1,0 +1,134 @@
+2022-10-01:
+  1.18.0old  - change UPDATE_FIRMWARE_HOST to baboon server 
+
+2022-09-10:
+  1.17.1  - added ESP32-C3
+
+2022-08-05:
+  1.17.0  - official release 1.17.0 including both: env and motion sensors
+
+2022-07-30:
+  1.16.2  - print MAC address in setup() if DEBUG
+          - print IP address during upgrade FW
+
+2022-07-30:
+  1.16.1  - new devices: 100. 101, 102, 104
+          - PERIODIC_FW_CHECK_HRS  14400 -> 30 days between updates
+
+2022-07-26:
+  1.16.0  - change of the data structure
+          - lux_with_tept(long int* lux_int); - not char
+
+2022-07-24:
+  1.15.2  - MINIMUM_VOLTS=3.3V for new devices
+
+2022-07-24:
+  1.15.1a - lipo.reset() on reset button or power reconnect
+          - boot_reason in loop() as sometimes Serial is not fast enough to print in setup()
+
+2022-07-23:
+  1.15.0 - "motion" "env" ok
+         - corrections
+
+2022-07-06:
+  1.15.b1 - added:
+            char sender_type[10]; // "motion" "env"
+            char motion[2];       // "0" "1"  [2]
+            for motion devices to reuse gateway with the same message structure
+
+2022-07-06:
+  1.14.2  - default PERIODIC_FW_CHECK_HRS is now 168 - 7 days
+  1.14.1  - turn off ENABLE_3V_GPIO when gather_data() fails (otherwise sleep current is 300uA)
+
+2022-07-05:
+  1.14.0  - rename LEDs, blink RED on error, MINIMUM_VOLTS=3.5V
+
+2022-07-04:
+  1.14.b1 - battery change rate, redo myData structure, fake receiver, lipo.quickStart abandoned
+
+2022-07-02:
+  1.13.0 - define MAC_BROADCAST for sending to all (receivers)
+
+2022-07-02:
+  1.12.0 - send to either of 2 receivers depending on bootCount (even/odd)
+
+2022-06-28:
+  1.11.1 - boot_reason added to reset bootCount on button reset
+  1.11.0 - major rework on charging_state()
+         - cosmetics
+
+2022-06-25:
+  1.10.5 - blink FW_UPGRADE_LED_GPIO on FAILED
+  1.10.4 - PERIODIC_FW_CHECK changed to PERIODIC_FW_CHECK_HRS
+
+2022-06-24:
+  1.10.3 - print MAC address while connecting to AP
+  1.10.2 - #define GND_GPIO_FOR_LED      13    // if not equipped comment out - GND for ACTIVITY_LED_GPIO
+         - testing esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_11B|WIFI_PROTOCOL_11G|WIFI_PROTOCOL_11N|WIFI_PROTOCOL_LR);
+           to extend the range of radio (no conclusion yet)
+         - print MAC address while connecting to AP
+
+2022-06-23:
+  1.10.1 - ESP32_IS_CHEATING measured for ESP32-S2 to be -288ms (head, tail, last commands) - added and verified
+
+2022-06-23:
+  1.10.0 - PPK2_GPIO and code added to measure current and time
+         - ESP32_IS_CHEATING measured for ESP32S to be 325ms (head, tail, last commands) - added and verified
+
+2022-06-22:
+  1.9.2 - version description in changelog.txt
+
+2022-06-22:
+  1.9.1 - cosmetics
+
+2022-06-22:
+  1.9.0 - ontime saved
+        - define ESP32_IS_CHEATING
+
+2022-06-20:
+  1.8.2 - cleaning even more: printf instead of print(ln) where possible
+        - reset bootCount on DRD_Detected
+
+2022-06-19:
+  1.8.1 - cleaning code for github ;-)
+
+2022-06-18:
+  1.8.0 - bootCount in file and in HA, periodic FW upgrade/check every PERIODIC_FW_CHECK (number of restarts)
+
+2022-06-18:
+  1.7.1 - "FW UPG..." instead of VERSION during upgrade
+
+2022-06-16:
+  1.7.0 - major rework of wire.h etc. - should be ok now
+
+2022-06-16:
+  1.6.1 - choose device to be compiled in main sketch
+
+  1.6.0 -  TSL2561 moved to SparkFunTSL2561, all in gather_data - nothing in setup
+        -  see if battery is still up/down every 30 minutes
+
+2022-06-15:
+  1.5.1 - move boards definitions to "devices_config.h"
+        - supress boot messages from ESP
+
+2022-06-14:
+  1.5.0 - Major redefinitions, choose sensors the device is equipped with
+
+2022-06-14:
+  1.4.0 - MINIMUM_VOLTS added to avoid start wifi if too low battery
+        - WAIT_FOR_WIFI=5s in seconds for upgrade
+
+2022-06-12:
+  1.3.1 - added USE_CUSTOM_I2C_GPIO
+        - moved SLEEP_TIME to each sensor config to have different sleep times
+
+2022-06-12:
+  1.3.0 - added DEVICE_NAME
+
+2022-06-12:
+  1.2.0 - Firmware Upgrade on double push button (fast after boot (led blinks))
+        - FW_UPGRADE_LED_GPIO (flashing during firmware upgrade) - red LED  flashes during upgrade, SOS on failure
+        - if no FW_UPGRADE_LED_GPIO then ACTIVITY_LED_GPIO will flash (if defined)
+
+2022-06-11:
+  1.1.0 - added lux from TEPT/ADC, added CHARGING_GPIO

@@ -1,0 +1,20 @@
+2022-08-07:
+  1.19.b2 - corrections and cleaning the code 
+
+2022-08-06:
+  1.18.3  - major rework battery
+          - send update to HA before FW upgrade starts
+  1.18.2  - lipo.reset() on FW_UPGRADE_GPIO or reset/power
+  1.18.1  - adding MAX17048 data from new boards
+  1.18.0  - correction in ext1 wakeup gpio mask - it calculates mask instead of hard coded pins
+
+2022-08-05:
+  1.17.0  - official release 1.17.0 including both: env and motion sensors
+
+2022-08-05:
+  1.16.0  - current load: 45uA in both: standby and cooling
+          - FW update on button press
+2022-08-04:
+  1.15.1  - battery monitoring (Volts) over ADC
+  1.15.0  - PIR motion detector wake up on GPIO and on heartbeat
+          - no FW update yet

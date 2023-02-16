@@ -1,0 +1,437 @@
+{
+  "uuid": "b5cfc27b054ba9ece9c6df62ccd32247",
+  "path": "Offline/ESP32S2-new%20sensor%20device%20template",
+  "name": "ESP32S2-new sensor device template",
+  "content": "",
+  "created_at": "2022-05-23 09:10:59",
+  "updated_at": "2022-07-07 21:51:29",
+  "stick": "",
+  "documents": [
+    {
+      "uuid": "6c4cb843408a372bcf99ba4b318a4e20",
+      "title": "schematic",
+      "description": "",
+      "docType": "1",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "12455067eb33456fbfc99ede78ea4211": 1,
+        "481f8e4ed10e4ad591955ec207ed64df": 1,
+        "9edb4d87c6cf441898f7fb44c9cce1f6": 1,
+        "24eeb2ceca08480b92b847b6a310acda": 2,
+        "253ff9e37bbb4c3081915352d3b6344b": 6,
+        "9c4544e26e1141d9a916165324469e60": 1,
+        "36be002046ee442daec3a30b0f22c9fe": 6,
+        "5cbe824183374fac8e4c1ae848199ce3": 1,
+        "7463a72b8a4540a09ec5278562590438": 1,
+        "444eb523f1484933b5b11c95fe142b6a": 1,
+        "8530036925254c879323a241341a7eae": 2,
+        "cfe329ef744646d4b294fac19e41e939": 1,
+        "3aaf6fd24c39ed69212ebeb331e3a4b4": 1,
+        "e0a955b7f916443daa29242ce21aaf8c": 2,
+        "b5c0913732d64a8283d44140bd469a65": 2,
+        "813630576eb64241a2faf598389644b1": 4,
+        "da49102266de49aaaefb16e764266eb3": 2,
+        "07aa0976f72c4cc0978a337162a4455b": 1,
+        "f6ecf3d99b253b820a00f4ab1dadf5fe": 2
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "BATTERY",
+          1,
+          "LIPO-110-TABS",
+          "BAT1",
+          {
+            "BOM_Manufacturer Part": "",
+            "puuid": "ec6b665e07484d9c8568cbfa99ce01da",
+            "uuid": "481f8e4ed10e4ad591955ec207ed64df"
+          }
+        ],
+        [
+          "TSC005A1518A",
+          2,
+          "SW-SMD_4P-L5.2-W5.2-P3.70-LS6.4",
+          "BOOT,RST",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C2888479",
+            "BOM_Manufacturer": "BZCN(博众电气)",
+            "BOM_Manufacturer Part": "TSC005A1518A",
+            "puuid": "2b8ce5eff8a742079dbaddfec7aff542",
+            "uuid": "8530036925254c879323a241341a7eae"
+          }
+        ],
+        [
+          "10uF",
+          2,
+          "C0603",
+          "C1,C4",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "f8151fdc728a41ebbc304e11d39e5437",
+            "uuid": "253ff9e37bbb4c3081915352d3b6344b"
+          }
+        ],
+        [
+          "10n",
+          1,
+          "C0603",
+          "C2",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "f8151fdc728a41ebbc304e11d39e5437",
+            "uuid": "24eeb2ceca08480b92b847b6a310acda"
+          }
+        ],
+        [
+          "0.1uF",
+          3,
+          "C0603",
+          "C3,C7,C8",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "f8151fdc728a41ebbc304e11d39e5437",
+            "uuid": "253ff9e37bbb4c3081915352d3b6344b"
+          }
+        ],
+        [
+          "1uF",
+          1,
+          "C0603",
+          "C5",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "f8151fdc728a41ebbc304e11d39e5437",
+            "uuid": "253ff9e37bbb4c3081915352d3b6344b"
+          }
+        ],
+        [
+          "0.1u",
+          1,
+          "C0603",
+          "C6",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "f8151fdc728a41ebbc304e11d39e5437",
+            "uuid": "24eeb2ceca08480b92b847b6a310acda"
+          }
+        ],
+        [
+          "470uF",
+          2,
+          "CAP-SMD_BD6.3-L6.6-W6.6-LS7.6-FD",
+          "C9,C10",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C165635",
+            "BOM_Manufacturer": "SamYoung Electronics",
+            "BOM_Manufacturer Part": "BXJ-16V220-6.3*7.7",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "98429e10446f41e793c95f63ad2f3e11",
+            "uuid": "da49102266de49aaaefb16e764266eb3"
+          }
+        ],
+        [
+          "A1251WR-2P",
+          4,
+          "CONN-TH_P1.25_A1251WV-02P",
+          "CHR,FTDI,RESET,VDD",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C225097",
+            "BOM_Manufacturer": "Changjiang Connectors",
+            "BOM_Manufacturer Part": "A1251WR-2P",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "88d1af39f4b441fbbc4d0c10345b3c8a",
+            "uuid": "813630576eb64241a2faf598389644b1"
+          }
+        ],
+        [
+          "ESP32-S2-WROOM-I",
+          1,
+          "ESP32-S2-WROOM",
+          "ESP32-S2",
+          {
+            "BOM_Manufacturer": "Espressif Systems",
+            "BOM_Manufacturer Part": "ESP32-S2-WROOM",
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "puuid": "49e9e2c0eeec4c3bbeca9f68168fade5",
+            "uuid": "9c4544e26e1141d9a916165324469e60"
+          }
+        ],
+        [
+          "LED-0603_B",
+          1,
+          "LED0603_BLUE",
+          "LEDB",
+          {
+            "BOM_Manufacturer": "EVERLIGHT(台湾亿光)",
+            "BOM_Manufacturer Part": "19-217/BHC-ZL1M2RY/3T",
+            "BOM_Supplier Part": "C72041",
+            "BOM_Supplier": "LCSC",
+            "puuid": "c15b145d6eaf4fb5b144555548f1c432",
+            "uuid": "7463a72b8a4540a09ec5278562590438"
+          }
+        ],
+        [
+          "LED-0603_R",
+          1,
+          "LED0603_RED",
+          "LEDR",
+          {
+            "BOM_Manufacturer": "EVERLIGHT(台湾亿光)",
+            "BOM_Manufacturer Part": "19-217/R6C-AL1M2VY/3T",
+            "BOM_Supplier Part": "C72044",
+            "BOM_Supplier": "LCSC",
+            "puuid": "1efb3a885b5b4aecb6d41221a8f4d86b",
+            "uuid": "5cbe824183374fac8e4c1ae848199ce3"
+          }
+        ],
+        [
+          "A1251WR-3P",
+          2,
+          "CONN-TH_3P-P1.25_A1251WV-03P",
+          "LEDS,UART",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C225098",
+            "BOM_Manufacturer": "Changjiang Connectors",
+            "BOM_Manufacturer Part": "A1251WR-3P",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "b9ad862b0d6f4dba834d3382b3a87e08",
+            "uuid": "b5c0913732d64a8283d44140bd469a65"
+          }
+        ],
+        [
+          "MAX17048G+T10",
+          1,
+          "DFN-8_L2.0-W2.0-P0.50-BL-EP",
+          "MAX17048",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C2682616",
+            "BOM_Manufacturer": "MAXIM(美信)",
+            "BOM_Manufacturer Part": "MAX17048G+T10",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "4e37ebaa3ef74e97938201a6e6cb0591",
+            "uuid": "444eb523f1484933b5b11c95fe142b6a"
+          }
+        ],
+        [
+          "10K(1%)",
+          1,
+          "C0603",
+          "R1",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "f8151fdc728a41ebbc304e11d39e5437",
+            "uuid": "36be002046ee442daec3a30b0f22c9fe"
+          }
+        ],
+        [
+          "2k2",
+          2,
+          "C0603",
+          "R2,R3",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "f8151fdc728a41ebbc304e11d39e5437",
+            "uuid": "36be002046ee442daec3a30b0f22c9fe"
+          }
+        ],
+        [
+          "10k(1%)",
+          2,
+          "C0603",
+          "R4,R5",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "f8151fdc728a41ebbc304e11d39e5437",
+            "uuid": "36be002046ee442daec3a30b0f22c9fe"
+          }
+        ],
+        [
+          "0",
+          1,
+          "C0603",
+          "R6",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "f8151fdc728a41ebbc304e11d39e5437",
+            "uuid": "36be002046ee442daec3a30b0f22c9fe"
+          }
+        ],
+        [
+          "A1251WR-04P",
+          2,
+          "CONN-TH_4P-P1.25_A1251WV-4P",
+          "SHT31,TSL2561",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C462094",
+            "BOM_Manufacturer": "HR(Joint Tech Elec)",
+            "BOM_Manufacturer Part": "A1251WR-04P",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "17f53f96f10e47d39c9fc90dcf0701f7",
+            "uuid": "e0a955b7f916443daa29242ce21aaf8c"
+          }
+        ],
+        [
+          "SHT31D temp & hum",
+          1,
+          "DFN-8_L2.5-W2.5-P0.50-BL-EP",
+          "SHT31MODULE",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer Part": "SHT31-DIS-B",
+            "BOM_Manufacturer": "Sensirion",
+            "BOM_Supplier Part": "C80862",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "9e477ac8937f44909cca12c6e6d4924d",
+            "uuid": "3aaf6fd24c39ed69212ebeb331e3a4b4"
+          }
+        ],
+        [
+          "SPX3819M5-L-1-2/TR",
+          1,
+          "SOT-23-5_L3.0-W1.7-P0.95-LS2.8-TL",
+          "SPX3819",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "EXAR",
+            "BOM_Manufacturer Part": "SPX3819M5-L-1-2/TR",
+            "BOM_Supplier Part": "C54988",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "5018d4522641410ca747c21246d29ca9",
+            "uuid": "9edb4d87c6cf441898f7fb44c9cce1f6"
+          }
+        ],
+        [
+          "S9014",
+          2,
+          "SOT-23-3_L2.9-W1.3-P1.90-LS2.4-BR",
+          "T1,T2",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "CJ",
+            "BOM_Manufacturer Part": "S9014LT1 (S9014 J6)",
+            "BOM_Supplier Part": "C2148",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "bade90667a6e4731855e9a223387b8a6",
+            "uuid": "f6ecf3d99b253b820a00f4ab1dadf5fe"
+          }
+        ],
+        [
+          "TP4056 MODULE",
+          1,
+          "TP4056 MODULE LITHIUM BATTERY CHARGING MODULE",
+          "TP4056MODULE",
+          {
+            "BOM_Manufacturer": "",
+            "BOM_Manufacturer Part": "",
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "puuid": "26d258137d0e4eccb7184473d3c68765",
+            "uuid": "12455067eb33456fbfc99ede78ea4211"
+          }
+        ],
+        [
+          "TSL2561T",
+          1,
+          "TMP-6_L3.8-W1.6-P0.90-BL",
+          "TSL2561MODULE",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C481878",
+            "BOM_Manufacturer": "Advanced Monolithic Systems",
+            "BOM_Manufacturer Part": "TSL2561T",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "97a30dadd865473bbeaa875a80ada0c8",
+            "uuid": "cfe329ef744646d4b294fac19e41e939"
+          }
+        ],
+        [
+          "DZ127R-11-02-25",
+          1,
+          "HDR-TH_2P-P1.27-V-M",
+          "VCCEN1",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C2935942",
+            "BOM_Manufacturer": "DEALON(德艺隆)",
+            "BOM_Manufacturer Part": "DZ127R-11-02-25",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "5d25056b053f43049cf80e680f29269c",
+            "uuid": "07aa0976f72c4cc0978a337162a4455b"
+          }
+        ]
+      ],
+      "updateTime": 1657226682,
+      "createTime": 1653293459,
+      "histories": [],
+      "created_at": "2022-05-23 09:10:59",
+      "updated_at": "2022-07-07 21:44:42"
+    },
+    {
+      "uuid": "1aea31c7ae621f2666fa46e0d6e852d6",
+      "puuid": "b5cfc27b054ba9ece9c6df62ccd32247",
+      "title": "PCB_7-OK- ORDERED",
+      "filename": "PCB_7-OK- ORDERED.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "88d1af39f4b441fbbc4d0c10345b3c8a": 4,
+        "c15b145d6eaf4fb5b144555548f1c432": 1,
+        "1efb3a885b5b4aecb6d41221a8f4d86b": 1,
+        "f8151fdc728a41ebbc304e11d39e5437": 14,
+        "bade90667a6e4731855e9a223387b8a6": 2,
+        "49e9e2c0eeec4c3bbeca9f68168fade5": 1,
+        "4e37ebaa3ef74e97938201a6e6cb0591": 1,
+        "5018d4522641410ca747c21246d29ca9": 1,
+        "2b8ce5eff8a742079dbaddfec7aff542": 2,
+        "17f53f96f10e47d39c9fc90dcf0701f7": 2,
+        "b9ad862b0d6f4dba834d3382b3a87e08": 2,
+        "98429e10446f41e793c95f63ad2f3e11": 2
+      },
+      "BOM": [],
+      "updateTime": 1657123454,
+      "createTime": 1657113769,
+      "histories": [],
+      "created_at": "2022-07-06 14:22:49",
+      "updated_at": "2022-07-06 17:04:14"
+    }
+  ],
+  "sort": [],
+  "title": "ESP32S2-new sensor device template",
+  "foldername": "ESP32S2-new sensor device template",
+  "schfilename": "ESP32S2-new sensor device template.json",
+  "schfilemtime": 1657226682951
+}

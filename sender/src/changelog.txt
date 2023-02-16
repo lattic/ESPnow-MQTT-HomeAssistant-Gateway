@@ -1,0 +1,224 @@
+button operation:
+1: very short push:   - normal forced run then sleep
+2: very short < x <3s - FW upgrade
+3: 3s< x < 6s         - start CP 
+4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
+
+MQTT commands to receiver:
+- topic:    
+  - esp32030/cmd/cmd_for_sender   // command send to all gateways as nobody knows which gw controls which sensor - sort it out or not?
+- message:
+  - ota:      {"mac":"xx:01:01:01:zz:yy","command":"1"} 
+  - restart:  {"mac":"xx:01:01:01:zz:yy","command":"2"} 
+  - captive:  {"mac":"xx:01:01:01:zz:yy","command":"3"} 
+  - factory:  {"mac":"xx:01:01:01:zz:yy","command":"4"} 
+  - Motion OFF:  {"mac":"xx:01:01:01:zz:yy","command":"10"} 
+  - Motion ON:  {"mac":"xx:01:01:01:zz:yy","command":11"} 
+  - LEDs OFF: {"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
+  - LEDs AUTO:{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs will dimm, lux < 1->dc = 1, 1<x<10 = 10, > 10 = 255 
+
+2023-02-16
+  2.9.0   - failure with Git(hub) 
+
+2023-02-15
+  2.8.3b  - restart after enabling/disabling motion 
+
+2023-02-15
+  2.8.3a  - only 1 gateway for krzych 
+
+2023-02-13
+  2.8.3   - if no lux sensor, set LED only from HA - don't apply anything default
+
+2023-02-13
+  2.8.2   - don't restart on motion_enabled change
+
+2023-02-13
+  2.8.1   - motion_enabled implemented 
+
+2023-02-13
+  2.8.0   - short push of the FW update button: normal forced run, FW update only if the push is long (so that ESP senses button after wake up)
+
+2023-02-13
+  2.7.3   - correction in PWM 
+
+2023-02-12
+  2.7.2   - correction in PWM - g_led_pwm = 50/255; if no lux sensor in use
+
+2023-02-12
+  2.7.1   - correction in PWM
+
+2023-02-12
+  2.7.0   - PWM for LED with automation both local on ESP and from HA
+
+2023-02-12
+  2.6.6   - cleaning devices_config.h and platformio.ini
+
+2023-02-01
+  2.6.5   - revert 2.6.4
+
+2023-02-01
+  2.6.4   - don't restart on erase_all_data() command - go to sleep 
+
+2023-01-27
+  2.6.2   - 3 gateways for CLIENT 
+
+2023-01-27
+  2.6.1   - CALIBRATE_TEMPERATURE and CALIBRATE_HUMIDITY added
+
+2023-01-26
+  2.6.0   - all seem to work
+
+2023-01-26
+  2.6.0b5 - sensor devices act on commands from receiver ;-)
+
+2023-01-24
+  2.6.0b1 - receiver sends confirmation to sender with command (u_int8_t),  sender acts on the command accordingly
+          - timeout set on sender side to be WAIT_FOR_COMMAND_MS=100ms
+
+2023-01-21:
+  2.5.0   - "unknow" changes ;-(
+
+2022-12-31:
+  2.4.1   - correction for ENABLE_3V_GPIO
+          - 1h SLEEP_TIME_S for TRVs 
+
+2022-12-31:
+  2.4.0   - add charging_int as result of charging_state()
+          - pinMode for charging and power at the beginning of setup()
+          - u_int8_t charging_state(); instead of void, at the beginning of setup()
+          - hibernate() not anymore hibernate but deep sleep ;-( - current still 38uA
+          - since charging is checked at the beginning, no 1 reboot delay to report it properly
+          - resetting ontime when charging != NC
+          - correction in html page
+
+2022-12-11:
+  2.3.1   - don't blink in tasks if LED GPIOs are not defined or it segfaults (this is mainly for C3 - no need for upgrading other boards to 2.3.1)
+          - max sleep time in Captive Portal: 86400s (24h)
+
+2022-12-10:
+  2.3.0   - wifi_ok added to myData to indicate if WiFi is configured on device sensor
+  2.2.0   - platformio.ini scripted - choosing boards in platformio.ini now - not in devices_config.h (but still full board config is in devices_config.h) 
+
+2022-12-09:
+  2.1.0   - sorted (?) AP and CP that were not starting (removed STA connection just before AP connection -> now AP works) 
+          - sorted lack of some GPIO configured for html page
+          - RED LED ON if wifi not configured (although ESPNow works without WiFi configured)
+
+2022-12-08:
+  2.0.1   - use last 2 bytes of fake MAC in case DEVICE_ID > 99 
+
+2022-12-08:
+  2.0.0   - captive portal improved with all data
+          - change MAC to fake to keep the same device on HA irrespective of new MCU
+          - led_blink_erase - red led blinks during erasing all data
+          - html page in separate file
+
+2022-12-07:
+  2.0.0b8 - wifi (ssd, password, sleeptime) in config
+  2.0.0b7 - preferences vanished, config file in json (encrypted or not - configurable) in /config.dat - ontime, bootCount, channel, last_gw done - not yet wifi (ssid and password)
+
+2022-12-06:
+  2.0.0b1 - complete rework including Captive Portal etc (based on HomeKit HomeSpan sensors) - work started, esp32100 tested and working
+
+
+// ============================ END OF VERSION 1.x.x ==========================
+2022-12-02:
+  1.24.b1 - no more fixed WiFi channel, all senders send to 1 of GW from the pool, each GW has fixed fake MAC address, based on their availability - not according to signal strength
+
+2022-11-10:
+  1.23.1  - added ESP32S
+
+2022-11-06:
+  1.23.0  - board type makes model in MQTT device
+
+2022-11-06:
+  1.22.6  - bootCount changed to unsigned int
+
+2022-11-06:
+  1.22.5  - more info printed (MCU type, boot and wake up reasons)
+
+2022-10-30:
+  1.22.4  - replace VERSION with ZH_PROG_VERSION as some libs use VERSION
+
+2022-10-30:
+  1.22.3  - mistake in turning ON RED LED - solved
+
+2022-10-23:
+  1.22.2a  - TRV4 sleep time 6h
+
+2022-10-20:
+  1.22.2   - C3 added in devices_config.h check: #if (BOARD_TYPE == 4)
+
+2022-10-20:
+  1.22.1   - new sender_type = battery for TRV battery sensors
+
+2022-10-19:
+  1.22.0   - added ESP32-C3, different wake up from GPIO (hibernate) and different cause of wake up (setup)
+           - ESP32-C3 can wake up on HIGH or LOW, set up done on HIGH to be compatible with S/S2 boards
+           - BOOTLOADER GPIO for ESP32-C3 is GPIO_9
+           - SDA = GPIO_8
+           - SCL = GPIO_9 - same as bootloader GPIO
+
+2022-10-17:
+  1.21.6   - sorting LED when FW_UPGRADE_GPIO pressed:
+            1 - red when pressed
+            2 - after 3s red off, blue on
+            3 - after next 3s red on, blue off
+
+2022-10-17:
+  1.21.5   - correction in wifi settings for wifi and espnow - both have all protocols enabled
+
+2022-10-17:
+  1.21.4   - improved wifi settings for both wifi (all protocols) and espnow (LR only):
+
+2022-10-17:
+  1.21.3   - testing long range esp_wifi_set_protocol( WIFI_IF_AP, WIFI_PROTOCOL_LR );
+
+2022-10-16:
+  1.21.2  - don't check MOTION_SENSOR_GPIO after wake up - just base on wake up reason
+            it was bringing too many false positive motion=1
+
+2022-10-16:
+  1.21.1  - added additional function to FW_UPGRADE_GPIO button:
+            - 1 short press: fw_update
+            - 1 press for 3 seconds (red goes to green at the end, then release it) - ESP.reset() - it resets MAX17048 and bootCount
+            - 1 press for 6 seconds (green goes to red at the end, then release it) - format FS, - it resets ontime, bootCount and MAX17048
+              as sensors without charger would never reset ontime, even after changing/charging the battery
+2022-10-01:
+  1.21.0  - change UPDATE_FIRMWARE_HOST to baboon server
+
+2022-09-15:
+  1.20.1  - USE_CUSTOM_I2C_GPIO
+
+2022-09-15:
+  1.20.0  - 5 devices finished (36, 100, 101, 102, 104), few minor improvements
+
+2022-09-15:
+  1.20.b10 - software reset on 3s press of FW_UPGRADE_GPIO (until red led turns off and blue/green turns on)
+
+2022-09-15:
+  1.20.b6 - corrections
+
+2022-09-14:
+  1.20.b1 - making universal sketch for devices that can be either: env, motion or env+motion
+
+2022-08-07:
+  1.19.b2 - corrections and cleaning the code
+
+2022-08-06:
+  1.18.3  - major rework battery
+          - send update to HA before FW upgrade starts
+  1.18.2  - lipo.reset() on FW_UPGRADE_GPIO or reset/power
+  1.18.1  - adding MAX17048 data from new boards
+  1.18.0  - correction in ext1 wakeup gpio mask - it calculates mask instead of hard coded pins
+
+2022-08-05:
+  1.17.0  - official release 1.17.0 including both: env and motion sensors
+
+2022-08-05:
+  1.16.0  - current load: 45uA in both: standby and cooling
+          - FW update on button press
+2022-08-04:
+  1.15.1  - battery monitoring (Volts) over ADC
+  1.15.0  - PIR motion detector wake up on GPIO and on heartbeat
+          - no FW update yet

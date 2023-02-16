@@ -1,0 +1,5 @@
+/*
+TODO:
+1: implement sending messages from sensor devices to the receiver that has the best RSSI
+
+*/

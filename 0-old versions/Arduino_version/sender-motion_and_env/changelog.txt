@@ -1,0 +1,94 @@
+2022-11-06:
+  1.23.0  - board type makes model in MQTT device 
+
+2022-11-06:
+  1.22.6  - bootCount changed to unsigned int
+
+2022-11-06:
+  1.22.5  - more info printed (MCU type, boot and wake up reasons)
+
+2022-10-30:
+  1.22.4  - replace VERSION with ZH_PROG_VERSION as some libs use VERSION
+
+2022-10-30:
+  1.22.3  - mistake in turning ON RED LED - solved
+
+2022-10-23:
+  1.22.2a  - TRV4 sleep time 6h
+
+2022-10-20:
+  1.22.2   - C3 added in devices_config.h check: #if (BOARD_TYPE == 4)
+
+2022-10-20:
+  1.22.1   - new sender_type = battery for TRV battery sensors
+
+2022-10-19:
+  1.22.0   - added ESP32-C3, different wake up from GPIO (hibernate) and different cause of wake up (setup)
+           - ESP32-C3 can wake up on HIGH or LOW, set up done on HIGH to be compatible with S/S2 boards
+           - BOOTLOADER GPIO for ESP32-C3 is GPIO_9
+           - SDA = GPIO_8
+           - SCL = GPIO_9 - same as bootloader GPIO
+
+2022-10-17:
+  1.21.6   - sorting LED when FW_UPGRADE_GPIO pressed:
+            1 - red when pressed
+            2 - after 3s red off, blue on
+            3 - after next 3s red on, blue off
+
+2022-10-17:
+  1.21.5   - correction in wifi settings for wifi and espnow - both have all protocols enabled
+
+2022-10-17:
+  1.21.4   - improved wifi settings for both wifi (all protocols) and espnow (LR only):
+
+2022-10-17:
+  1.21.3   - testing long range esp_wifi_set_protocol( WIFI_IF_AP, WIFI_PROTOCOL_LR );
+
+2022-10-16:
+  1.21.2  - don't check MOTION_SENSOR_GPIO after wake up - just base on wake up reason
+            it was bringing too many false positive motion=1
+
+2022-10-16:
+  1.21.1  - added additional function to FW_UPGRADE_GPIO button:
+            - 1 short press: fw_update
+            - 1 press for 3 seconds (red goes to green at the end, then release it) - ESP.reset() - it resets MAX17048 and bootCount
+            - 1 press for 6 seconds (green goes to red at the end, then release it) - format FS, - it resets ontime, bootCount and MAX17048
+              as sensors without charger would never reset ontime, even after changing/charging the battery
+2022-10-01:
+  1.21.0  - change UPDATE_FIRMWARE_HOST to baboon server
+
+2022-09-15:
+  1.20.1  - USE_CUSTOM_I2C_GPIO
+
+2022-09-15:
+  1.20.0  - 5 devices finished (36, 100, 101, 102, 104), few minor improvements
+
+2022-09-15:
+  1.20.b10 - software reset on 3s press of FW_UPGRADE_GPIO (until red led turns off and blue/green turns on)
+
+2022-09-15:
+  1.20.b6 - corrections
+
+2022-09-14:
+  1.20.b1 - making universal sketch for devices that can be either: env, motion or env+motion
+
+2022-08-07:
+  1.19.b2 - corrections and cleaning the code
+
+2022-08-06:
+  1.18.3  - major rework battery
+          - send update to HA before FW upgrade starts
+  1.18.2  - lipo.reset() on FW_UPGRADE_GPIO or reset/power
+  1.18.1  - adding MAX17048 data from new boards
+  1.18.0  - correction in ext1 wakeup gpio mask - it calculates mask instead of hard coded pins
+
+2022-08-05:
+  1.17.0  - official release 1.17.0 including both: env and motion sensors
+
+2022-08-05:
+  1.16.0  - current load: 45uA in both: standby and cooling
+          - FW update on button press
+2022-08-04:
+  1.15.1  - battery monitoring (Volts) over ADC
+  1.15.0  - PIR motion detector wake up on GPIO and on heartbeat
+          - no FW update yet

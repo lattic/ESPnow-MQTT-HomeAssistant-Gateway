@@ -1,0 +1,347 @@
+TODO:
+1 - implement #ifdef DEBUG instead of if (debug_mode)
+2 - improve CP html, add old values, checking if new are correct etc (check in sender sketch)
+
+
+
+
+MQTT commands to receiver:
+- topic:    
+  - esp32030/cmd/cmd_for_sender   // command send to all gateways as nobody knows which gw controls which sensor - sort it out or not?
+- message:
+  - ota:      {"mac":"xx:01:01:01:zz:yy","command":"1"} 
+  - restart:  {"mac":"xx:01:01:01:zz:yy","command":"2"} 
+  - captive:  {"mac":"xx:01:01:01:zz:yy","command":"3"} 
+  - factory:  {"mac":"xx:01:01:01:zz:yy","command":"4"} 
+  - Motion OFF:  {"mac":"xx:01:01:01:zz:yy","command":"10"} 
+  - Motion ON:  {"mac":"xx:01:01:01:zz:yy","command":11"} 
+  - LEDs OFF: {"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
+  - LEDs AUTO:{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs will dimm, lux < 1->dc = 1, 1<x<10 = 10, > 10 = 255 
+
+
+Webserial:
+- http://HOSTNAME.local/log  
+- commands: start, stop, info, reset, restart, update
+
+OTA:
+- http://HOSTNAME.local:8080/update
+
+2023-02-16
+  2.14.0  - failure with Git(hub)
+
+2023-02-15
+  2.13.1c - cleaning variables
+
+2023-02-15
+  2.13.1b - gateway serving as sensor on sender
+
+2023-02-15
+  2.13.1a - corrections: #if (xxx == 1) 
+
+2023-02-14
+  2.13.1  - motion_enabled as sensor (not binary_sensor)
+
+2023-02-13
+  2.13.0  - motion_enabled implemented 
+
+2023-02-12
+  2.12.4  - corrected humidity unit to %
+
+2023-02-01
+  2.12.3  - corrected clearing the queue AGAIN but now it is ok ;-)
+
+2023-01-31
+  2.12.2  - corrected clearing the queue 
+
+2023-01-31
+  2.12.1  - removed clearing the queue - work on it later 
+
+2023-01-30
+  2.12.0  - added lux measurement using TEPT4400
+
+2023-01-30
+  2.11.0  - added temperature from BMP280
+
+2023-01-29
+  2.10.0  - added MHZ19B CO2 sensor
+          - OTA_ACTIVE, USE_WEB_SERIAL per device config
+
+2023-01-29
+  2.9.0   - implemented badbootcount
+            - only restart on command resets badbootcount, any other restart (on ESP.restart()) i.e. MQTT error will cause badbootcount to increase
+            good restarts:
+              - fw update
+              - queue reset
+              - any restart on command: webserial, mqtt, button, etc
+            bad restarts:
+              - MQTT error
+              - wifi error
+              - queue error
+            - if badbootcount > MAX_BAD_BOOT_COUNT erase_nvs() is performed
+            - when first time heartbeat() is successful it will reset badbootcount
+  
+2023-01-29
+  2.8.2   - added WebSerial.println() to fw_update.h, mqtt.h, main.c 
+          - stop checking MQTT if FW update requested from webserial - new global variable: skip_mqtt
+          - more command to webserial (info, restart, reset, update)
+          - print2web enabled at start, disabled by end of setup()
+
+2023-01-28
+  2.8.1   - last_cmd_received to count COMMAND_QUEUE_TIMEOUT_S from last command received
+
+2023-01-28
+  2.8.0   - all LEDs can be managed from HA (on/off, dimm) 
+          - LED removed from connect_wifi() - LED_GPIO_GATEWAY obligatory to work
+          
+2023-01-27
+  2.7.0   - all LED related macros redefined, BLUE-standby, RED-sensor, GREEN-gateway
+
+2023-01-27
+  2.6.1   - added BMP280 air pressure to gateway
+          - COMMAND_QUEUE_TIMEOUT_S to clear cmd_for_sender queue
+          - publish to HA queue with commands size
+          - clear queue with commands from HA (button) 
+          - added:
+            bool mqtt_publish_text_sensor_config(const char* text_sensor);
+            bool mqtt_publish_text_sensor_value(const char* text_sensor, const char* text_sensor_value);
+            bool mqtt_publish_sensor_with_unit_config(const char* sensor_with_unit, const char* sensor_unit);
+            bool mqtt_publish_sensor_with_unit_value(const char* sensor_with_unit, const char* sensor_unit, const char* sensor_with_unit_value);
+          - void measure_temp_pressure(char *pressure);
+          - publish config before publishing values always
+          - 
+
+
+2023-01-26
+  2.6.0b5 - sensor devices act on commands from receiver ;-)
+  
+2023-01-24
+  2.6.0b1- receiver sends confirmation to sender with command (u_int8_t),  sender acts on the command accordingly
+         - timeout set on sender side to be WAIT_FOR_COMMAND_MS=100ms
+2023-01-22
+  2.4.0  - reversing to publishing configs before publishing values
+
+2023-01-21
+  2.3.1  - added USE_INFLUXDB to bypass MQTT (for testing purposes only for HomeKit) -  disabled by default now
+
+2023-01-18
+  2.3.0  - update firmware for CLIENT(s) on web, on local server for my devices
+         - MQTT server, port, user, password on captive_portal
+
+2023-01-10
+  2.2.5  - // config["exp_aft"] for rssi, now all are not expiring
+
+2023-01-03
+  2.2.4  - serial2web http://esp.local/log  start to start, stop to stop prining on web, default is stopped
+
+2022-12-25
+  2.1.0  - dedicated  MQTT_SERVER x.43
+
+2022-12-12
+  2.0.2  - corrections: 
+          - rssi was not published as promiscuous_rx_cb was omitted - solved
+          - reshuffle functions definitions
+         - change: 
+          - abandon zhwifi.h file
+          - #define MQTT_DEVICE_IDENTIFIER in config.h
+
+2022-12-11
+  2.0.1  - corrections in captive_portal.h (variable names, DNS) and MQTT_DEVICE_IDENTIFIER in change_mac()
+  2.0.0  - captive portal done, it seems to work ;-) all is done in 1 file only: captive-portal.h so it should be movable to other sketches
+         - if wifi not ok CP starts
+         - if CP timeout occures nvs is reset, old wifi credentials are restored, restart happens and it tries WiFi again 
+         - CP blinks LED provided in wifi_connected = connect_wifi(STATUS_GW_LED_GPIO_RED); returns bool true when connected
+
+2022-12-11
+  1.26.b2- added blinking LED (error_led, global variable must be!) during CP active 
+
+2022-12-10
+  1.26.b1- added captive portal and nvs_reset() on restart from HA - check if all is OK !!!
+
+  1.25.0 - platformio.ini scripted - choosing boards in platformio.ini now - not in config.h (but still full board config is in config.h)
+  1.24.0 - wifi_ok added to myData to indicate if WiFi is configured on device sensor 
+
+2022-12-02
+  1.23.b3 - mqtt_publish_gw_last_updated_sensor_config never expire (as some gateways are totally idle)
+  1.23.b2 - added MDNS so device can be reached on hostname.local
+  1.23.b1 - every GW has fixed fake MAC address
+
+2022-11-19
+  1.22.1  - temp and hum expire after 400s (6 minutes 40 seconds)
+
+2022-10-31
+  1.22.0  - board type makes model in MQTT device
+
+2022-10-31
+  1.21.10  - RESTART GW on queue FULL as data is not important anymore few minutes/hours later
+
+2022-10-21
+  1.21.9   - redo setup_wifi, move some functions from espnow_start to start_wifi - all to reduce disconnections for S3 and C3
+
+2022-10-20
+  1.21.8   - correcting fw_update.h for C3
+
+2022-10-20
+  1.21.7   - correcting pins for ESP32-S, cleaning
+
+2022-10-20
+  1.21.6   - correction in fw_update.h: #ifdefined LEDs...
+
+2022-10-19
+  1.21.5   - config["exp_aft"] does not expire for anything except rssi
+           - rssi does not expire for new sender_type = battery
+2022-10-17:
+  1.21.4   - improved wifi settings for wifi (all protocols)
+
+2022-10-17:
+  1.21.3   - testing long range esp_wifi_set_protocol( WIFI_IF_AP, WIFI_PROTOCOL_LR );
+
+2022-10-15:
+  1.21.2   - charging, boot, ontime, pretty_ontime - are now in all sensor types
+
+2022-10-15:
+  1.21.1   - remove config["exp_aft"] = 3600; from motion sensor - never expire then
+
+2022-10-13:
+  1.21.0   - "_pretty_ontime" changed to "_prettyontime" to distinguish them on HA
+
+2022-10-11:
+  1.20.0   - finally ready
+
+2022-10-11:
+  1.20.b8  - cleaning done for (probably) all functions
+
+2022-10-10:
+  1.20.b5f - merged to main
+  1.20.b5f3- mqtt_publish_sensors_data.h corrected fully
+  1.20.b5f5- espnow.h corrected fully
+  1.20.b5f6- mqtt.h corrected fully
+  1.20.b6  - more cleaning done
+
+2022-10-10:
+  1.20.b5c - b5 based, reconnect and loop in loop(), nice prints from publish
+  1.20.b5d - heartbeat in loop()
+  1.20.b5e - only setup_wifi() as task - all others in loop (reconnect, mqtt_loop, gw-update, sensors-update)
+
+2022-10-10:
+  1.20.b5 - DON'T change MAC address - not needed and conflicting
+          - mqtt reconnect and loop in loop()
+          -
+
+2022-10-08:
+  1.20.b3 - updateFirmware working
+
+2022-10-08:
+  1.20.b1 - rewrite on vTasks with fully working queue
+
+2022-10-06:
+  1.19.3  - cleanup of MOTION_SENSOR_GPIO
+
+2022-10-02:
+  1.19.2  - cancelling 1.19.1
+
+2022-10-02:
+  1.19.1  - enable queue again - testing
+
+2022-10-02:
+  1.19.0  - change UPDATE_FIRMWARE_HOST to baboon server
+
+2022-09-17:
+  1.18.1  - UPDATE_INTERVAL 60s
+
+2022-09-14:
+  1.18.0  - "env" + "motion" + "env+mot" in mqtt_publish_sensors_data for unified sensor device
+
+2022-08-06:
+  1.17.2  - add device type to name on HA
+  1.17.1  - batchr and batpct for motion sensors added
+
+2022-08-05:
+  1.17.0  - official release 1.17.0 including both: env and motion sensors
+
+2022-08-04:
+  1.12.1c - add battery to motion sensors
+  1.12.1b - 2nd correction for "turn RED LED on when publish switch is OFF"
+  1.12.1a - correction for "turn RED LED on when publish switch is OFF"
+  1.12.1  - deregister callback during update to HA to avoid interference between sensors
+          - turn RED LED on when publish switch is OFF
+
+2022-07-26:
+  1.12.0  - change of the data structure
+
+2022-07-24:
+  1.11.b2 - device name with or without MAC (chose in mqtt_publish_sensors_config())
+          - model = ESP32
+
+2022-07-09:
+  1.11.b1 - added:
+            char sender_type[10]; // "motion" "env"
+            char motion[2];       // "0" "1"  [2]
+            for motion devices to reuse gateway with the same message structure
+
+2022-07-09:
+  1.10.1 - corrections
+  1.10.0 - remove MOTION sensor because of interference with antenna
+
+2022-07-09:
+  1.9.3  - cleaning (Serial.println(), config.h etc.)
+  1.9.2  - motion with interrupts
+         - keep motion "Detected" for entire motion_delay_s time since the last detection (not the first detection)
+         - few cosmetics
+
+2022-07-08:
+  1.9.1  - motion sensor added working always on Gateway
+
+2022-07-04:
+  1.9.b1 - battery change rate, redo myData structure
+
+2022-07-04:
+  1.8.2 - version and uptime added to GW status
+
+2022-07-02:
+  1.8.1 - 3 LEDs, POWER_ON_LED_GPIO_GREEN with PWM
+
+2022-07-02:
+  1.8.0 - common script for multiple receivers (DEVICE_ID and config.h)
+
+2022-06-29:
+  1.7.2 - added support for ESP32-S3 board
+        - 2x LED: 1 for gateway device (STATUS_GW_LED_GPIO_RED) and 1 for sensor device (SENSORS_LED_GPIO_BLUE)
+
+2022-06-26:
+  1.7.1 - change name of the device on HA (all devices) to: ESPnow_hostname_name
+
+2022-06-26:
+  1.7.0 - incoming messages in the queue to avoid losing data
+
+2022-06-24:
+  1.6.2 - #define GND_GPIO_FOR_LED      13    // if not equipped comment out - GND for ACTIVITY_LED_GPIO
+        - testing esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_11B|WIFI_PROTOCOL_11G|WIFI_PROTOCOL_11N|WIFI_PROTOCOL_LR);
+          to extend the range of radio (no conclusion yet)
+2022-06-22:
+  1.6.1 - pretty_ontime implemented as string
+
+2022-06-22:
+  1.6.0 - ontime implemented in seconds
+
+2022-06-21:
+  1.5.0 - gateway firmware update implemented
+
+2022-06-19:
+  1.4.1 - cleaning for github
+
+2022-06-18:
+  1.4.0 - bootCount added
+
+2022-06-15:
+  1.3.0 - switch "publish" to enable/disable publishing to HA
+        - buttons: update/restart
+        - update FW on gateway not yet implemented
+
+2022-06-11:
+  1.2.0 - added device name on sender, myData.name on receiver, it goes to name of the device on HA
+
+2022-06-11:
+  1.1.0 - added lux from TEPT/ADC, added CHARGING
+
+2022-06-10:
+  1.0.0 - journey started ;-)
