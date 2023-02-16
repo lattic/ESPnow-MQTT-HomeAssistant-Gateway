@@ -2239,6 +2239,8 @@ gather_data();
     if (data_recv.command == 2) 
     {
       Serial.printf("[%s]: Received command from gateway to perform RESTART\n",__func__);
+      // reset bootcount, it will increase to 1 on saving config
+      g_bootCount = 0;
       do_esp_restart();
     }   
     else 
