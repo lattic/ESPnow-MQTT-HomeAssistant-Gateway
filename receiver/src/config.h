@@ -201,7 +201,7 @@ config
 
   uint8_t FixedMACAddress[] =       {0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03};
 
-  #define OTA_ACTIVE                1
+  #define OTA_ACTIVE                0
   #define COMMAND_QUEUE_TIMEOUT_S   30 * 60  // 15min, in seconds, clear the commands queue for sender after timeout
 
   #define USE_INFLUXDB              0
