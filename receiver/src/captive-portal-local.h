@@ -10,7 +10,7 @@
 #include <nvs_flash.h>
 
 #ifndef CP_TIMEOUT_S
-    #define CP_TIMEOUT_S                    180             // Captive Portal will terminate after this time and ESP will restart
+    #define CP_TIMEOUT_S                    300             // Captive Portal will terminate after this time and ESP will restart
 #endif
 #ifndef WIF_STA_CONNECTION_TIMEOUT_S
     #define WIF_STA_CONNECTION_TIMEOUT_S    10              // WiFi STA will give up after this time and CP will start
