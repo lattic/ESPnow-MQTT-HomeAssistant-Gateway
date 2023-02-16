@@ -23,7 +23,7 @@ void get_lux(char* lux)
     long mt=em-sm;
     Serial.print("LUX=");Serial.println(lux);
     Serial.print("RAW=");Serial.println(temp_volts_raw);
-    Serial.println("LUX TIME:"+String(mt)+"ms");}
+    Serial.println("LUX TIME:"+String(mt)+"ms");
   #endif
 
 }
