@@ -6,7 +6,7 @@ variables
 
 */
 // struct types
-typedef struct struct_message             // main data struct sent from sender to gateway over ESPnow
+typedef struct struct_message             // main data struct sent from sender to gateway over ESPnow, 92 bytes with motion_enabled
 {
   char host[10];                          // esp32123   - 9 characters maximum (esp32123=8)
   char name[16];                          // 15 characters maximum
@@ -33,12 +33,12 @@ typedef struct struct_message_aux         // auxiliary data structure for sensor
   char macStr[18];
 } struct_message_aux;
 
-typedef struct struct_message_recv        // command to sender - only 1 type but struct ready for expansion ;-)
+typedef struct struct_message_recv        // command to sender - only 1 type but struct ready for expansion, the same type on sensor device!
 {
   uint8_t command;
 } struct_message_recv;
 
-typedef struct struct_commands            // commands for the sender: mac of the sender and the command
+typedef struct struct_commands            // commands for the sender: mac of the sender and the command, used locally only on receiver
 {
   char mac[18];
   uint8_t command;
@@ -73,8 +73,8 @@ struct_message myData;                    // data from sensors
 struct_message_aux myData_aux;            // aux_data from/for sensors: rssi and MAC
 struct_message myLocalData;               // local copy after receiving to avoid overwriting
 struct_message_aux myLocalData_aux;       // local copy after receiving to avoid overwriting
-struct_message_recv data_answer;          // commands for sender - struct with uint8_t only at this moment
-struct_commands commands;
+struct_message_recv data_answer;          // commands for sender - struct with uint8_t only at this moment, the same type on sensor device!
+struct_commands commands;                 // local only: mac and command stored in the queue
 
 // // critical for OnDataRecv
 // portMUX_TYPE receive_cb_mutex    = portMUX_INITIALIZER_UNLOCKED;
