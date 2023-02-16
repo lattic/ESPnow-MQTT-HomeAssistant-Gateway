@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "2.14.2b1"
+#define VERSION "2.14.3"
 
 
 // gateways config file
@@ -208,7 +208,7 @@ void setup()
 
   Serial.printf("\n\n =============================================================\n");
   change_mac();
-  Serial.printf("[%s]: GATEWAY started, DEVICE_ID=%d, version=%s, MAC:%s\n",__func__,DEVICE_ID,VERSION, mac_new_char);
+  Serial.printf("[%s]: Program started, hostname=%s, DEVICE_ID=%d, version=%s, MAC:%s\n",__func__,HOSTNAME,DEVICE_ID,VERSION, mac_new_char);
 
   check_badbootcount();
 

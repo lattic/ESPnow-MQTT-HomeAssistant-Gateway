@@ -127,6 +127,10 @@ int update_firmware_prepare()
   fw_totalLength=0;
   fw_currentLength=0;
   Serial.printf("[%s]: uploading file: %s\n",__func__,firmware_file);
+  #if (USE_WEB_SERIAL == 1)
+    WebSerial.print("Uploading file: ");
+    WebSerial.println(firmware_file);
+  #endif
   firmware_update_client.begin(firmware_file);
   int resp = firmware_update_client.GET();
   Serial.printf("[%s]: Response: %d\n",__func__,resp);
@@ -145,7 +149,6 @@ int update_firmware_prepare()
     // get tcp stream
     WiFiClient * stream = firmware_update_client.getStreamPtr();
     // read all data from server
-    // Serial.println("Updating firmware progress:");
     Serial.printf("[%s]: Updating firmware progress:\n",__func__);
     while(firmware_update_client.connected() && (len > 0 || len == -1))
     {

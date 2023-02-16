@@ -223,10 +223,38 @@ config
   #define LUX_MAX_RAW_MAPPED_READING 1000 // TEPT4400 can measure only up to 1000lx then it gets satturated
   #define LUX_MIN_RAW_READING       0     // set it to min shown when TEPT4400 is completely covered to get 0lx 
 
-
   #pragma message "compilation for: ESPnow_krz103_gateway3"    
 
 
+#elif DEVICE_ID == 92
+  #define BOARD_TYPE                2
+  #define HOSTNAME                  "esp32092"
+  #define ROLE_NAME                 "gw92-test"
+  #define LED_GPIO_SENSORS          3   // RED
+  #define LED_GPIO_GATEWAY          5   // GREEN
+  #define LED_GPIO_STANDBY          2   // BLUE
+
+  #define LED_GPIO_SENSORS_USE_PWM  1
+  #define LED_GPIO_SENSORS_PWM_DC   10
+
+  #define LED_GPIO_GATEWAY_USE_PWM  1
+  #define LED_GPIO_GATEWAY_PWM_DC   10
+
+  #define LED_GPIO_STANDBY_USE_PWM  1
+  #define LED_GPIO_STANDBY_PWM_DC   10
+
+  #define PUSH_BUTTON_GPIO          0  // to control ESP
+  #define PUSH_BUTTON_GPIO_ACT    LOW  // HIGH or LOW, HIGH = 1, LOW = 0, 0 if not defined (so default)
+
+  uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x92};
+  
+  #define OTA_ACTIVE                1
+
+  #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
+
+  #define USE_WEB_SERIAL            1
+
+  #pragma message "compilation for: ESPnow_esp32092-gwtest"
 
 
 #else
