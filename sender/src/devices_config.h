@@ -450,18 +450,18 @@
   #define CALIBRATE_TEMPERATURE       0 //0.15   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          0 //-0.6   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
 
-  // #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
-  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
-  // {
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
-  // };
-
-  #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
   uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
   {
-    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
   };
+
+  // #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
+  // {
+  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+  // };
 
   #pragma message "compilation for: krz001"
 // ---------------------------------------------------------------------------------------------------
@@ -487,18 +487,18 @@
   #define CALIBRATE_TEMPERATURE       0 //-1.17   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          -2.7 //-0.9   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
 
-  // #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
-  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
-  // {
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
-  // };
-
-  #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
   uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
   {
-    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
   };
+
+  // #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
+  // {
+  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+  // };
 
   #pragma message "compilation for: krz002"
 // ---------------------------------------------------------------------------------------------------
@@ -524,18 +524,18 @@
   #define CALIBRATE_TEMPERATURE       0 //0.23   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          -2.7 //-3.4   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
 
-  // #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
-  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
-  // {
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
-  // };
-
-  #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
   uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
   {
-    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
   };
+
+  // #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
+  // {
+  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+  // };
 
   #pragma message "compilation for: krz003"
 // ---------------------------------------------------------------------------------------------------
@@ -562,18 +562,18 @@
   #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
 
-  // #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
-  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
-  // {
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
-  // };
-
-  #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
   uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
   {
-    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
   };
+
+  // #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
+  // {
+  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+  // };
 
   #pragma message "compilation for: krz004"
 // ---------------------------------------------------------------------------------------------------
@@ -600,18 +600,18 @@
   #define CALIBRATE_TEMPERATURE       0.08   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          -9.5   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
 
-  // #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
-  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
-  // {
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
-  // };
-
-  #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
   uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
   {
-    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
   };
+
+  // #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
+  // {
+  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+  // };
 
   #pragma message "compilation for: krz005"
 // ---------------------------------------------------------------------------------------------------
@@ -638,18 +638,18 @@
   #define CALIBRATE_TEMPERATURE       -0.2 //-0.33   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          0 //0.3   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
 
-  // #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
-  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
-  // {
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
-  // };
-
-  #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
   uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
   {
-    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
   };
+
+  // #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
+  // {
+  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+  // };
 
 
 #elif DEVICE_ID == 7
@@ -672,18 +672,18 @@
   #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          -7.0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
 
-  // #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
-  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
-  // {
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
-  // };
-
-  #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
   uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
   {
-    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
   };
+
+  // #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
+  // {
+  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+  // };
 
   #pragma message "compilation for: krz007"
 // ---------------------------------------------------------------------------------------------------
@@ -706,18 +706,18 @@
   #define USE_TSL2561                 0   // use "0" to disable
   #define SLEEP_TIME_S                900 // seconds - 180
 
-  // #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
-  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
-  // {
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
-  // };
-
-  #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
   uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
   {
-    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
   };
+
+  // #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
+  // {
+  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+  // };
 
   #pragma message "compilation for: krz008"
 // ---------------------------------------------------------------------------------------------------
@@ -740,18 +740,18 @@
   #define USE_TSL2561                 0   // use "0" to disable
   #define SLEEP_TIME_S                900 // seconds - 180
 
-  // #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
-  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
-  // {
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
-  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
-  // };
-
-  #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  #define NUMBER_OF_GATEWAYS          2               // number of receivers/gateways
   uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
   {
-    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01,               // krz101-gateway1
+    0x3A, 0xFF, 0x01, 0x01, 0x01, 0x03                // krz103-gateway3
   };
+
+  // #define NUMBER_OF_GATEWAYS          1               // number of receivers/gateways
+  // uint8_t receivers[NUMBER_OF_GATEWAYS][6] =          // put here the fake MAC addresses that are assigned in receiver sketch
+  // {
+  //   0x3A, 0xFF, 0x01, 0x01, 0x01, 0x01               // krz101-gateway1
+  // };
 
   #pragma message "compilation for: krz009"
 // ---------------------------------------------------------------------------------------------------
