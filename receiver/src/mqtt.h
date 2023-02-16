@@ -11,7 +11,11 @@ mqtt functions
 // mqtt callback
 void mqtt_callback(char* topic, byte* message, unsigned int length)
 {
-
+  if (skip_mqtt) 
+  {
+    mqtt_connected = false;
+    return;
+  }
   String topic_str = String(topic);
   String messageTemp;
   unsigned long sm = micros();
@@ -508,7 +512,11 @@ void mqtt_reconnect()
 {
   unsigned long aux_pushbutton_interval;
   unsigned long press_time, released;
-
+  if (skip_mqtt) 
+  {
+    mqtt_connected = false;
+    return;
+  }
   if (mqttc.connected())
   {
     mqtt_connected = true;

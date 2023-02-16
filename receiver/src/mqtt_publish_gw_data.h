@@ -21,6 +21,7 @@ dev["sw"]= String(VERSION)+ "," + String(__DATE__) + "_" + String(__TIME__);
 // gateway status config - sent by heartbeat() periodically to HA
 bool mqtt_publish_gw_status_config()
 {
+  if (!mqtt_connected) return false;
   bool publish_status = false;      //changes locally in each config publish
   bool total_publish_status = true; //changes globally in each config publish when any fails
 
@@ -293,6 +294,7 @@ bool mqtt_publish_gw_status_config()
 // gateway status value
 bool mqtt_publish_gw_status_values(const char* status)
 {
+  if (!mqtt_connected) return false;
   bool publish_status = false;
 
   char status_state_topic[60];
@@ -354,6 +356,7 @@ bool mqtt_publish_gw_status_values(const char* status)
 // gw last_updated_sensor config - once sensor data is sent to HA, show on HA which sensor was last updated or queue full
 bool mqtt_publish_gw_last_updated_sensor_config()
 {
+  if (!mqtt_connected) return false;
   bool publish_status = false;      //changes locally in each config publish
   bool total_publish_status = true; //changes globally in each config publish when any fails
 
@@ -421,6 +424,7 @@ bool mqtt_publish_gw_last_updated_sensor_config()
 // gw last_updated_sensor value
 bool mqtt_publish_gw_last_updated_sensor_values(const char* status)
 {
+  if (!mqtt_connected) return false;
   bool publish_status = false;
 
   char status_state_topic[60];
@@ -474,6 +478,7 @@ bool mqtt_publish_gw_last_updated_sensor_values(const char* status)
 // gateway FW update - button on HA
 bool mqtt_publish_button_update_config()
 {
+  if (!mqtt_connected) return false;
   bool publish_status = false;      //changes locally in each config publish
   bool total_publish_status = true; //changes globally in each config publish when any fails
 
@@ -545,6 +550,7 @@ bool mqtt_publish_button_update_config()
 // gateway restart - button on HA
 bool mqtt_publish_button_restart_config()
 {
+  if (!mqtt_connected) return false;
   bool publish_status = false;      //changes locally in each config publish
   bool total_publish_status = true; //changes globally in each config publish when any fails
 
@@ -615,6 +621,7 @@ bool mqtt_publish_button_restart_config()
 // stop/start updating HA with sensors data - switch on HA
 bool mqtt_publish_switch_publish_config()
 {
+  if (!mqtt_connected) return false;
   bool publish_status = false;      //changes locally in each config publish
   bool total_publish_status = true; //changes globally in each config publish when any fails
 
@@ -689,6 +696,7 @@ bool mqtt_publish_switch_publish_config()
 
 bool mqtt_publish_switch_publish_values()
 {
+  if (!mqtt_connected) return false;
   bool publish_status = false;
 
   char publish_state_topic[60];
@@ -864,6 +872,7 @@ void heartbeat()
 // universal button on HA - config
 bool mqtt_publish_button_config(const char* button)
 {
+  if (!mqtt_connected) return false;
   bool debug_mode = false;
   bool publish_status = false;      //changes locally in each config publish
   bool total_publish_status = true; //changes globally in each config publish when any fails
@@ -939,6 +948,7 @@ bool mqtt_publish_button_config(const char* button)
 // universal standalone text sensor on HA - config
 bool mqtt_publish_text_sensor_config(const char* text_sensor)
 {
+  if (!mqtt_connected) return false;
   bool debug_mode = false;
   bool publish_status = false;      //changes locally in each config publish
   bool total_publish_status = true; //changes globally in each config publish when any fails
@@ -1010,6 +1020,7 @@ bool mqtt_publish_text_sensor_config(const char* text_sensor)
 // universal standalone text sensor on HA - publish value
 bool mqtt_publish_text_sensor_value(const char* text_sensor, const char* text_sensor_value)
 {
+  if (!mqtt_connected) return false;
   bool debug_mode = false;
   bool publish_status = false;
 
@@ -1061,6 +1072,7 @@ bool mqtt_publish_text_sensor_value(const char* text_sensor, const char* text_se
 // universal standalone sensor with unit on HA - config
 bool mqtt_publish_sensor_with_unit_config(const char* sensor_with_unit, const char* sensor_unit)
 {
+  if (!mqtt_connected) return false;
   bool debug_mode = false;
   bool publish_status = false;      //changes locally in each config publish
   bool total_publish_status = true; //changes globally in each config publish when any fails
@@ -1133,6 +1145,7 @@ bool mqtt_publish_sensor_with_unit_config(const char* sensor_with_unit, const ch
 // universal standalone sensor with unit on HA - publish value
 bool mqtt_publish_sensor_with_unit_value(const char* sensor_with_unit, const char* sensor_unit, const char* sensor_with_unit_value)
 {
+  if (!mqtt_connected) return false;
   bool debug_mode = false;
   bool publish_status = false;
 
@@ -1184,6 +1197,7 @@ bool mqtt_publish_sensor_with_unit_value(const char* sensor_with_unit, const cha
 // universal light on HA - config
 bool mqtt_publish_light_config(const char* light, bool optimistic)
 {
+  if (!mqtt_connected) return false;
   bool debug_mode = false;
   bool publish_status = false;      //changes locally in each config publish
   bool total_publish_status = true; //changes globally in each config publish when any fails
@@ -1284,6 +1298,7 @@ bool mqtt_publish_light_config(const char* light, bool optimistic)
 // universal light on HA - values
 bool mqtt_publish_light_values(const char* light, bool power, u_int8_t brightness)
 {
+  if (!mqtt_connected) return false;
   bool debug_mode = false;
   bool publish_status = false;
 

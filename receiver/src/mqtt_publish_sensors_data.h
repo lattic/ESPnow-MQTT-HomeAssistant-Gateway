@@ -9,6 +9,7 @@ mqtt functions for sensors
 
 bool mqtt_publish_sensors_config(const char* hostname, const char* name, const char* mac, const char* fw, const char* dev_type, byte boardtype)
 {
+  if (!mqtt_connected) return false;
   bool publish_status = false;      //changes locally in each config publish
   bool total_publish_status = true; //changes globally in each config publish when any fails
 
@@ -1033,15 +1034,11 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 
 bool mqtt_publish_sensors_values()
 {
+  if (!mqtt_connected) return false;
   // aux variable to format floats
   char temp_value[50];
   // no wifi
   if (!wifi_connected)
-  {
-    return false;
-  }
-  // no MQTT
-  if (!mqtt_connected)
   {
     return false;
   }
