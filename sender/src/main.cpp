@@ -2230,12 +2230,14 @@ gather_data();
       Serial.printf("[%s]: Received command from gateway = %d\n",__func__,data_recv.command); 
     #endif
     // act on commands here
+    // OTA
     if (data_recv.command == 1) 
     {
       fw_update = true;
       Serial.printf("[%s]: Received command from gateway to perform fw update\n",__func__);
     }
     else 
+    // RESTART
     if (data_recv.command == 2) 
     {
       Serial.printf("[%s]: Received command from gateway to perform RESTART\n",__func__);
@@ -2244,6 +2246,7 @@ gather_data();
       do_esp_restart();
     }   
     else 
+    // CP
     if (data_recv.command == 3) 
     {
       Serial.printf("[%s]: Received command from gateway TO start CAPTIVE PORTAL\n",__func__);
@@ -2254,6 +2257,7 @@ gather_data();
       do_esp_restart();
     }   
     else 
+    // Factory
     if (data_recv.command == 4) 
     {
       Serial.printf("[%s]: Received command from gateway to perform FACTORY RESET\n",__func__);
@@ -2262,7 +2266,8 @@ gather_data();
       Serial.printf("[%s]: RESTARTING ESP\n\n\n",__func__);
       ESP.restart();  // restart without saving data!
     }  
-    else 
+    else    
+    // Motion OFF
     if (data_recv.command == 10) 
     {
       #ifdef DEBUG
@@ -2272,6 +2277,7 @@ gather_data();
       do_esp_restart();
     }  
     else 
+    // Motion ON
     if (data_recv.command == 11) 
     {
       #ifdef DEBUG
@@ -2281,12 +2287,44 @@ gather_data();
       do_esp_restart();
     }      
     else 
+    // gw1
+    if (data_recv.command == 21) 
+    {
+      Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 1\n",__func__);
+      if (NUMBER_OF_GATEWAYS > 1) // only if there is more than 1 gw, otherwise it makes no sense
+      {
+        g_last_gw = 0;
+      }
+    }  
+    else  
+    // gw2
+    if (data_recv.command == 22) 
+    {
+      Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 2\n",__func__);
+      if (NUMBER_OF_GATEWAYS > 1) // only if there is more than 1 gw, otherwise it makes no sense
+      {
+        g_last_gw = 1;
+      }
+    }  
+    else 
+    // gw3
+    if (data_recv.command == 23) 
+    {
+      Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 3\n",__func__);
+      if (NUMBER_OF_GATEWAYS > 2) // only if there is more than 2 gw, otherwise it makes no sense
+      {
+        g_last_gw = 2;
+      }
+    }  
+    else  
+    // LEDs OFF   
     if (data_recv.command == 200) 
     {
       Serial.printf("[%s]: Received command from gateway to perform set LED PMW DC to 0\n",__func__);
       g_led_pwm = 0;
     }     
     else 
+    // LEDs ON
     if (data_recv.command == 201) 
     {
       Serial.printf("[%s]: Received command from gateway to perform set LED PMW DC to 255\n",__func__);

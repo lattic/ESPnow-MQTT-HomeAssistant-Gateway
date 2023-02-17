@@ -756,6 +756,20 @@
   #pragma message "compilation for: krz009"
 // ---------------------------------------------------------------------------------------------------
 
+//-----------------------  TEST -----------------------
+#elif DEVICE_ID == 92                 // Lilygo 1A
+  #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
+  #define HOSTNAME                    "esp32092"
+  #define DEVICE_NAME                 "test92"  // 15 characters maximum
+  #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define FW_UPGRADE_GPIO             17   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define SLEEP_TIME_S                5 // seconds - 180
+
+  #pragma message "compilation for: esp32092-test"
+// ---------------------------------------------------------------------------------------------------
+
 
 #else
   #error "Wrong DEVICE_ID chosen"
