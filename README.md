@@ -23,7 +23,7 @@ LEDs on sensor devices can be turned OFF/ON by MQTT command. If not OFF, then au
 <li>{"mac":"xx:01:01:01:zz:yy","command":"22"} - force connection to GW2 (if exists)
 <li>{"mac":"xx:01:01:01:zz:yy","command":"23"} - force connection to GW3 (if exists)
 <li>{"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
-<li>{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs dimm automatically by ESP: lux<1 -> dc=1, 1<lux<10 -> dc=10, lux>10 -> dc=255 
+<li>{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs dimm automatically by ESP: lux below 1 ->dc=1, lux between 1 and 10 => dc=10, lux>10 => dc=255 
 </ul>
 <br><br>
 <h2> Update 2023-01-26:</h2>
@@ -354,6 +354,4 @@ All information from sensor device is sent to Home Assistant MQTT broker in one 
 
 <br>
 <h2>TODO list</h2>
-<ul>
-  <li><s>Sensor device: OTA - how to do it ON DEMAND? No idea yet. If device is to listen to gateway, it will consume battery... Anybody knows?</s>
-</ul>
+Probably nothing at this moment ;)
