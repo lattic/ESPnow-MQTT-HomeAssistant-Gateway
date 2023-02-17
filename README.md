@@ -1,5 +1,8 @@
 <h1> ESPnow MQTT Home Assistant Gateway </h1>
 <h2> SKETCHES MOVED TO PLATFORMIO! </h2>
+<h2> Update 2023-02-17:</h2>
+<br>
+Force connection to specific gateway - see below commands: 21, 22 and 23
 <h2> Update 2023-02-12:</h2>
 <br>
 LEDs on sensor devices can be turned OFF/ON by MQTT command. If not OFF, then automatically dimmed by measured light.
@@ -16,6 +19,9 @@ LEDs on sensor devices can be turned OFF/ON by MQTT command. If not OFF, then au
 <li>{"mac":"xx:01:01:01:zz:yy","command":"4"} - factory reset
 <li>{"mac":"xx:01:01:01:zz:yy","command":"10"} - Motion OFF
 <li>{"mac":"xx:01:01:01:zz:yy","command":"11"} - Motion ON
+<li>{"mac":"xx:01:01:01:zz:yy","command":"21"} - force connection to GW1
+<li>{"mac":"xx:01:01:01:zz:yy","command":"22"} - force connection to GW2 (if exists)
+<li>{"mac":"xx:01:01:01:zz:yy","command":"23"} - force connection to GW3 (if exists)
 <li>{"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
 <li>{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs dimm automatically by ESP: lux<1 -> dc=1, 1<lux<10 -> dc=10, lux>10 -> dc=255 
 </ul>
