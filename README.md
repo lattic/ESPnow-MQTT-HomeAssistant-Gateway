@@ -246,6 +246,18 @@ Other important configurable settings (some mandatory, some optional):
   <li>MQTT username - gateway device
   <li>MQTT password - gateway device
 </ul>
+  
+  <b> UPDATE: </b>
+  <br>
+  All below configuration parameters are being set up during first integration of gateway devices over Captive Portal. 
+  <br>
+  All pareameters can be set up also later by invoking Captive Portal:
+  </br>
+  
+
+<img width="557" alt="Screenshot 2023-02-17 at 11 38 17" src="https://user-images.githubusercontent.com/46562447/219645575-162993f2-8816-417a-9aaf-c6697add16b0.png">
+
+
 <h2>Software</h2>
 <h3>Sensor device - sender</h3>
 Tasks are as described above so the code is in 1 file only: sender.ino <br>
