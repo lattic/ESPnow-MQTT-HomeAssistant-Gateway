@@ -257,6 +257,7 @@ Other important configurable settings (some mandatory, some optional):
 
 <img width="557" alt="Screenshot 2023-02-17 at 11 38 17" src="https://user-images.githubusercontent.com/46562447/219645575-162993f2-8816-417a-9aaf-c6697add16b0.png">
 
+All info on ESP is stored in encrypted form so not readable by "non-super-hacker" ;-)
 
 <h2>Software</h2>
 <h3>Sensor device - sender</h3>
