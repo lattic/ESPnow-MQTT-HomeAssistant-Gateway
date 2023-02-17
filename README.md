@@ -321,19 +321,22 @@ Ontime is also reduced by turning off the bootloader logo during wake up from sl
 <b>Gateway device as discovered by Home Assistant:<br>
 <br>
 
-<img width="532" alt="Screenshot 2022-07-04 at 09 11 38" src="https://user-images.githubusercontent.com/46562447/177111787-2e294347-cb40-4041-80e7-a02f0d6d7af2.png">
+<img width="695" alt="Screenshot 2023-02-17 at 11 29 37" src="https://user-images.githubusercontent.com/46562447/219640220-d505aeb7-781f-4ccb-8e5c-23c41ab516f1.png">
+
 
 <br><br>
 <b>Gateway device on lovelace dashboard:<br>
 <br>
 
-<img width="390" alt="Screenshot 2022-07-04 at 09 10 54" src="https://user-images.githubusercontent.com/46562447/177111873-b1d236dd-abfc-4cbf-91e7-c3a316369cee.png">
+<img width="337" alt="Screenshot 2023-02-17 at 11 28 08" src="https://user-images.githubusercontent.com/46562447/219639838-aef4fced-90cb-4da4-8a0f-981c0b58fe24.png">
+
 
 <br><br>
 <b>Sensor device as discovered by Home Assistant:<br>
 <br>
 
-<img width="531" alt="Screenshot 2022-07-04 at 09 11 52" src="https://user-images.githubusercontent.com/46562447/177111944-b11afa4f-93ac-4319-966b-8fcfd8772ad1.png">
+<img width="687" alt="Screenshot 2023-02-17 at 11 25 52" src="https://user-images.githubusercontent.com/46562447/219639310-1aa8ee80-1a1a-4e67-9c69-e6e585ac8109.png">
+
 
 <br><br><br>
 <b>Sensor Device on lovelace dashboard:<br>
