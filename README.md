@@ -2,7 +2,15 @@
 <h2> SKETCHES MOVED TO PLATFORMIO! </h2>
 <h2> Update 2023-02-17:</h2>
 <br>
-Force connection to specific gateway - see below commands: 21, 22 and 23
+Force connection to specific gateway - see below commands: 21, 22 and 23</br>
+All commands to sensor devices are available in Node Red dashboard - no more hustle 
+<br>
+<img width="1053" alt="Screenshot 2023-02-17 at 11 48 03" src="https://user-images.githubusercontent.com/46562447/219646236-68ca9795-8753-4aa8-8cf1-a1e3d07dd2b2.png">
+<img width="1070" alt="Screenshot 2023-02-17 at 11 47 44" src="https://user-images.githubusercontent.com/46562447/219646257-c54ecdb5-cac6-4c81-b959-ab73cfad1860.png">
+
+<img width="1074" alt="Screenshot 2023-02-17 at 11 47 35" src="https://user-images.githubusercontent.com/46562447/219646275-b14fa555-819c-479a-8b71-997a13372084.png">
+
+<br>
 <h2> Update 2023-02-12:</h2>
 <br>
 LEDs on sensor devices can be turned OFF/ON by MQTT command. If not OFF, then automatically dimmed by measured light.
