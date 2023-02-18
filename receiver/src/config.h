@@ -38,6 +38,7 @@ config
   #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
 
   #define USE_WEB_SERIAL            1
+  #define CP_TIMEOUT_S              180
 
   #pragma message "compilation for: ESPnow_esp32029_gw1"
 
@@ -69,6 +70,7 @@ config
   #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
 
   #define USE_WEB_SERIAL            1
+  #define CP_TIMEOUT_S              180
 
   #pragma message "compilation for: ESPnow_esp32030_gw2"
 
@@ -109,6 +111,7 @@ config
   #define MY_TIME_ZONE              "GMT0BST,M3.5.0/1,M10.5.0" 
 
   #define USE_WEB_SERIAL            1
+  #define CP_TIMEOUT_S              180
 
   #define MEASURE_LUX               1
   #define MEASURE_LUX_GPIO          11
