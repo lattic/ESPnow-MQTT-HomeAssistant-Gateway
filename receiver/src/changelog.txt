@@ -36,7 +36,7 @@ OTA:
   2.14.2b1  - testing mqtt off from weblog
 
 2023-02-16
-  2.14.1  - CP_TIMEOUT_S = 600s / 5min 
+  2.14.1  - CP_TIMEOUT_S = 600s / 5min for CLIENT
 
 2023-02-16
   2.14.0  - failure with Git(hub)
