@@ -17,6 +17,25 @@ MQTT commands to receiver:
   - LEDs OFF: {"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
   - LEDs AUTO:{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs will dimm, lux < 1->dc = 1, 1<x<10 = 10, > 10 = 255 
 
+2023-02-20
+  2.10.0  - ESP32S integrated
+          - thermocouple sensor integrated (041) with MAX31855 (only ESP32S working due to SPI implementation in the library)
+          - commands to set SLEEP_TIME_S: 
+            30-1s
+            31-3s
+            32-5s
+            33-10s
+            34-15s
+            35-30s
+            36-60s
+            37-90s
+            38-120s
+            39-180s
+            40-300s
+            41-600s
+            42-900s
+            43-1800s
+            44-3600s
 
 2023-02-17
   2.9.3   -  possibility to force sensor device to specific GW (commands: 21, 22, 23)

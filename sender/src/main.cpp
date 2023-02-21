@@ -55,6 +55,14 @@ sender.ino
 #if (USE_TSL2561 == 1)
   #include <SparkFunTSL2561.h>
 #endif
+
+
+// temp from MAX31855 - temp sensor, SPI
+#if (USE_MAX31855 == 1)
+  #include <Adafruit_MAX31855.h>
+  Adafruit_MAX31855 thermocouple(CLK_GPIO, CS_GPIO, MISO_GPIO);
+#endif
+
 // ========================================================================== libraries END
 
 // some consistency checks 
@@ -177,6 +185,7 @@ bool motion = false;
 bool sht31ok = true;
 bool tslok   = true;
 bool max17ok = true;
+bool max31855ok = true;
 
 char charging[5];       // global as assigned in setup() - to avoid calling again
 uint8_t charging_int = 0;       // by default NC
@@ -744,6 +753,31 @@ void gather_data()
       myData.hum = sht31.readHumidity()     + (CALIBRATE_HUMIDITY);
     }
   #endif
+
+  // MAX31855
+  #if (USE_MAX31855 == 1)
+    if (max31855ok)
+    {
+      double c = thermocouple.readCelsius();
+      if (isnan(c) or (c == 0))
+      {
+        for (uint8_t i=0; i < 10; i++)
+        {
+          delay(5);
+          c = thermocouple.readCelsius();
+          if (c != 0) 
+          {
+            myData.temp = c;
+            break;
+          }
+        }
+      } else
+      {
+        myData.temp = c;
+      }
+    }
+  #endif
+
   #ifdef DEBUG
     Serial.printf("\ttemp=%fC\n",myData.temp);
     Serial.printf("\thum=%f%%\n",myData.hum);
@@ -1827,7 +1861,7 @@ void setup()
       Serial.printf("[%s]: Enabling 3V to power sensors on GPIO=%d\n",__func__,ENABLE_3V_GPIO);
     #endif
     digitalWrite(ENABLE_3V_GPIO, HIGH);
-    while (!digitalRead(ENABLE_3V_GPIO)){}
+    while (!digitalRead(ENABLE_3V_GPIO)){delay(1);}
     delay(10);
   #endif
   
@@ -1872,7 +1906,6 @@ void setup()
   boot_reason = esp_reset_reason();
   wakeup_reason = esp_sleep_get_wakeup_cause();
 
-
   Serial.printf("[%s]: Boot cause=%d - ",__func__,boot_reason);
   switch(boot_reason)
   {
@@ -1904,8 +1937,6 @@ void setup()
       break;
     }
   }
-
-
 
   Serial.printf("[%s]: Wakeup cause=%d - ",__func__,wakeup_reason);
   switch(wakeup_reason)
@@ -2080,9 +2111,9 @@ void setup()
     }
   #endif
 
+// ===============  SENSORS INITIALISATION
 // MAX17048 - fuel gauge
   #if (USE_MAX17048 == 1)
-    
     #ifdef DEBUG
       lipo.enableDebugging();
       Serial.printf("[%s]: start USE_MAX17048\n",__func__);
@@ -2098,7 +2129,6 @@ void setup()
       #ifdef DEBUG
         Serial.printf("[%s]: start MAX17048 OK\n",__func__);
       #endif
-
       // reset MAX17048 if NOT woke up from deep sleep and apply MAX17048_DELAY_ON_RESET_MS
       if (boot_reason != 8)
       {
@@ -2108,28 +2138,12 @@ void setup()
         lipo.reset();
         delay(MAX17048_DELAY_ON_RESET_MS);
       }
-
     }
   #else
     #ifdef DEBUG
       Serial.printf("[%s]: DONT USE_MAX17048\n",__func__);
     #endif
   #endif
-
-// Firmware update
-// print only in DEBUG otherwise security breach
-  #ifdef DEBUG
-    char firmware_file[255];
-    #ifndef CLIENT
-      // UPDATE_FIRMWARE_HOST is in local network
-      snprintf(firmware_file,sizeof(firmware_file),"%s/01-Production/0-ESPnow/firmware/%s.bin",UPDATE_FIRMWARE_HOST,HOSTNAME);
-    #else
-      // UPDATE_FIRMWARE_HOST is on internet
-      snprintf(firmware_file,sizeof(firmware_file),"%s/%s.bin",UPDATE_FIRMWARE_HOST,HOSTNAME);
-    #endif
-  Serial.printf("[%s]: firmware file:\n %s\n",__func__,firmware_file);
-  #endif
-// Firmware update END
 
 //lux
   #if (USE_TSL2561 == 1)
@@ -2182,6 +2196,44 @@ void setup()
       Serial.printf("[%s]: DONT USE_SHT31\n",__func__);
     #endif
   #endif
+
+//MAX31855
+  #if (USE_MAX31855 == 1)
+    #ifdef DEBUG
+      Serial.printf("[%s]: start USE_MAX31855\n",__func__);
+    #endif
+    if (!thermocouple.begin()) {   // Set to 0x45 for alternate i2c addr
+        Serial.printf("[%s]: MAX31855 NOT detected ... Check your wiring!\n",__func__);
+      max31855ok = false;
+    } else
+    {
+      #ifdef DEBUG
+        Serial.printf("[%s]: max31855ok =%d\n",__func__,max31855ok);
+      #endif
+    }
+  #else
+    #ifdef DEBUG
+      Serial.printf("[%s]: DONT USE_MAX31855\n",__func__);
+    #endif
+  #endif
+// ===============  SENSORS INITIALISATION END
+
+// Firmware update
+// print only in DEBUG otherwise security breach
+  #ifdef DEBUG
+    char firmware_file[255];
+    #ifndef CLIENT
+      // UPDATE_FIRMWARE_HOST is in local network
+      snprintf(firmware_file,sizeof(firmware_file),"%s/01-Production/0-ESPnow/firmware/%s.bin",UPDATE_FIRMWARE_HOST,HOSTNAME);
+    #else
+      // UPDATE_FIRMWARE_HOST is on internet
+      snprintf(firmware_file,sizeof(firmware_file),"%s/%s.bin",UPDATE_FIRMWARE_HOST,HOSTNAME);
+    #endif
+  Serial.printf("[%s]: firmware file:\n %s\n",__func__,firmware_file);
+  #endif
+// Firmware update END
+
+
 
 // gather data
 gather_data();
@@ -2317,6 +2369,112 @@ gather_data();
       }
     }  
     else  
+    // SLEEP_TIME_S=1s   
+    if (data_recv.command == 30) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 1s\n",__func__);
+      g_sleeptime_s = 1;
+    }     
+    else
+    // SLEEP_TIME_S=3s   
+    if (data_recv.command == 31) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 3s\n",__func__);
+      g_sleeptime_s = 3;
+    }     
+    else
+    // SLEEP_TIME_S=5s   
+    if (data_recv.command == 32) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 5s\n",__func__);
+      g_sleeptime_s = 5;
+    }     
+    else
+    // SLEEP_TIME_S=10s   
+    if (data_recv.command == 33) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 10s\n",__func__);
+      g_sleeptime_s = 10;
+    }     
+    else
+    // SLEEP_TIME_S=15s   
+    if (data_recv.command == 34) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 15s\n",__func__);
+      g_sleeptime_s = 15;
+    }     
+    else    
+    // SLEEP_TIME_S=30s   
+    if (data_recv.command == 35) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 30s\n",__func__);
+      g_sleeptime_s = 30;
+    }     
+    else
+    // SLEEP_TIME_S=60s   
+    if (data_recv.command == 36) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 60s\n",__func__);
+      g_sleeptime_s = 60;
+    }     
+    else 
+    // SLEEP_TIME_S=90s   
+    if (data_recv.command == 37) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 90s\n",__func__);
+      g_sleeptime_s = 90;
+    }     
+    else  
+    // SLEEP_TIME_S=120s   
+    if (data_recv.command == 38) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 120s\n",__func__);
+      g_sleeptime_s = 120;
+    }     
+    else 
+    // SLEEP_TIME_S=180s   
+    if (data_recv.command == 39) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 180s\n",__func__);
+      g_sleeptime_s = 180;
+    }     
+    else 
+    // SLEEP_TIME_S=300s   
+    if (data_recv.command == 40) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 300s\n",__func__);
+      g_sleeptime_s = 300;
+    }     
+    else 
+    // SLEEP_TIME_S=600s   
+    if (data_recv.command == 41) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 600s\n",__func__);
+      g_sleeptime_s = 600;
+    }     
+    else
+    // SLEEP_TIME_S=900s   
+    if (data_recv.command == 42) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 900s\n",__func__);
+      g_sleeptime_s = 900;
+    }     
+    else  
+    // SLEEP_TIME_S=1800s   
+    if (data_recv.command == 43) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 1800s\n",__func__);
+      g_sleeptime_s = 1800;
+    }     
+    else 
+    // SLEEP_TIME_S=3600s   
+    if (data_recv.command == 44) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set sleeptime to 3600s\n",__func__);
+      g_sleeptime_s = 3600;
+    }     
+    else 
+
     // LEDs OFF   
     if (data_recv.command == 200) 
     {

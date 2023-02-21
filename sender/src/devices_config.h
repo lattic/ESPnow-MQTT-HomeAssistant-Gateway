@@ -18,6 +18,7 @@
   // #define DEVICE_ID  37           // "esp32037" - C3, production - TRV1 Bedroom
   // #define DEVICE_ID  38           // "esp32038" - S2, production - Toilet bedroom
   // #define DEVICE_ID  39           // "esp32039" - S2, production - garage front mot.
+  // #define DEVICE_ID  41           // "esp32041" - S,  production - thermocouple  
   // #define DEVICE_ID  49           // "esp32049" - S2, production - kitchen
   // #define DEVICE_ID  55           // "esp32055" - C3, production - TRV3 Toilet Bedroom
   // #define DEVICE_ID  56           // "esp32056" - C3, production - TRV7 Tailor
@@ -267,6 +268,34 @@
   #define SLEEP_TIME_S                300 // seconds - 180
 
   #pragma message "compilation for: esp32039-Garage front m."
+// ---------------------------------------------------------------------------------------------------
+
+#elif DEVICE_ID == 41                 // 
+  #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
+  #define HOSTNAME                    "esp32041"
+  #define DEVICE_NAME                 "thermocouple01"  // 15 characters maximum
+  #define BOARD_TYPE                  1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define SLEEP_TIME_S                15  // seconds - 
+  #define ACT_BLUE_LED_GPIO           27   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define ERROR_RED_LED_GPIO          27   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+
+
+  #define USE_MAX17048                1   // use "0" to disable
+  #define CUSTOM_SDA_GPIO             21
+  #define CUSTOM_SCL_GPIO             22
+  #define CHARGING_GPIO               23  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define POWER_GPIO                  17  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+   
+
+  #define ENABLE_3V_GPIO              32   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+
+  #define USE_MAX31855                1   // tested ONLY with ESP32S
+  #define MISO_GPIO                   19
+  #define CLK_GPIO                    18
+  #define CS_GPIO                     25 
+
+  #pragma message "compilation for: esp32041-thermocouple01"
 // ---------------------------------------------------------------------------------------------------
 
 
@@ -757,6 +786,17 @@
 // ---------------------------------------------------------------------------------------------------
 
 //-----------------------  TEST -----------------------
+#elif DEVICE_ID == 91                 // 
+  #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
+  #define HOSTNAME                    "esp32091"
+  #define DEVICE_NAME                 "test91esp32s"  // 15 characters maximum
+  #define BOARD_TYPE                  1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define SLEEP_TIME_S                15  // seconds - 
+
+  #pragma message "compilation for: esp32091-test91esp32s"
+// ---------------------------------------------------------------------------------------------------
+
 #elif DEVICE_ID == 92                 // Lilygo 1A
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32092"
@@ -776,6 +816,11 @@
 #endif
 
 // common parameters
+// #if defined(USE_MAX31855) and defined(USE_SHT31)
+#if (USE_MAX31855 == 1) and (USE_SHT31 == 1)
+  #error only 1 temperature sensor defined - choose USE_SHT31 or USE_MAX31855
+#endif
+
 #ifdef ACT_BLUE_LED_GPIO
   // check if PWM is defined, i.e. = 0
   #ifndef ACT_BLUE_LED_GPIO_USE_PWM
