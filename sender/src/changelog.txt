@@ -17,6 +17,9 @@ MQTT commands to receiver:
   - LEDs OFF: {"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
   - LEDs AUTO:{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs will dimm, lux < 1->dc = 1, 1<x<10 = 10, > 10 = 255 
 
+2023-02-21
+  2.11.0 - lux measurements with auto gain (function from bedroom sketch) 
+
 2023-02-20
   2.10.0  - ESP32S integrated
           - thermocouple sensor integrated (041) with MAX31855 (only ESP32S working due to SPI implementation in the library)

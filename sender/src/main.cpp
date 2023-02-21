@@ -54,6 +54,8 @@ sender.ino
 // lux from TSL2561 - light sensor, I2C
 #if (USE_TSL2561 == 1)
   #include <SparkFunTSL2561.h>
+  bool light_high = false;
+  SFE_TSL2561 light;
 #endif
 
 
@@ -63,6 +65,8 @@ sender.ino
   Adafruit_MAX31855 thermocouple(CLK_GPIO, CS_GPIO, MISO_GPIO);
 #endif
 
+// lux tsl2561: measure-lux.h
+#include "measure-lux.h"
 // ========================================================================== libraries END
 
 // some consistency checks 
@@ -133,10 +137,6 @@ int id                            = 1;
   Adafruit_SHT31 sht31 = Adafruit_SHT31();
 #endif
 
-// lux from TSL2561 - light sensor, I2C
-#if (USE_TSL2561 == 1)
-  SFE_TSL2561 light;
-#endif
 
 // data variables
 typedef struct struct_message           // 92 bytes
@@ -268,6 +268,9 @@ void led_blink(void *pvParams);
 void led_blink_erase(void *pvParams);
 void cp_timer( TimerHandle_t cp_timer_handle );
 void get_old_wifi_credentials();
+
+// lux
+void get_lux(char* lux_char);  
 
 // ========================================================================== FUNCTIONS declaration END
 
@@ -786,34 +789,10 @@ void gather_data()
   // lux
   myData.lux = 0.0f;
   #if (USE_TSL2561 == 1)
-    unsigned int data0, data1; //data0=infrared, data1=visible light
-    double lux;              // Resulting lux value
-    boolean good;            // True if neither sensor is saturated
-    boolean gain = false;     // Gain setting, 0 = X1, 1 = X16; if with gain and overshoots it goes from 0 again - better false
-    unsigned int ms;         // Integration ("shutter") time in milliseconds
-    // If time = 0, integration will be 13.7ms
-    // If time = 1, integration will be 101ms
-    // If time = 2, integration will be 402ms
-    // If time = 3, use manual start / stop to perform your own integration
-    unsigned char time = 0;
-
-    light.begin();
-    light.setTiming(gain,time,ms);
-    if (light.setPowerUp()) tslok = true; else tslok = false;
-
-    light.manualStart();
-    delay(ms);
-    light.manualStop();
-
-    myData.lux = 0.0f;
-    if (tslok)
-    {
-      if (light.getData(data0,data1))
-      {
-        good = light.getLux(gain,ms,data0,data1,lux);
-        myData.lux = lux;
-      }
-    }
+    char lux_ch[10];
+    get_lux(lux_ch);
+    float lux = atof(lux_ch);
+    myData.lux = lux;
   if (g_led_pwm != 0)
   {
     if (lux <= 1) 
