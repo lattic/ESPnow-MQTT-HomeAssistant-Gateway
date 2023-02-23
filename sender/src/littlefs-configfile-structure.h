@@ -14,6 +14,7 @@ struct Config
   char      c_password[65];           // WiFi password
   uint8_t   c_led_pwm;                // DC for LED PWM
   uint8_t   c_motion = 1;             // motion enabled - toggle
+  uint8_t   c_lux_high_sens = 0;      // lux high sensitivity - toggle
 };
 
 // Global variables: all with "g_" to distinguish from config variables
@@ -27,6 +28,7 @@ char        g_wifi_ssid[33];          // WiFi ssid
 char        g_wifi_password[65];      // WiFi password
 uint8_t     g_led_pwm;                // DC for LED PWM
 uint8_t     g_motion = 1;             // motion enabled - toggle
+uint8_t     g_lux_high_sens = 0;      // lux high sensitivity - toggle
 
 
 #endif /* #ifndef littlefs_configfile_structure_h */

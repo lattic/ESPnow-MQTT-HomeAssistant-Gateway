@@ -816,7 +816,7 @@
 #endif
 
 // common parameters
-// #if defined(USE_MAX31855) and defined(USE_SHT31)
+
 #if (USE_MAX31855 == 1) and (USE_SHT31 == 1)
   #error only 1 temperature sensor defined - choose USE_SHT31 or USE_MAX31855
 #endif

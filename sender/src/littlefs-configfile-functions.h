@@ -141,6 +141,8 @@ Config variables - all variables with "c_" to distinguish from global variables
   char      c_ssid[33];               // WiFi ssid
   char      c_password[65];           // WiFi password
   uint8_t   c_led_pwm;                // DC for LED PWM
+  motion...
+  lux high sens...
 };
 
 Global variables - all variables with "g_" to distinguish from config variables
@@ -153,6 +155,8 @@ uint8_t     g_last_gw = 0;            // last used gateway
 char        g_wifi_ssid[33];          // WiFi ssid
 char        g_wifi_password[65];      // WiFi password
 uint8_t     g_led_pwm;                // DC for LED PWM
+motion...
+lux highh sens...
 */
 
 //JSON functions
@@ -171,6 +175,7 @@ void convertToJson(const Config &src, JsonVariant dst) {
   dst["c_password"]             = g_wifi_password;
   dst["c_led_pwm"]              = g_led_pwm;
   dst["c_motion"]               = g_motion;
+  dst["c_lux_high_sens"]        = g_lux_high_sens;
 }
 
 
@@ -187,6 +192,7 @@ void convertFromJson(JsonVariantConst src, Config &dst) {
   g_last_gw                     = src["c_last_gw"];
   g_led_pwm                     = src["c_led_pwm"];
   g_motion                      = src["c_motion"];
+  g_lux_high_sens               = src["c_lux_high_sens"];
 
   strlcpy(g_wifi_ssid, src["c_ssid"], sizeof(g_wifi_ssid));
   strlcpy(g_wifi_password, src["c_password"], sizeof(g_wifi_password));

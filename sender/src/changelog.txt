@@ -12,10 +12,16 @@ MQTT commands to receiver:
   - restart:  {"mac":"xx:01:01:01:zz:yy","command":"2"} 
   - captive:  {"mac":"xx:01:01:01:zz:yy","command":"3"} 
   - factory:  {"mac":"xx:01:01:01:zz:yy","command":"4"} 
+  - high sensitivity light measurement:  {"mac":"xx:01:01:01:zz:yy","command":"5"} 
+  - low  sensitivity light measurement:  {"mac":"xx:01:01:01:zz:yy","command":"6"} 
   - Motion OFF:  {"mac":"xx:01:01:01:zz:yy","command":"10"} 
   - Motion ON:  {"mac":"xx:01:01:01:zz:yy","command":11"} 
   - LEDs OFF: {"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
   - LEDs AUTO:{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs will dimm, lux < 1->dc = 1, 1<x<10 = 10, > 10 = 255 
+
+2023-02-23
+  2.12.b1 - light_high_sensitivity:  0 - low, light meas. time 13ms, 1 - high, light meas. time 403ms
+          - commands: 5 = high, 6 = low
 
 2023-02-21
   2.11.0 - lux measurements with auto gain (function from bedroom sketch) 

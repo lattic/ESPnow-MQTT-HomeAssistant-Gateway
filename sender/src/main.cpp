@@ -156,8 +156,9 @@ typedef struct struct_message           // 92 bytes
   unsigned int boot;
   unsigned long ontime;                 // seconds, probably unsigned int would be enough - check it
   byte boardtype;
-  u_int8_t wifi_ok;                     // 0 - wifi not configured, 1 - wifi configured
-  u_int8_t motion_enabled;              // 0 - motion disabled, 1 - motion enabled
+  uint8_t wifi_ok;                      // 0 - wifi not configured, 1 - wifi configured
+  uint8_t motion_enabled;               // 0 - motion disabled, 1 - motion enabled
+  uint8_t light_high_sensitivity;       // 0 - low, light meas. time 13ms, 1 - high, light meas. time 403ms
 } struct_message;
 
 struct_message myData;
@@ -629,9 +630,10 @@ void hibernate(bool force, int final_sleeping_time_s)
           esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
         }
       #endif
-
-      Serial.printf("[%s]: going to sleep until next motion detected\n",__func__);
-      Serial.printf("[%s]:  or for %ds (heartbeat)\n",__func__,final_sleeping_time_s);
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: going to sleep until next motion detected\n",__func__);
+        Serial.printf("[%s]:  or for %ds (heartbeat)\n",__func__,final_sleeping_time_s);
+      #endif
     }
   #else
     //send ESP to deep unconditional sleep for predefined time -  wake up on timer...(heartbeat)
@@ -712,6 +714,9 @@ void gather_data()
 
   // wifi_ok
   myData.wifi_ok = g_wifi_ok;
+
+  // lux high sensitivity
+  myData.light_high_sensitivity = g_lux_high_sens;
 
   // motion enabled/disable
   #ifdef MOTION_SENSOR_GPIO
@@ -1008,7 +1013,9 @@ bool send_data()      // unsigned long s1=millis();Serial.println("sending took 
   if(espnow_data_sent)
   {
     // #ifdef DEBUG
+    #ifdef DEBUG_LIGHT
       Serial.printf("[%s]:\n [SAVED CHANNEL, SAVED RECEIVER] esp_now_send SUCCESSFUL on channel=%d, receiver=%d, MAC=%s; it took=%dms\n",__func__,channel,last_gw,receiver_mac,millis()-s1);
+    #endif
     // #endif
     return true;
   }
@@ -1535,7 +1542,9 @@ void erase_all_data()
 void do_esp_go_to_sleep()
 {
   save_config("Config saved before going to sleep");
-  Serial.printf("[%s]: Bye...\n========= E N D =========\n",__func__);
+  #ifdef DEBUG_LIGHT
+    Serial.printf("[%s]: Bye...\n========= E N D =========\n",__func__);
+  #endif
   esp_deep_sleep_start();
 }
 
@@ -1609,7 +1618,10 @@ void save_config(const char* reason)
     #endif
     g_saved_ontime_ms = 0; // reset on charging
   }
-  Serial.printf("[%s]: Program finished after %lums.\n",__func__,work_time);
+  
+  #ifdef DEBUG_LIGHT
+    Serial.printf("[%s]: Program finished after %lums.\n",__func__,work_time);
+  #endif
   
   // testing with PPK2 - end save ontime
   #ifdef PPK2_GPIO
@@ -1678,7 +1690,9 @@ void change_mac()
   if (mac_changed == ESP_OK) 
   {
     // #ifdef DEBUG
+    #ifdef DEBUG_LIGHT
       Serial.printf("[%s]: OLD MAC: %s, NEW MAC: %s\n",__func__,mac_org_char,mac_new_char);
+    #endif
     // #endif
   } else 
   {
@@ -1721,7 +1735,7 @@ void set_act_blue_led_level(u_int8_t level)
       {
         ledcWrite(ACT_BLUE_LED_PWM_CHANNEL, g_led_pwm);
         #ifdef DEBUG
-          Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: %d\n",__func__,g_led_pwm);
+          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: %d\n",__func__,g_led_pwm);
         #endif
       } else 
       {
@@ -1735,13 +1749,13 @@ void set_act_blue_led_level(u_int8_t level)
       {
         digitalWrite(ACT_BLUE_LED_GPIO,HIGH);
         #ifdef DEBUG
-          Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: HIGH\n",__func__);
+          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: HIGH\n",__func__);
         #endif
       } else 
       {
         digitalWrite(ACT_BLUE_LED_GPIO,LOW);
         #ifdef DEBUG
-          Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: LOW\n",__func__);
+          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: LOW\n",__func__);
         #endif
       }
     #endif
@@ -1761,7 +1775,7 @@ void set_error_red_led_level(u_int8_t level)
           red_level = g_led_pwm;
         ledcWrite(ERROR_RED_LED_PWM_CHANNEL, red_level);
         #ifdef DEBUG
-          Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: %d\n",__func__,red_level);
+          // Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: %d\n",__func__,red_level);
         #endif
       } else 
       {
@@ -1775,13 +1789,13 @@ void set_error_red_led_level(u_int8_t level)
       {
           digitalWrite(ERROR_RED_LED_GPIO,HIGH);
           #ifdef DEBUG
-            Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: HIGH\n",__func__);
+            // Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: HIGH\n",__func__);
           #endif
       } else 
       {
         digitalWrite(ERROR_RED_LED_GPIO,LOW);
         #ifdef DEBUG
-          Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: LOW\n",__func__);
+          // Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: LOW\n",__func__);
         #endif
       }
     #endif
@@ -1792,6 +1806,26 @@ void set_error_red_led_level(u_int8_t level)
 void setup()
 {
   program_start_time = millis();
+
+  #if defined(DEBUG_LIGHT) or defined(DEBUG)
+    Serial.begin(115200);
+  #endif
+
+  // ciphered config
+  cipher->setKey(cipher_key);     //for encryption/decryption of config file
+// load config file
+  if (!load_config())
+  {
+    Serial.begin(115200);
+    Serial.printf("[%s]: Loading config file FAILED, restarting\n",__func__);
+    do_esp_restart();
+  } else 
+  {
+    #ifdef DEBUG
+      Serial.printf("[%s]: Loading config file SUCCESSFUL\n",__func__);
+    #endif
+  }
+
   // testing with PPK2 - start
   #ifdef PPK2_GPIO
     pinMode(PPK2_GPIO,OUTPUT);
@@ -1800,11 +1834,10 @@ void setup()
 
   // start LEDs  
   initiate_all_leds();
-
-  Serial.begin(115200);
-  Serial.printf("\n======= S T A R T =======\n");
-  Serial.printf("[%s]: Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__,DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
-
+  #ifdef DEBUG_LIGHT
+    Serial.printf("\n======= S T A R T =======\n");
+    Serial.printf("[%s]: Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__,DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
+  #endif
   // check if device is charging
   snprintf(charging,4,"%s","N/A");
   #if (defined(CHARGING_GPIO) and defined(POWER_GPIO))
@@ -1855,19 +1888,19 @@ void setup()
   Wire.begin();
   delay(1);  
 
-  // ciphered config
-  cipher->setKey(cipher_key);     //for encryption/decryption of config file
-// load config file
-  if (!load_config())
-  {
-    Serial.printf("[%s]: Loading config file FAILED, restarting\n",__func__);
-    do_esp_restart();
-  } else 
-  {
-    #ifdef DEBUG
-      Serial.printf("[%s]: Loading config file SUCCESSFUL\n",__func__);
-    #endif
-  }
+//   // ciphered config
+//   cipher->setKey(cipher_key);     //for encryption/decryption of config file
+// // load config file
+//   if (!load_config())
+//   {
+//     Serial.printf("[%s]: Loading config file FAILED, restarting\n",__func__);
+//     do_esp_restart();
+//   } else 
+//   {
+//     #ifdef DEBUG
+//       Serial.printf("[%s]: Loading config file SUCCESSFUL\n",__func__);
+//     #endif
+//   }
 
   // just check if WiFi is configured - start ERROR LED if not
   if (g_wifi_ok != 1) 
@@ -1884,8 +1917,9 @@ void setup()
   // read_saved_sleeping_time();
   boot_reason = esp_reset_reason();
   wakeup_reason = esp_sleep_get_wakeup_cause();
-
-  Serial.printf("[%s]: Boot cause=%d - ",__func__,boot_reason);
+  #ifdef DEBUG_LIGHT
+    Serial.printf("[%s]: Boot cause=%d - ",__func__,boot_reason);
+  #endif
   switch(boot_reason)
   {
     // 1 = reset/power on
@@ -1907,7 +1941,9 @@ void setup()
     // 8 = deep sleep
     case ESP_RST_DEEPSLEEP:
     {
-      Serial.printf("wake up from deep sleep \n");
+      #ifdef DEBUG_LIGHT
+        Serial.printf("wake up from deep sleep \n");
+      #endif
       break;
     }
     default:
@@ -1917,7 +1953,9 @@ void setup()
     }
   }
 
-  Serial.printf("[%s]: Wakeup cause=%d - ",__func__,wakeup_reason);
+  #ifdef DEBUG_LIGHT
+    Serial.printf("[%s]: Wakeup cause=%d - ",__func__,wakeup_reason);
+  #endif
   switch(wakeup_reason)
   {
     // 0 = not deep sleep
@@ -1961,7 +1999,9 @@ void setup()
     // 4 = wake up on timer (SLEEP_TIME_S or COOLING_SLEEP_DURATION_S)
     case ESP_SLEEP_WAKEUP_TIMER:
     {
-      Serial.printf("timer (cooling or heartbeat)\n");
+      #ifdef DEBUG_LIGHT
+        Serial.printf("timer (cooling or heartbeat)\n");
+      #endif
       set_act_blue_led_level(1);
       break;
     }
@@ -2228,7 +2268,9 @@ gather_data();
   Serial.printf("[%s]: gathering data took: %dms\n",__func__,tt);
 #endif
 
- Serial.printf("[%s]: Temp=%0.2fC, Hum=%0.2f%%, batpct=%0.2f%%, charging=%s, ontime=%us\n",__func__,myData.temp,myData.hum,myData.batpct,myData.charg,myData.ontime);
+#ifdef DEBUG_LIGHT
+  Serial.printf("[%s]: Temp=%0.2fC, Hum=%0.2f%%, Light=%0.2flx (high sensitivity=%d), batpct=%0.2f%%, charging=%s, ontime=%us\n",__func__,myData.temp,myData.hum,myData.lux,g_lux_high_sens,myData.batpct,myData.charg,myData.ontime);
+#endif
 
 // turn off power for sensors - all code below is only valid if gather_data() was successfull
   #ifdef ENABLE_3V_GPIO
@@ -2297,6 +2339,22 @@ gather_data();
       Serial.printf("[%s]: RESTARTING ESP\n\n\n",__func__);
       ESP.restart();  // restart without saving data!
     }  
+    else 
+    // lux high sensitivity
+    if (data_recv.command == 5) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set lux measurement to high sensitivity\n",__func__);
+      g_lux_high_sens = 1;
+      do_esp_restart();
+    }  
+    else 
+    // lux low sensitivity
+    if (data_recv.command == 6) 
+    {
+      Serial.printf("[%s]: Received command from gateway to set lux measurement to low sensitivity\n",__func__);
+      g_lux_high_sens = 0;
+      do_esp_restart();
+    }      
     else    
     // Motion OFF
     if (data_recv.command == 10) 

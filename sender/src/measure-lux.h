@@ -32,15 +32,28 @@ void get_lux(char* lux_char)            // <20us with time = 0
         unsigned char time;
         boolean gain;
 
-        if (light_high)
+        if (g_lux_high_sens)
         {
-            time = 1;
-            gain = false;
-        } else
+            if (light_high)
+            {
+                time = 1;
+                gain = false;
+            } else
+            {
+                time = 2;
+                gain = true;
+            }
+        }
+        else 
         {
-            time = 2;
+            time = 0;
             gain = true;
         }
+
+
+        #ifdef DEBUG
+            Serial.printf("[%s]: INITIAL: light_high=%d, time=%d, gain=%d\n",__func__,light_high,time,gain);
+        #endif
 
         light.begin();
         light.setTiming(gain,time,ms);
@@ -50,6 +63,10 @@ void get_lux(char* lux_char)            // <20us with time = 0
             Serial.printf("[%s]: LUX error=%s, LEAVING\n",__func__,lux_char);
             return;
         }
+
+        #ifdef DEBUG
+            Serial.printf("[%s]: 2nd: light_high=%d, time=%d, gain=%d, ms=%d\n",__func__,light_high,time,gain,ms);
+        #endif
 
         light.manualStart();
         delay(ms);
@@ -65,6 +82,9 @@ void get_lux(char* lux_char)            // <20us with time = 0
                 gain = false; time = 1;
                 light.setTiming(gain,time,ms);
                 light.manualStart();
+                #ifdef DEBUG
+                    Serial.printf("[%s]: 3rd: light_high=%d, time=%d, gain=%d, ms=%d\n",__func__,light_high,time,gain,ms);
+                #endif
                 delay(ms);
                 light.manualStop();
 
