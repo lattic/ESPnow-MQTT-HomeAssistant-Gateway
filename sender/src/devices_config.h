@@ -19,6 +19,7 @@
   // #define DEVICE_ID  38           // "esp32038" - S2, production - Toilet bedroom
   // #define DEVICE_ID  39           // "esp32039" - S2, production - garage front mot.
   // #define DEVICE_ID  41           // "esp32041" - S,  production - thermocouple  
+  // #define DEVICE_ID  42           // "esp32042" - S2, production - pushbuttons 6x desk  
   // #define DEVICE_ID  49           // "esp32049" - S2, production - kitchen
   // #define DEVICE_ID  55           // "esp32055" - C3, production - TRV3 Toilet Bedroom
   // #define DEVICE_ID  56           // "esp32056" - C3, production - TRV7 Tailor
@@ -296,6 +297,30 @@
   #define CS_GPIO                     25 
 
   #pragma message "compilation for: esp32041-thermocouple01"
+// ---------------------------------------------------------------------------------------------------
+
+
+#elif DEVICE_ID == 42                 // 
+  #define SENSOR_TYPE                 4 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = battery, 4 = "push_b"
+  #define HOSTNAME                    "esp32042"
+  #define DEVICE_NAME                 "pushb_6x_desk"  // 15 characters maximum
+  #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  #define FW_UPGRADE_GPIO             8   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define SLEEP_TIME_S                3600  // seconds - 
+  #define ACT_BLUE_LED_GPIO           38   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define ERROR_RED_LED_GPIO          37   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  
+
+  #define PUSH_BUTTONS_ONLY           1
+
+  #define NUMBER_OF_BUTTONS           5  
+  uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the fake MAC addresses that are assigned in receiver sketch
+  {
+    3,4,5,6,7
+  }; 
+  uint8_t button_pressed = 0;               // 0 means: not pressed, from 1 ... is the button number from the above array, starting from 1 (not from 0)
+
+  #pragma message "compilation for: esp32042-pushb_6x_desk"
 // ---------------------------------------------------------------------------------------------------
 
 
@@ -786,29 +811,66 @@
 // ---------------------------------------------------------------------------------------------------
 
 //-----------------------  TEST -----------------------
-#elif DEVICE_ID == 91                 // 
-  #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
-  #define HOSTNAME                    "esp32091"
-  #define DEVICE_NAME                 "test91esp32s"  // 15 characters maximum
-  #define BOARD_TYPE                  1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-  #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
-  #define SLEEP_TIME_S                15  // seconds - 
+// #elif DEVICE_ID == 91                 // 
+//   #define SENSOR_TYPE                 4 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = battery, 4 = push buttons only
+//   #define HOSTNAME                    "esp32091"
+//   #define DEVICE_NAME                 "pushbuttons91"  // 15 characters maximum
+//   #define BOARD_TYPE                  1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+//   #define FW_UPGRADE_GPIO             25   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+//   #define SLEEP_TIME_S                5  // seconds - 
+  
 
-  #pragma message "compilation for: esp32091-test91esp32s"
-// ---------------------------------------------------------------------------------------------------
+//   #define PUSH_BUTTONS_ONLY           1
 
-#elif DEVICE_ID == 92                 // Lilygo 1A
-  #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
-  #define HOSTNAME                    "esp32092"
-  #define DEVICE_NAME                 "test92"  // 15 characters maximum
-  #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-  #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define FW_UPGRADE_GPIO             17   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
-  #define SLEEP_TIME_S                5 // seconds - 180
+//   #define NUMBER_OF_BUTTONS           6  
+//   uint8_t button_gpio[NUMBER_OF_BUTTONS] =          // put here the fake MAC addresses that are assigned in receiver sketch
+//   {
+//     32,33,34,35,36,39
+//   }; 
+//   uint8_t button_pressed = 0;               // 0 means: not pressed, from 1 ... is the button number from the above array, starting from 1 (not from 0)
 
-  #pragma message "compilation for: esp32092-test"
-// ---------------------------------------------------------------------------------------------------
+//   #pragma message "compilation for: esp32091-pushbuttons91"
+// // ---------------------------------------------------------------------------------------------------
+
+
+// #elif DEVICE_ID == 92
+//   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
+//   #define HOSTNAME                    "esp32092"
+//   #define DEVICE_NAME                 "92-105"  // 15 characters maximum
+//   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+//   // #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+//   // #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+//   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+//   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+//   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+//   // #define ENABLE_3V_GPIO              3   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+//   // #define USE_MAX17048                1   // use "0" to disable
+//   // #define USE_SHT31                   1   // use "0" to disable
+//   // #define USE_TSL2561                 1   // use "0" to disable
+//   #define SLEEP_TIME_S                180 // seconds - 180
+
+//   #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
+//   #define CALIBRATE_HUMIDITY          -5   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
+
+
+//   #pragma message "compilation for: esp32105-Garden"
+// // ---------------------------------------------------------------------------------------------------
+
+
+
+
+// #elif DEVICE_ID == 92                 // Lilygo 1A
+//   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
+//   #define HOSTNAME                    "esp32092"
+//   #define DEVICE_NAME                 "test92"  // 15 characters maximum
+//   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+//   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+//   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+//   #define FW_UPGRADE_GPIO             17   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+//   #define SLEEP_TIME_S                5 // seconds - 180
+
+//   #pragma message "compilation for: esp32092-test"
+// // ---------------------------------------------------------------------------------------------------
 
 
 #else
@@ -816,6 +878,9 @@
 #endif
 
 // common parameters
+#if (PUSH_BUTTONS_ONLY == 1) and (BOARD_TYPE == 4)
+  #error "push buttons board not yet defined for ESP32-C3"
+#endif
 
 #if (USE_MAX31855 == 1) and (USE_SHT31 == 1)
   #error only 1 temperature sensor defined - choose USE_SHT31 or USE_MAX31855
@@ -850,7 +915,7 @@
 #else
   #if (BOARD_TYPE == 1)
     #define MODEL "ESP32"
-    #define ESP32_BOOT_TIME           350      // since power ON to GPIO ON, ms
+    #define ESP32_BOOT_TIME           470//350      // since power ON to GPIO ON, ms
     #define ESP32_TAIL_TIME           15      // since GPIO OFF to power OFF, ms
     #define ESP32_BOOT_TIME_EXTRA     20     // +180ms from power ON or hard reset    #ifdef PRINT_COMPILER_MESSAGES
     #ifdef PRINT_COMPILER_MESSAGES
@@ -859,7 +924,7 @@
   #elif (BOARD_TYPE == 2)
     #define MODEL "ESP32S2"
     #define ESP32_BOOT_TIME           35      // since power ON to GPIO ON, ms
-    #define ESP32_TAIL_TIME           25      // since GPIO OFF to power OFF, ms
+    #define ESP32_TAIL_TIME           30      // since GPIO OFF to power OFF, ms
     #define ESP32_BOOT_TIME_EXTRA     180     // +180ms from power ON or hard reset
     #ifdef PRINT_COMPILER_MESSAGES
       #pragma message "chosen BOARD_TYPE = ESP32S2"
@@ -897,6 +962,13 @@
 #if (SENSOR_TYPE == 1) or (SENSOR_TYPE == 2)
   #ifndef MOTION_SENSOR_GPIO
     #error "MOTION_SENSOR_GPIO not defined"
+  #endif
+#endif
+
+#if (SENSOR_TYPE == 4)
+  #ifdef MOTION_SENSOR_GPIO
+    #warning "SENSOR_TYPE=4 (buttons) should not have MOTION_SENSOR_GPIO defined - removing it"
+    #undef MOTION_SENSOR_GPIO
   #endif
 #endif
 
