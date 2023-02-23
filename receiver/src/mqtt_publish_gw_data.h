@@ -34,6 +34,15 @@ bool mqtt_publish_gw_status_config()
   snprintf(mac_name,sizeof(mac_name),"%s_mac",HOSTNAME);
   if (debug_mode) Serial.println("mac_name="+String(mac_name));
 
+  // ip
+  char ip_conf_topic[60];
+  snprintf(ip_conf_topic,sizeof(ip_conf_topic),"homeassistant/sensor/%s/ip/config",HOSTNAME);
+  if (debug_mode) Serial.println("ip_conf_topic="+String(ip_conf_topic));
+
+  char ip_name[30];
+  snprintf(ip_name,sizeof(ip_name),"%s_ip",HOSTNAME);
+  if (debug_mode) Serial.println("ip_name="+String(ip_name));  
+
   // status
   char status_conf_topic[60];
   snprintf(status_conf_topic,sizeof(status_conf_topic),"homeassistant/sensor/%s/status/config",HOSTNAME);
@@ -70,7 +79,7 @@ bool mqtt_publish_gw_status_config()
   snprintf(rssi_name,sizeof(rssi_name),"%s_rssi",HOSTNAME);
   if (debug_mode) Serial.println("rssi_name="+String(rssi_name));
 
-  // commont topic
+  // common topic
   char status_state_topic[60];
   snprintf(status_state_topic,sizeof(status_state_topic),"%s/sensor/state",HOSTNAME);
   if (debug_mode) Serial.println("status_state_topic="+String(status_state_topic));
@@ -119,6 +128,48 @@ bool mqtt_publish_gw_status_config()
     }
     Serial.println("============ DEBUG CONFIG MAC END ========\n");
   }
+
+// gw ip config
+  config.clear();
+  config["name"] = ip_name;
+  config["stat_t"] = status_state_topic;
+  config["val_tpl"] = "{{value_json.ip}}";
+  config["uniq_id"] = ip_name;
+  config["frc_upd"] = "true";
+  config["entity_category"] = "diagnostic";
+  // config["exp_aft"] = 60;
+
+  CREATE_GW_MQTT_DEVICE
+
+  size_c = serializeJson(config, config_json);
+
+  if (!mqttc.publish(ip_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  {
+    publish_status = false; total_publish_status = false;
+    Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,ip_conf_topic);
+  } else
+  {
+    publish_status = true;
+    if (debug_mode) {Serial.printf("[%s]: PUBLISH SUCCESSFULL for %s\n",__func__,ip_conf_topic);}
+  }
+
+  if (debug_mode) {
+    Serial.println("\n============ DEBUG CONFIG MAC ============");
+    Serial.println("Size of ip config="+String(size_c)+" bytes");
+    Serial.println("Serialised config_json:");
+    Serial.println(config_json);
+    Serial.println("serializeJsonPretty");
+    serializeJsonPretty(config, Serial);
+    if (publish_status) {
+      Serial.println("\n IP CONFIG OK");
+    } else
+    {
+      Serial.println("\n PRETTYONTIME CONFIG UNSUCCESSFULL");
+    }
+    Serial.println("============ DEBUG CONFIG IP END ========\n");
+  }
+
+
 
 // status config
   config.clear();
@@ -310,6 +361,9 @@ bool mqtt_publish_gw_status_values(const char* status)
   payload["status"] = status;
   payload["rssi"] = WiFi.RSSI();
   payload["mac"]  = WiFi.macAddress();
+  char ip_char[20];
+  snprintf(ip_char,sizeof(ip_char),"%s",WiFi.localIP().toString());
+  payload["ip"]  = ip_char;
 
   char ret_clk[60];
   uptime(ret_clk);

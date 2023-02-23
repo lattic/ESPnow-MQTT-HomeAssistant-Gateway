@@ -26,6 +26,12 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+2023-02-23
+  2.15.b2  - add IP of gateway
+
+2023-02-23
+  2.15.b1  - light_high_sensitivity:  0 - low, light meas. time 13ms, 1 - high, light meas. time 403ms
+
 2023-02-16
   2.14.3a  - CP_TIMEOUT_S = 180s / 3min for my receivers
 

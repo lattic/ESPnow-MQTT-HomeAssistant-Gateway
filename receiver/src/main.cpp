@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "2.14.3a"
+#define VERSION "2.15.b2"
 
 
 // gateways config file

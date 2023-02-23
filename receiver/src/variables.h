@@ -25,6 +25,7 @@ typedef struct struct_message             // main data struct sent from sender t
   byte boardtype;
   uint8_t wifi_ok;                       // 0 - wifi not configured, 1 - wifi configured
   uint8_t motion_enabled;                // 0 - motion disabled, 1 - motion enabled
+  uint8_t light_high_sensitivity;        // 0 - low, light meas. time 13ms, 1 - high, light meas. time 403ms
 } struct_message;
 
 typedef struct struct_message_aux         // auxiliary data structure for sensors - with RSSI and MAC (of sender)

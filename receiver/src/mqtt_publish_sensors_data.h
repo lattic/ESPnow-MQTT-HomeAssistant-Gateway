@@ -131,6 +131,10 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   snprintf(wifi_ok_conf_topic,sizeof(wifi_ok_conf_topic),"homeassistant/sensor/%s/wifi_ok/config",hostname);
   if (debug_mode) Serial.println("wifi_ok_conf_topic="+String(wifi_ok_conf_topic));
 
+  char light_highsens_conf_topic[80];
+  snprintf(light_highsens_conf_topic,sizeof(light_highsens_conf_topic),"homeassistant/sensor/%s/light_highsens/config",hostname);
+  if (debug_mode) Serial.println("light_highsens_conf_topic="+String(light_highsens_conf_topic));
+
   char gateway_conf_topic[60];
   snprintf(gateway_conf_topic,sizeof(gateway_conf_topic),"homeassistant/sensor/%s/gateway/config",hostname);
   if (debug_mode) Serial.println("gateway_conf_topic="+String(gateway_conf_topic));
@@ -196,11 +200,15 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   snprintf(dev_type_name,sizeof(dev_type_name),"%s_dev_type",hostname);
   if (debug_mode) Serial.println("dev_type_name="+String(dev_type_name));
 
-  char wifi_ok_name[30];
+  char wifi_ok_name[60];
   snprintf(wifi_ok_name,sizeof(wifi_ok_name),"%s_wifi_ok",hostname);
   if (debug_mode) Serial.println("wifi_ok_name="+String(wifi_ok_name));
 
-  char gateway_name[30];
+  char light_highsens_name[60];
+  snprintf(light_highsens_name,sizeof(light_highsens_name),"%s_light_highsens",hostname);
+  if (debug_mode) Serial.println("light_highsens_name="+String(light_highsens_name));
+
+  char gateway_name[60];
   snprintf(gateway_name,sizeof(gateway_name),"%s_gateway",hostname);
   if (debug_mode) Serial.println("gateway_name="+String(gateway_name));
 
@@ -857,6 +865,46 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
     Serial.println("============ DEBUG CONFIG WIFI_OK END ========\n");
   }  
 
+// sensor light_highsens config
+  config.clear();
+  config["name"] = light_highsens_name;
+  config["stat_t"] = sensors_topic_state;
+  config["val_tpl"] = "{{value_json.light_highsens}}";
+  config["uniq_id"] = light_highsens_name;
+  config["frc_upd"] = "true";
+  config["entity_category"] = "diagnostic";
+  // config["exp_aft"] = 900;
+
+  CREATE_SENSOR_MQTT_DEVICE
+
+  size_c = serializeJson(config, config_json);
+
+  if (!mqttc.publish(light_highsens_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  {
+    publish_status = false; total_publish_status = false;
+    Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,light_highsens_conf_topic);
+  } else
+  {
+    publish_status = true;
+    if (debug_mode) {Serial.printf("[%s]: PUBLISH SUCCESSFULL for %s\n",__func__,light_highsens_conf_topic);}
+  }
+
+  if (debug_mode) {
+    Serial.println("\n============ DEBUG CONFIG WIFI_OK ============");
+    Serial.println("Size of dev_type config="+String(size_c)+" bytes");
+    Serial.println("Serialised config_json:");
+    Serial.println(config_json);
+    Serial.println("serializeJsonPretty");
+    serializeJsonPretty(config, Serial);
+    if (publish_status) {
+      Serial.println("\n CONFIG OK");
+    } else
+    {
+      Serial.println("\n CONFIG UNSUCCESSFULL");
+    }
+    Serial.println("============ DEBUG CONFIG WIFI_OK END ========\n");
+  }  
+
 // battery volts config
   config.clear();
   config["name"] = bat_name;
@@ -1204,6 +1252,7 @@ bool mqtt_publish_sensors_values()
   snprintf(temp_value,sizeof(temp_value),"%0.3f",myLocalData.batchr);
   payload["batchr"]             = temp_value;
   payload["wifi_ok"]            = myLocalData.wifi_ok;
+  payload["light_highsens"]     = myLocalData.light_high_sensitivity;
   payload["gateway"]            = ROLE_NAME;
 
   char payload_json[JSON_PAYLOAD_SIZE];
