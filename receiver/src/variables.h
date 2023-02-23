@@ -11,7 +11,7 @@ typedef struct struct_message             // main data struct sent from sender t
   char host[10];                          // esp32123   - 9 characters maximum (esp32123=8)
   char name[16];                          // 15 characters maximum
   char ver[10];                           // 123.56.89  - 9 characters maximum (123.56.89=9)
-  char sender_type[10];                   // "env", "motion","env+mot"
+  char sender_type[10];                   // "env", "motion","env+mot", "push_b"
   char charg[5];                          // "FULL","ON","NC" - 4 characters maximum
   float temp;
   float hum;
@@ -23,9 +23,11 @@ typedef struct struct_message             // main data struct sent from sender t
   unsigned int boot;
   unsigned long ontime;                   // seconds, probably unsigned int would be enough - check it
   byte boardtype;
-  uint8_t wifi_ok;                       // 0 - wifi not configured, 1 - wifi configured
-  uint8_t motion_enabled;                // 0 - motion disabled, 1 - motion enabled
-  uint8_t light_high_sensitivity;        // 0 - low, light meas. time 13ms, 1 - high, light meas. time 403ms
+  uint8_t wifi_ok;                        // 0 - wifi not configured, 1 - wifi configured
+  uint8_t motion_enabled;                 // 0 - motion disabled, 1 - motion enabled
+  uint8_t light_high_sensitivity;         // 0 - low, light meas. time 13ms, 1 - high, light meas. time 403ms
+  uint8_t button_pressed = 0;             // 0 = none, >0 = the button number as per button_gpio[NUMBER_OF_BUTTONS] - NOT GPIO NUMBER! index starts from 1
+
 } struct_message;
 
 typedef struct struct_message_aux         // auxiliary data structure for sensors - with RSSI and MAC (of sender)

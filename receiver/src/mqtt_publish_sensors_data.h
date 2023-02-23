@@ -131,6 +131,10 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   snprintf(wifi_ok_conf_topic,sizeof(wifi_ok_conf_topic),"homeassistant/sensor/%s/wifi_ok/config",hostname);
   if (debug_mode) Serial.println("wifi_ok_conf_topic="+String(wifi_ok_conf_topic));
 
+  char button_pressed_conf_topic[80];
+  snprintf(button_pressed_conf_topic,sizeof(button_pressed_conf_topic),"homeassistant/sensor/%s/button_pressed/config",hostname);
+  if (debug_mode) Serial.println("button_pressed_conf_topic="+String(button_pressed_conf_topic));  
+
   char light_highsens_conf_topic[80];
   snprintf(light_highsens_conf_topic,sizeof(light_highsens_conf_topic),"homeassistant/sensor/%s/light_highsens/config",hostname);
   if (debug_mode) Serial.println("light_highsens_conf_topic="+String(light_highsens_conf_topic));
@@ -203,6 +207,10 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   char wifi_ok_name[60];
   snprintf(wifi_ok_name,sizeof(wifi_ok_name),"%s_wifi_ok",hostname);
   if (debug_mode) Serial.println("wifi_ok_name="+String(wifi_ok_name));
+
+  char button_pressed_name[60];
+  snprintf(button_pressed_name,sizeof(button_pressed_name),"%s_button_pressed",hostname);
+  if (debug_mode) Serial.println("button_pressed_name="+String(button_pressed_name));  
 
   char light_highsens_name[60];
   snprintf(light_highsens_name,sizeof(light_highsens_name),"%s_light_highsens",hostname);
@@ -451,6 +459,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 // "motion" sensors only END
 
 // common sensors for all types
+
 // charging config
   config.clear();
   config["name"] = charging_name;
@@ -865,6 +874,47 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
     Serial.println("============ DEBUG CONFIG WIFI_OK END ========\n");
   }  
 
+// sensor button_pressed config
+  config.clear();
+  config["name"] = button_pressed_name;
+  config["stat_t"] = sensors_topic_state;
+  config["val_tpl"] = "{{value_json.button_pressed}}";
+  config["uniq_id"] = button_pressed_name;
+  config["frc_upd"] = "true";
+  config["entity_category"] = "diagnostic";
+  // config["exp_aft"] = 900;
+
+  CREATE_SENSOR_MQTT_DEVICE
+
+  size_c = serializeJson(config, config_json);
+
+  if (!mqttc.publish(button_pressed_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  {
+    publish_status = false; total_publish_status = false;
+    Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,button_pressed_conf_topic);
+  } else
+  {
+    publish_status = true;
+    if (debug_mode) {Serial.printf("[%s]: PUBLISH SUCCESSFULL for %s\n",__func__,button_pressed_conf_topic);}
+  }
+
+  if (debug_mode) {
+    Serial.println("\n============ DEBUG CONFIG button_pressed ============");
+    Serial.println("Size of dev_type config="+String(size_c)+" bytes");
+    Serial.println("Serialised config_json:");
+    Serial.println(config_json);
+    Serial.println("serializeJsonPretty");
+    serializeJsonPretty(config, Serial);
+    if (publish_status) {
+      Serial.println("\n CONFIG OK");
+    } else
+    {
+      Serial.println("\n CONFIG UNSUCCESSFULL");
+    }
+    Serial.println("============ DEBUG CONFIG button_pressed END ========\n");
+  }  
+
+
 // sensor light_highsens config
   config.clear();
   config["name"] = light_highsens_name;
@@ -1165,6 +1215,7 @@ bool mqtt_publish_sensors_values()
     Serial.print("\tmcuttype=");Serial.println(myLocalData.boardtype);
     Serial.print("\twifi_ok=");Serial.println(myLocalData.wifi_ok);
     Serial.print("\tmotion_enabled=");Serial.println(myLocalData.motion_enabled);
+    Serial.print("\tbutton_pressed=");Serial.println(myLocalData.button_pressed);
     Serial.println();
   }
 
@@ -1254,6 +1305,7 @@ bool mqtt_publish_sensors_values()
   payload["wifi_ok"]            = myLocalData.wifi_ok;
   payload["light_highsens"]     = myLocalData.light_high_sensitivity;
   payload["gateway"]            = ROLE_NAME;
+  payload["button_pressed"]     = myLocalData.button_pressed;
 
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
