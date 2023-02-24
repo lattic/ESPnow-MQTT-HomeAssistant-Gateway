@@ -11,7 +11,8 @@ Sends button number (that was pushed) to Home Assistant and then Node Red acts a
 </br>
 Still using ESPnow to send data to Home Assistant via gateway</br>
 ESP32 is too slow (600ms) - only ESP32-S2 does the job properly (100ms)</br></br>
-<img width="962" alt="Screenshot 2023-02-24 at 06 23 42" src="https://user-images.githubusercontent.com/46562447/221107348-eb3bce35-23c0-4f3f-8740-878f38e3b508.png">
+<img width="979" alt="Screenshot 2023-02-24 at 08 52 40" src="https://user-images.githubusercontent.com/46562447/221134962-d25dbf69-0d07-4138-8d31-2d20ccbfb63c.png">
+
 
 <br>
 <h2> Update 2023-02-17:</h2>
