@@ -1,5 +1,19 @@
 <h1> ESPnow MQTT Home Assistant Gateway </h1>
 <h2> SKETCHES MOVED TO PLATFORMIO! </h2>
+<h2> Update 2023-02-23:</h2>
+<br>
+New end device - push buttons - implemented</br>
+Example: small box with 6 push buttons to control the devices around the house (i.e. switches, lights, etc.)</br>
+Powered with small 500mAh battery, sleeps all the time until button pressed.</br>
+Sends button number (that was pushed) to Home Assistant and then Node Red acts accordingly</br></br>
+<img width="510" alt="Screenshot 2023-02-24 at 06 29 26" src="https://user-images.githubusercontent.com/46562447/221108210-a48b4102-6a19-4d7d-ab59-d20b0c0a672f.png">
+
+</br>
+Still using ESPnow to send data to Home Assistant via gateway</br>
+ESP32 is too slow (600ms) - only ESP32-S2 does the job properly (100ms)</br></br>
+<img width="962" alt="Screenshot 2023-02-24 at 06 23 42" src="https://user-images.githubusercontent.com/46562447/221107348-eb3bce35-23c0-4f3f-8740-878f38e3b508.png">
+
+<br>
 <h2> Update 2023-02-17:</h2>
 <br>
 Force connection to specific gateway - see below commands: 21, 22 and 23</br>
