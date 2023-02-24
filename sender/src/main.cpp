@@ -1589,7 +1589,6 @@ void do_esp_go_to_sleep()
   save_config("Config saved before going to sleep");
   
   #if (PUSH_BUTTONS_ONLY == 1)
-    #define DEBOUNCE_MS_PUSHBUTTON 100
     if (button_pressed)
     {
       Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_PUSHBUTTON);
@@ -2011,11 +2010,12 @@ void setup()
       Serial.printf("2: external signal using RTC_IO (motion detected)\n");
       break;
     }
-    // 3 = fw update (FW_UPGRADE_GPIO) or motion detected (MOTION_SENSOR_GPIO) - not for ESP32-C3!
+    // 3 = PUSH BUTTONS or fw update (FW_UPGRADE_GPIO) or motion detected (MOTION_SENSOR_GPIO) - not for ESP32-C3!
     #if (BOARD_TYPE != 4)
       case ESP_SLEEP_WAKEUP_EXT1:
       {
-        delay(DEBOUNCE_MS);
+        Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_ANY_GPIO);
+        delay(DEBOUNCE_MS_ANY_GPIO);
         wakeup_gpio_mask = esp_sleep_get_ext1_wakeup_status();
         wakeup_gpio = log(wakeup_gpio_mask)/log(2);
         Serial.printf("3: external signal using GPIO=%d, GPIO_MASK=%ju\n",wakeup_gpio,wakeup_gpio_mask);
@@ -2025,7 +2025,6 @@ void setup()
           {
             fw_update = true;
             Serial.printf("[%s]: woke up on FW button pressed\n",__func__);
-            Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS);
             break;
           }
         #endif
@@ -2074,8 +2073,8 @@ void setup()
     #if (BOARD_TYPE == 4)
       case ESP_SLEEP_WAKEUP_GPIO:
       {
-        delay(DEBOUNCE_MS);
-        Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS);
+        Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_ANY_GPIO);
+        delay(DEBOUNCE_MS_ANY_GPIO);
         wakeup_gpio_mask = esp_sleep_get_gpio_wakeup_status();
         wakeup_gpio = log(wakeup_gpio_mask)/log(2);
         Serial.printf("7: external signal using GPIO=%d, GPIO_MASK=%ju\n",wakeup_gpio,wakeup_gpio_mask);
@@ -2113,6 +2112,8 @@ void setup()
     {
       set_act_blue_led_level(0);
       set_error_red_led_level(1);
+      Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_FW_GPIO);
+      delay(DEBOUNCE_MS_FW_GPIO);
     }
     // check if FW_UPGRADE_GPIO is still high after boot
     pinMode(FW_UPGRADE_GPIO,INPUT);
@@ -2154,7 +2155,6 @@ void setup()
           connect_wifi();
           Serial.printf("[%s]: Restarting...\n",__func__);
           do_esp_restart();
-
         }
       } else
       // FW_UPGRADE_GPIO LOW after 3s - FW upgrade here
