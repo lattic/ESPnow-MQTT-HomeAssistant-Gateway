@@ -808,14 +808,23 @@ void gather_data()
   #if (USE_MAX31855 == 1)
     if (max31855ok)
     {
+      delay(USE_MAX31855_DELAY_MS);
       double c = thermocouple.readCelsius();
+      #ifdef DEBUG
+        Serial.printf("[%s]: USE_MAX31855: First check after delay for %dms, temp=%0.2f\n",__func__,USE_MAX31855_DELAY_MS,c);
+      #endif
       if (isnan(c) or (c == 0))
       {
         for (uint8_t i=0; i < 10; i++)
         {
-          delay(5);
+          #ifdef DEBUG
+            Serial.printf("[%s]: USE_MAX31855: repetition %d, delay for %dms, temp=%0.2f\n",__func__,i,USE_MAX31855_DELAY_MS,c);
+          #endif 
+          delay(USE_MAX31855_DELAY_MS);
           c = thermocouple.readCelsius();
-          if (c != 0) 
+          if (isnan(c) or (c == 0)) 
+            continue;
+          else
           {
             myData.temp = c;
             break;
@@ -1677,7 +1686,7 @@ void save_config(const char* reason)
   }
   
   // #ifdef DEBUG_LIGHT
-    Serial.printf("[%s]: Program finished after %lums.\n\n",__func__,work_time);
+    Serial.printf("[%s]: Program finished after %lums.\n",__func__,work_time);
   // #endif
   
   // testing with PPK2 - end save ontime
@@ -1798,7 +1807,7 @@ void set_act_blue_led_level(u_int8_t level)
       {
         ledcWrite(ACT_BLUE_LED_PWM_CHANNEL, 0);
         #ifdef DEBUG
-          Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: 0\n",__func__);
+          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: 0\n",__func__);
         #endif
       }
     #else 
@@ -1838,7 +1847,7 @@ void set_error_red_led_level(u_int8_t level)
       {
         ledcWrite(ERROR_RED_LED_PWM_CHANNEL, 0);
         #ifdef DEBUG
-          Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: 0\n",__func__);
+          // Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: 0\n",__func__);
         #endif
       }
     #else 

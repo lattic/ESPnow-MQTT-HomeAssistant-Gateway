@@ -292,9 +292,11 @@
   #define ENABLE_3V_GPIO              32   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
 
   #define USE_MAX31855                1   // tested ONLY with ESP32S
+  #define USE_MAX31855_DELAY_MS       200 // to avoid nan or 0
   #define MISO_GPIO                   19
   #define CLK_GPIO                    18
   #define CS_GPIO                     25 
+
 
   #pragma message "compilation for: esp32041-thermocouple01"
 // ---------------------------------------------------------------------------------------------------

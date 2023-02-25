@@ -19,6 +19,9 @@ MQTT commands to receiver:
   - LEDs OFF: {"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
   - LEDs AUTO:{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs will dimm, lux < 1->dc = 1, 1<x<10 = 10, > 10 = 255 
 
+2023-02-25
+  2.13.b3 - corrections in USE_MAX31855 - extra delays
+
 2023-02-23
   2.13.b2 - DEBOUNCE_MS_ANY_GPIO=5, DEBOUNCE_MS_FW_GPIO=200, DEBOUNCE_MS_PUSHBUTTON=100
 
