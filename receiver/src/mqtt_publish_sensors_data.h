@@ -230,6 +230,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   {
   // temperature config
     config.clear();
+    config["en"] = false;
     config["name"] = temp_name;
     config["dev_cla"] = "temperature";
     config["stat_cla"] = "measurement";
@@ -272,6 +273,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 
   // humidity config
     config.clear();
+    config["en"] = false;
     config["name"] = hum_name;
     config["dev_cla"] = "humidity";
     config["stat_cla"] = "measurement";
@@ -314,6 +316,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 
   // lux config
     config.clear();
+    config["en"] = false;
     config["name"]=lux_name;
     config["dev_cla"] = "illuminance";
     config["stat_cla"] = "measurement";
@@ -462,6 +465,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 
 // charging config
   config.clear();
+  config["en"] = false;
   config["name"] = charging_name;
   config["stat_t"] = sensors_topic_state;
   config["val_tpl"] = "{{value_json.charging}}";
@@ -796,6 +800,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 
 // sensor dev_type config
   config.clear();
+  config["en"] = false;
   config["name"] = dev_type_name;
   config["stat_t"] = sensors_topic_state;
   config["val_tpl"] = "{{value_json.dev_type}}";
@@ -876,6 +881,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 
 // sensor button_pressed config
   config.clear();
+  config["en"] = false;
   config["name"] = button_pressed_name;
   config["stat_t"] = sensors_topic_state;
   config["val_tpl"] = "{{value_json.button_pressed}}";
@@ -917,6 +923,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 
 // sensor light_highsens config
   config.clear();
+  config["en"] = false;
   config["name"] = light_highsens_name;
   config["stat_t"] = sensors_topic_state;
   config["val_tpl"] = "{{value_json.light_highsens}}";
@@ -957,6 +964,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 
 // battery volts config
   config.clear();
+  config["en"] = false;
   config["name"] = bat_name;
   config["dev_cla"] = "voltage";
   config["stat_cla"] = "measurement";
@@ -1043,6 +1051,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 
 // batchr config
   config.clear();
+  config["en"] = false;
   config["name"] = batchr_name;
   config["stat_cla"] = "measurement";
   config["stat_t"] = sensors_topic_state;
