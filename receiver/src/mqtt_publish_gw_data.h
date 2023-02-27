@@ -103,7 +103,7 @@ bool mqtt_publish_gw_status_config()
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(mac_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(mac_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,mac_conf_topic);
@@ -143,7 +143,7 @@ bool mqtt_publish_gw_status_config()
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(ip_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(ip_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,ip_conf_topic);
@@ -180,13 +180,13 @@ bool mqtt_publish_gw_status_config()
   config["val_tpl"] = "{{value_json.status}}";
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = 60;
+  // config["exp_aft"] = 60;
 
   CREATE_GW_MQTT_DEVICE
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(status_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(status_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,status_conf_topic);
@@ -228,7 +228,7 @@ bool mqtt_publish_gw_status_config()
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(uptime_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(uptime_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,uptime_conf_topic);
@@ -270,7 +270,7 @@ bool mqtt_publish_gw_status_config()
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(version_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(version_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,version_conf_topic);
@@ -313,7 +313,7 @@ bool mqtt_publish_gw_status_config()
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(rssi_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(rssi_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,rssi_conf_topic);
@@ -374,7 +374,7 @@ bool mqtt_publish_gw_status_values(const char* status)
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(status_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
+  if (!mqttc.publish(status_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,status_state_topic);
@@ -447,7 +447,7 @@ bool mqtt_publish_gw_last_updated_sensor_config()
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(status_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(status_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,status_conf_topic);
@@ -496,7 +496,7 @@ bool mqtt_publish_gw_last_updated_sensor_values(const char* status)
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(status_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
+  if (!mqttc.publish(status_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,status_state_topic);
@@ -573,7 +573,7 @@ bool mqtt_publish_button_update_config()
   size_c = serializeJson(config, config_json);
 
 
-  if (!mqttc.publish(update_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(update_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,update_conf_topic);
@@ -644,7 +644,7 @@ bool mqtt_publish_button_restart_config()
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(restart_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(restart_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,restart_conf_topic);
@@ -720,7 +720,7 @@ bool mqtt_publish_switch_publish_config()
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(publish_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(publish_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,publish_conf_topic);
@@ -769,7 +769,7 @@ bool mqtt_publish_switch_publish_values()
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(publish_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
+  if (!mqttc.publish(publish_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,publish_state_topic);
@@ -971,7 +971,7 @@ bool mqtt_publish_button_config(const char* button)
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(button_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(button_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,button_conf_topic);
@@ -1043,7 +1043,7 @@ bool mqtt_publish_text_sensor_config(const char* text_sensor)
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(text_sensor_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(text_sensor_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,text_sensor_conf_topic);
@@ -1094,7 +1094,7 @@ bool mqtt_publish_text_sensor_value(const char* text_sensor, const char* text_se
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(text_sensor_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
+  if (!mqttc.publish(text_sensor_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,text_sensor_state_topic);
@@ -1168,7 +1168,7 @@ bool mqtt_publish_sensor_with_unit_config(const char* sensor_with_unit, const ch
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(sensor_with_unit_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(sensor_with_unit_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,sensor_with_unit_conf_topic);
@@ -1219,7 +1219,7 @@ bool mqtt_publish_sensor_with_unit_value(const char* sensor_with_unit, const cha
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(sensor_with_unit_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
+  if (!mqttc.publish(sensor_with_unit_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,sensor_with_unit_state_topic);
@@ -1315,13 +1315,14 @@ bool mqtt_publish_light_config(const char* light, bool optimistic)
   config["unique_id"]=light_name;
 
   config["frc_upd"] = "true";
+  // config["exp_aft"] = 600;
 
 
   CREATE_GW_MQTT_DEVICE
 
   size_c = serializeJson(config, config_json);
 
-  if (!mqttc.publish(light_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  if (!mqttc.publish(light_conf_topic,(uint8_t*)config_json,strlen(config_json), false))
   {
     publish_status = false; total_publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,light_conf_topic);
@@ -1373,7 +1374,7 @@ bool mqtt_publish_light_values(const char* light, bool power, u_int8_t brightnes
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(light_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
+  if (!mqttc.publish(light_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,light_state_topic);

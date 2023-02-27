@@ -27,6 +27,14 @@ OTA:
 - http://HOSTNAME.local:8080/update
 
 
+2023-02-27
+  2.17.0   - exp_aft removed for all  except rssi: 
+            - sensors:
+              - 900s (env or env+mot) or 
+              - 3700s (battery or push_b + motion) 
+            - gw=60s
+           - all MQTT are now NOT retained!
+
 2023-02-26
   2.16.b2  - config["en"] = false; for 9 sensors
 
