@@ -1,38 +1,3 @@
-// #pragma once
-
-
-// void measure_temp_pressure(char *pressure)   // 2ms
-// {
-//   // temperature sensor from BM280 is not used as it is shifted by around 0.5C vs SHT31
-  
-//   #if (USE_BMP280 == 1)
-//     size_t nbytes;
-//     #ifdef DEBUG
-//         unsigned long function_start = millis(); 
-//     #endif
-    
-//     // float temp = bmp.readTemperature();
-//     float press =((bmp.readPressure() + 900) / 10 / 10) + (AIR_PRESSURE_CALIBRATION);
-//     // Serial.printf("[%s]: pressure float=%fhPa, callibrated pressure=%fhPa\n",__func__,(press-(AIR_PRESSURE_CALIBRATION)),press);
-
-//     // nbytes = snprintf(NULL,0,"%0.2f",temp) +1;
-//     // snprintf(temperature,nbytes,"%0.2f",temp);
-
-//     nbytes = snprintf(NULL,0,"%0.1f",press) +1;
-//     snprintf(pressure,nbytes,"%0.1f",press);
-
-
-//     #ifdef DEBUG
-//         // Serial.printf("[%s]: temperature=%sC\n",__func__,temperature);
-//         Serial.printf("[%s]: pressure=%shPa\n",__func__,pressure);
-//     #endif
-//   #endif
-  
-//   #ifdef DEBUG
-//       Serial.printf("[%s]: took %ums\n",__func__,(millis()-function_start));
-//   #endif
-// }
-
 #pragma once
 
 

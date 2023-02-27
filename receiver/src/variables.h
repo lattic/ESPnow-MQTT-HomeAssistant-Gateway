@@ -115,6 +115,8 @@ bool valid_mqtt_password_received = false;
 bool valid_mqtt_port_received = false;
 
 bool skip_mqtt = false;
+unsigned long mqtt_last_connected;
+unsigned long aux_mqtt_last_connected_interval = 0;
 bool mqtt_published_to_ha = false;
 // global others END
 

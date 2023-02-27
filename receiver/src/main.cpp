@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "2.17.0"
+#define VERSION "2.18.0"
 
 
 // gateways config file
@@ -483,6 +483,24 @@ void loop()
       mqtt_reconnect();
     }
     mqttc.loop();
+  }
+
+  // safeguarding if MQTT not connected for MAX_MQTT_ERROR seconds (180 now) - it restarts ESP unconditionally 
+  if (millis() >= aux_mqtt_last_connected_interval + (3 * 1000))
+  {
+    if (mqttc.connected())
+    {
+      mqtt_last_connected = millis();
+    }
+    if (((millis() - mqtt_last_connected) / 1000) >  MAX_MQTT_ERROR)
+    {
+      #if (USE_WEB_SERIAL == 1)
+        WebSerial.println("mqtt timeout..., restarting in 3s");
+      #endif
+      delay(3000);
+      ESP.restart();
+    }
+    aux_mqtt_last_connected_interval = millis();
   }
 
     // button
