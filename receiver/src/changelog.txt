@@ -27,6 +27,9 @@ OTA:
 - http://HOSTNAME.local:8080/update
 
 2023-02-27
+  2.18.1   - FW update timer: FW_UPDATE_TIME_S - 180s - to avoid hanging without handling it
+
+2023-02-27
   2.18.0   - restart if MQTT not connected for MAX_MQTT_ERROR seconds (180)
 
 2023-02-27

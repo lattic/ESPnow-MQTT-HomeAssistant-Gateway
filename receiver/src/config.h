@@ -292,6 +292,9 @@ config
 // how often to update HA on GW status
 #define HEARTBEAT_INTERVAL_S        10    //10 in seconds
 
+// FW update timeout
+#define FW_UPDATE_TIME_S            180   // in seconds - 3 minutes shall be enough
+
 // LED PWM settings
 #ifdef LED_GPIO_STANDBY_USE_PWM
   #define LED_GPIO_STANDBY_PWM_CHANNEL    1

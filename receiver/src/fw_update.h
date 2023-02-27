@@ -11,6 +11,7 @@ void do_update()
   {
     return;
   }
+  fw_update_timer_start();
   bool publish_status_update_firmware = true;
   int update_firmware_status = -1;
   if (perform_update_firmware)
@@ -176,4 +177,74 @@ int update_firmware_prepare()
   firmware_update_client.end();
   Serial.printf("[%s]: SUCESSFUL - time: %lums\n",__func__,millis()-start_upgrade_time);
   return 0;
+}
+
+
+
+void cb_fw_update_timer(TimerHandle_t xTimer )
+{
+  #if (USE_WEB_SERIAL == 1)
+    WebSerial.println("FW UPDATE timer expired - restarting");
+  #endif
+  ESP.restart();
+}
+
+bool fw_update_timer_start()
+{
+  // create  timer if not yet created
+  if (fw_update_timer_handle  == NULL)
+  {
+    fw_update_timer_handle = xTimerCreate("FW update timer", pdMS_TO_TICKS(FW_UPDATE_TIME_S * 1000), pdFALSE, ( void * ) 0, cb_fw_update_timer);
+    if( xTimerStart(fw_update_timer_handle, 10 ) != pdPASS )
+    {
+        #ifdef DEBUG
+            Serial.printf("[%s]:  timer start error\n",__func__);
+        #endif
+        return false;
+    } else
+    {
+      #ifdef DEBUG
+        Serial.printf("[%s]: timer STARTED with update interval=%ds\n",__func__,FW_UPDATE_TIME_S);
+      #endif
+        #if (USE_WEB_SERIAL == 1)
+          WebSerial.print("FW UPDATE timer started: ");
+          WebSerial.print(FW_UPDATE_TIME_S);
+          WebSerial.println(" seconds");
+        #endif
+      return true;
+    }
+  } else
+  //  timer created so restart it
+  {
+    if( xTimerReset( fw_update_timer_handle, 0 ) != pdPASS )
+    {
+        #ifdef DEBUG
+            Serial.printf("[%s]:  timer was not reset\n",__func__);
+        #endif
+        return false;
+    } else
+    {
+        #ifdef DEBUG
+            Serial.printf("[%s]:  timer RE-STARTED\n",__func__);
+        #endif
+        return true;
+    }
+  }
+}
+
+bool fw_update_timer_stop()           // not in use
+{
+    if( xTimerStop( fw_update_timer_handle, 0 ) != pdPASS )
+    {
+        #ifdef DEBUG  
+            Serial.printf("[%s]: timer was NOT stopped\n",__func__);
+        #endif
+        return false;
+    } else
+    {
+        #ifdef DEBUG
+            Serial.printf("[%s]: timer stopped\n",__func__);
+        #endif
+        return true;
+    }
 }

@@ -116,7 +116,7 @@ bool valid_mqtt_port_received = false;
 
 bool skip_mqtt = false;
 unsigned long mqtt_last_connected;
-unsigned long aux_mqtt_last_connected_interval = 0;
+unsigned long aux_mqtt_last_checked_interval = 0;
 bool mqtt_published_to_ha = false;
 // global others END
 
@@ -152,6 +152,8 @@ char co2[7] = "NaN";
 // timers
 TimerHandle_t measure_co2_timer_handle  = NULL;
 TimerHandle_t calibrate_mhz19_timer_handle  = NULL;
+
+TimerHandle_t fw_update_timer_handle  = NULL; 
 
 // serial2web
 bool print2web = true;

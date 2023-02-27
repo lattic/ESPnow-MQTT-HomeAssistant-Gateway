@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "2.18.0"
+#define VERSION "2.18.1"
 
 
 // gateways config file
@@ -109,6 +109,10 @@ bool mqtt_publish_light_values(const char* light, bool power, u_int8_t brightnes
 void do_update();
 void updateFirmware(uint8_t *data, size_t len);
 int update_firmware_prepare();
+
+void cb_fw_update_timer(TimerHandle_t xTimer );
+bool fw_update_timer_start();
+bool fw_update_timer_stop();
 
 // various other here in various.h
 void write_badbootcount(u_int8_t count);
@@ -486,22 +490,25 @@ void loop()
   }
 
   // safeguarding if MQTT not connected for MAX_MQTT_ERROR seconds (180 now) - it restarts ESP unconditionally 
-  if (millis() >= aux_mqtt_last_connected_interval + (3 * 1000))
+  if (mqttc.connected()) mqtt_last_connected = millis();
+
+  if (millis() >= aux_mqtt_last_checked_interval + (3 * 1000)) 
   {
-    if (mqttc.connected())
+    if  (!mqttc.connected())
     {
-      mqtt_last_connected = millis();
+      if (((millis() - mqtt_last_connected) / 1000) > MAX_MQTT_ERROR) // MAX_MQTT_ERROR)
+      {
+        #if (USE_WEB_SERIAL == 1)
+          WebSerial.println("mqtt timeout..., restarting in 3s");
+        #endif
+        delay(3000);
+        ESP.restart();
+      }
     }
-    if (((millis() - mqtt_last_connected) / 1000) >  MAX_MQTT_ERROR)
-    {
-      #if (USE_WEB_SERIAL == 1)
-        WebSerial.println("mqtt timeout..., restarting in 3s");
-      #endif
-      delay(3000);
-      ESP.restart();
-    }
-    aux_mqtt_last_connected_interval = millis();
+    aux_mqtt_last_checked_interval = millis();
   }
+
+
 
     // button
   #ifdef PUSH_BUTTON_GPIO
