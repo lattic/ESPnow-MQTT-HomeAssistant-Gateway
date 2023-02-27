@@ -147,7 +147,7 @@ bool co2_received = false;
 bool calibration_in_progress = false;
 bool calibration_finished = false;
 long last_co2_update_time = 0;
-char co2[7] = "NaN";
+char co2[7] = "0";
 
 // timers
 TimerHandle_t measure_co2_timer_handle  = NULL;

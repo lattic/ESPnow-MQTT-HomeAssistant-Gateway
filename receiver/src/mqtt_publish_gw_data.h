@@ -1196,7 +1196,7 @@ bool mqtt_publish_sensor_with_unit_config(const char* sensor_with_unit, const ch
   return total_publish_status;
 }
 
-// universal standalone sensor with unit on HA - publish value
+// universal standalone sensor with unit on HA - publish value - value is float - not string!
 bool mqtt_publish_sensor_with_unit_value(const char* sensor_with_unit, const char* sensor_unit, const char* sensor_with_unit_value)
 {
   if (!mqtt_connected) return false;
@@ -1214,7 +1214,11 @@ bool mqtt_publish_sensor_with_unit_value(const char* sensor_with_unit, const cha
   } 
 
   StaticJsonDocument<JSON_PAYLOAD_SIZE> payload;
-  payload[sensor_with_unit] = sensor_with_unit_value;
+  
+  // check if this is always float - what if string? it will be then ZERO always
+
+  float value = atof(sensor_with_unit_value);
+  payload[sensor_with_unit] = value;
 
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
