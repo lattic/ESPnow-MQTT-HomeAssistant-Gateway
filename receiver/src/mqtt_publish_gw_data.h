@@ -855,6 +855,7 @@ void heartbeat()
   #endif
 
   #if (USE_MHZ19_CO2 == 1)
+    if (co2_received)
     publish_status = publish_status && mqtt_publish_sensor_with_unit_value("co2", "ppm",co2);
   #endif
 
@@ -1214,11 +1215,7 @@ bool mqtt_publish_sensor_with_unit_value(const char* sensor_with_unit, const cha
   } 
 
   StaticJsonDocument<JSON_PAYLOAD_SIZE> payload;
-  
-  // check if this is always float - what if string? it will be then ZERO always
-
-  float value = atof(sensor_with_unit_value);
-  payload[sensor_with_unit] = value;
+  payload[sensor_with_unit] = sensor_with_unit_value;
 
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);

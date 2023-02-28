@@ -27,6 +27,15 @@ OTA:
 - http://HOSTNAME.local:8080/update
 
 2023-02-27
+  2.19.1e   - use co2_received to trigger publishing
+
+2023-02-27
+  2.19.1d   - reverted 2.19.0, using 2.19.1 instead
+
+2023-02-27
+  2.19.1   - don't publish CO2 if < MIN_CO2
+
+2023-02-27
   2.19.0   - mqtt_publish_sensor_with_unit_value() accepts value as char* but publishes as float!
 
 2023-02-27
