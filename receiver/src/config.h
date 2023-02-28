@@ -193,7 +193,7 @@ config
   #define RX_PIN                    11    // Rx pin which the MHZ19 Tx pin is attached to - BROWN
   #define TX_PIN                    10    // Tx pin which the MHZ19 Rx pin is attached to - BLACK
   #define BAUDRATE                 9600   // Device to MH-Z19 Serial baudrate (should not be changed)
-  #define MHZ19_AUTO_CALIBRATION    0   // don't autocalibrate MHZ19
+  #define MHZ19_AUTO_CALIBRATION    1   // don't autocalibrate MHZ19
   #define CO2_UPDATE_INTERVAL_S     120   // 120, how often to measure CO2 - every 2m as per datasheet
   #define CO2_PREHEAT_TIME_S        180   // 180, initial preheat time as per datasheet 
   #define MIN_CO2                   330   // 330, invalid reading below 330 ppm as per datasheet (400 +-50 +-5%)
