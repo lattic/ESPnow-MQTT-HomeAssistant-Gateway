@@ -316,7 +316,7 @@
   #define PUSH_BUTTONS_ONLY           1
 
   #define NUMBER_OF_BUTTONS           5  
-  uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the fake MAC addresses that are assigned in receiver sketch
+  uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of push buttons
   {
     3,4,5,6,7
   }; 
@@ -825,7 +825,7 @@
 //   #define PUSH_BUTTONS_ONLY           1
 
 //   #define NUMBER_OF_BUTTONS           6  
-//   uint8_t button_gpio[NUMBER_OF_BUTTONS] =          // put here the fake MAC addresses that are assigned in receiver sketch
+//   uint8_t button_gpio[NUMBER_OF_BUTTONS] =          // put here ...
 //   {
 //     32,33,34,35,36,39
 //   }; 
@@ -873,6 +873,47 @@
 
 //   #pragma message "compilation for: esp32092-test"
 // // ---------------------------------------------------------------------------------------------------
+
+#elif DEVICE_ID == 93                 // 
+  #define SENSOR_TYPE                 4 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = battery, 4 = "push_b"
+  #define HOSTNAME                    "esp32093"
+  #define DEVICE_NAME                 "tp-93-test"  // 15 characters maximum
+  #define BOARD_TYPE                  1     // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  #define FW_UPGRADE_GPIO             34    // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define SLEEP_TIME_S                3600    // seconds - 
+  #define ACT_BLUE_LED_GPIO           19    // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define ERROR_RED_LED_GPIO          32    // comment out if not in use - don't use "0" here unless you mean GPIO=0
+
+  #define TOUCHPAD_ONLY               1
+  #define TOUCHPAD_MEASUREMENTS_MS    20    // measuring time after wake up to establish threshold
+  #define TOUCHPAD_COOLTIME_MS        300   // wait before stariting measurement (to avoid measuring while still touched - it would never wake up if too low threshold)
+
+  #define NUMBER_OF_BUTTONS           1 // 10
+  uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of touch buttons
+  {
+    TOUCH_PAD_NUM0        // GPIO 4
+    
+    // TOUCH_PAD_NUM1,       // GPIO 0
+    // TOUCH_PAD_NUM2,       // GPIO 2
+    // TOUCH_PAD_NUM3,       // GPIO 15
+    // TOUCH_PAD_NUM4,       // GPIO 13
+    // TOUCH_PAD_NUM5,       // GPIO 12
+    // TOUCH_PAD_NUM6,       // GPIO 14
+    // TOUCH_PAD_NUM7,       // GPIO 27
+    // TOUCH_PAD_NUM8,       // GPIO 33
+    // TOUCH_PAD_NUM9        // GPIO 32
+    
+  }; 
+  float touchpad_thr_multiplier[NUMBER_OF_BUTTONS] =  // threshold multipliers, i.e. for glass it has to be 25/26 or so while for metal it can be 2/3
+  {
+     0.98       // 25/26 - glass
+    //  0.66    // 2/3   - metal
+  };
+
+  uint8_t button_pressed = 0;               // 0 means: not pressed, from 1 ... is the button number from the above array, starting from 1 (not from 0)
+
+  #pragma message "compilation for: esp32093-touch"
+// ---------------------------------------------------------------------------------------------------
 
 
 #else
@@ -965,6 +1006,10 @@
   #ifndef MOTION_SENSOR_GPIO
     #error "MOTION_SENSOR_GPIO not defined"
   #endif
+#endif
+
+#if (TOUCHPAD_ONLY == 1) and (BOARD_TYPE != 1)
+  #error "TOUCHPAD_ONLY works (now) only with ESP32"
 #endif
 
 #if (SENSOR_TYPE == 4)
