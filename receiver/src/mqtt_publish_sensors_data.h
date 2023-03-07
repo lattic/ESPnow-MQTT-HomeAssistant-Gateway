@@ -1331,7 +1331,7 @@ bool mqtt_publish_sensors_values()
     if (print2web) WebSerial.println(payload_json);
   #endif
 
-  if (!mqttc.publish(sensors_topic_state,(uint8_t*)payload_json,strlen(payload_json), false))
+  if (!mqttc.publish(sensors_topic_state,(uint8_t*)payload_json,strlen(payload_json), true))
   {
     Serial.printf("[%s]: -> sending data from \"%s\" to HA - FAILED, leaving\n",__func__,myLocalData.name);
     xSemaphoreGive( myLocalData_protect );

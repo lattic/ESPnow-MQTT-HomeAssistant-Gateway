@@ -374,7 +374,7 @@ bool mqtt_publish_gw_status_values(const char* status)
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(status_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
+  if (!mqttc.publish(status_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,status_state_topic);
@@ -496,7 +496,7 @@ bool mqtt_publish_gw_last_updated_sensor_values(const char* status)
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(status_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
+  if (!mqttc.publish(status_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,status_state_topic);
@@ -769,7 +769,7 @@ bool mqtt_publish_switch_publish_values()
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(publish_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
+  if (!mqttc.publish(publish_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,publish_state_topic);
@@ -1095,7 +1095,7 @@ bool mqtt_publish_text_sensor_value(const char* text_sensor, const char* text_se
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(text_sensor_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
+  if (!mqttc.publish(text_sensor_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,text_sensor_state_topic);
@@ -1220,7 +1220,7 @@ bool mqtt_publish_sensor_with_unit_value(const char* sensor_with_unit, const cha
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(sensor_with_unit_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
+  if (!mqttc.publish(sensor_with_unit_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,sensor_with_unit_state_topic);
@@ -1375,7 +1375,7 @@ bool mqtt_publish_light_values(const char* light, bool power, u_int8_t brightnes
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
 
-  if (!mqttc.publish(light_state_topic,(uint8_t*)payload_json,strlen(payload_json), false))
+  if (!mqttc.publish(light_state_topic,(uint8_t*)payload_json,strlen(payload_json), true))
   {
     publish_status = false;
     Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,light_state_topic);
