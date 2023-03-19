@@ -1421,6 +1421,12 @@ void WiFiStationSetup(String rec_ssid, String rec_password, String rec_sleep_s)
   {
     Serial.printf("[%s]: NOT valid sleeptime: %d, using default: %d seconds\n", __func__,sleeptime_s, (SLEEP_TIME_S));
   }
+
+  // THIS SETS PROPERLY THE HOSTNAME - WiFi.setHostname(HOSTNAME); is NOT WORKING - sender
+  esp_netif_t *esp_netif = NULL;
+  esp_netif = esp_netif_next(esp_netif);
+  esp_netif_set_hostname(esp_netif, HOSTNAME);
+
   WiFi.begin(ssid_arr, password_arr);
   Serial.printf("[%s]: Connecting...\n",__func__);
   uint32_t t1 = millis();
