@@ -26,6 +26,9 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+2023-03-19
+  2.22.0   - set hostname properly
+
 2023-03-07
   2.21.0   - full revert 2.17.0: all mqtt messages are retained
 
