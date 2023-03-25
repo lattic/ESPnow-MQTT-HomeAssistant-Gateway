@@ -1018,7 +1018,10 @@ void gather_data()
     Serial.printf("\tcharg=%s\n",myData.charg);
   #endif
 
-  // bootCount calculated in save_config()
+  // bootCount calculated in save_config() + 1
+  // myData.boot = g_bootCount;
+
+  ++g_bootCount;
   myData.boot = g_bootCount;
   #ifdef DEBUG
     Serial.printf("\tboot=%d\n",myData.boot);
@@ -1764,11 +1767,12 @@ void save_config(const char* reason)
   // bootCount
   if ((boot_reason == 1) or (boot_reason == 3))         // reset or power ON
   {
-    g_bootCount = 1;
+    // g_bootCount = 1;
+    g_bootCount = 0;
     extra_reset_time = ESP32_BOOT_TIME_EXTRA;
   } else 
   {
-    ++g_bootCount;
+    // ++g_bootCount;
     extra_reset_time = 0;
   }
 

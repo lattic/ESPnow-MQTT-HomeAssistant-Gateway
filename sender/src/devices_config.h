@@ -874,46 +874,74 @@
 //   #pragma message "compilation for: esp32092-test"
 // // ---------------------------------------------------------------------------------------------------
 
-#elif DEVICE_ID == 93                 // 
-  #define SENSOR_TYPE                 4 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = battery, 4 = "push_b"
-  #define HOSTNAME                    "esp32093"
-  #define DEVICE_NAME                 "tp-93-test"  // 15 characters maximum
-  #define BOARD_TYPE                  1     // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-  #define FW_UPGRADE_GPIO             34    // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
-  #define SLEEP_TIME_S                3600    // seconds - 
-  #define ACT_BLUE_LED_GPIO           19    // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define ERROR_RED_LED_GPIO          32    // comment out if not in use - don't use "0" here unless you mean GPIO=0
+// #elif DEVICE_ID == 93                 // 
+//   #define SENSOR_TYPE                 4 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = battery, 4 = "push_b"
+//   #define HOSTNAME                    "esp32093"
+//   #define DEVICE_NAME                 "tp-93-test"  // 15 characters maximum
+//   #define BOARD_TYPE                  1     // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+//   #define FW_UPGRADE_GPIO             34    // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+//   #define SLEEP_TIME_S                3600    // seconds - 
+//   #define ACT_BLUE_LED_GPIO           19    // comment out if not in use - don't use "0" here unless you mean GPIO=0
+//   #define ERROR_RED_LED_GPIO          32    // comment out if not in use - don't use "0" here unless you mean GPIO=0
 
-  #define TOUCHPAD_ONLY               1
-  #define TOUCHPAD_MEASUREMENTS_MS    20    // measuring time after wake up to establish threshold
-  #define TOUCHPAD_COOLTIME_MS        300   // wait before stariting measurement (to avoid measuring while still touched - it would never wake up if too low threshold)
+//   #define TOUCHPAD_ONLY               1
+//   #define TOUCHPAD_MEASUREMENTS_MS    20    // measuring time after wake up to establish threshold
+//   #define TOUCHPAD_COOLTIME_MS        300   // wait before stariting measurement (to avoid measuring while still touched - it would never wake up if too low threshold)
 
-  #define NUMBER_OF_BUTTONS           1 // 10
-  uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of touch buttons
-  {
-    TOUCH_PAD_NUM0        // GPIO 4
+//   #define NUMBER_OF_BUTTONS           1 // 10
+//   uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of touch buttons
+//   {
+//     TOUCH_PAD_NUM0        // GPIO 4
     
-    // TOUCH_PAD_NUM1,       // GPIO 0
-    // TOUCH_PAD_NUM2,       // GPIO 2
-    // TOUCH_PAD_NUM3,       // GPIO 15
-    // TOUCH_PAD_NUM4,       // GPIO 13
-    // TOUCH_PAD_NUM5,       // GPIO 12
-    // TOUCH_PAD_NUM6,       // GPIO 14
-    // TOUCH_PAD_NUM7,       // GPIO 27
-    // TOUCH_PAD_NUM8,       // GPIO 33
-    // TOUCH_PAD_NUM9        // GPIO 32
+//     // TOUCH_PAD_NUM1,       // GPIO 0
+//     // TOUCH_PAD_NUM2,       // GPIO 2
+//     // TOUCH_PAD_NUM3,       // GPIO 15
+//     // TOUCH_PAD_NUM4,       // GPIO 13
+//     // TOUCH_PAD_NUM5,       // GPIO 12
+//     // TOUCH_PAD_NUM6,       // GPIO 14
+//     // TOUCH_PAD_NUM7,       // GPIO 27
+//     // TOUCH_PAD_NUM8,       // GPIO 33
+//     // TOUCH_PAD_NUM9        // GPIO 32
     
-  }; 
-  float touchpad_thr_multiplier[NUMBER_OF_BUTTONS] =  // threshold multipliers, i.e. for glass it has to be 25/26 or so while for metal it can be 2/3
-  {
-     0.98       // 25/26 - glass
-    //  0.66    // 2/3   - metal
-  };
+//   }; 
+//   float touchpad_thr_multiplier[NUMBER_OF_BUTTONS] =  // threshold multipliers, i.e. for glass it has to be 25/26 or so while for metal it can be 2/3
+//   {
+//      0.98       // 25/26 - glass
+//     //  0.66    // 2/3   - metal
+//   };
 
-  uint8_t button_pressed = 0;               // 0 means: not pressed, from 1 ... is the button number from the above array, starting from 1 (not from 0)
+//   uint8_t button_pressed = 0;               // 0 means: not pressed, from 1 ... is the button number from the above array, starting from 1 (not from 0)
 
-  #pragma message "compilation for: esp32093-touch"
+//   #pragma message "compilation for: esp32093-touch"
+// // ---------------------------------------------------------------------------------------------------
+
+
 // ---------------------------------------------------------------------------------------------------
+
+#elif DEVICE_ID == 92
+  #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
+  #define HOSTNAME                    "esp32092"
+  #define DEVICE_NAME                 "test92"  // 15 characters maximum
+  #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define ENABLE_3V_GPIO              3   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  #define USE_MAX17048                1   // use "0" to disable
+  #define USE_SHT31                   1   // use "0" to disable
+  #define USE_TSL2561                 1   // use "0" to disable
+  #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
+  #define CALIBRATE_HUMIDITY          -5   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
+
+
+  #pragma message "compilation for: esp32092-test92"
+// ---------------------------------------------------------------------------------------------------
+
+
 
 
 #else
