@@ -298,8 +298,11 @@ All info on ESP is stored in encrypted form so not readable by "non-super-hacker
 <h3>Sensor device - sender</h3>
 Tasks are as described above so the code is in 1 file only: sender.ino <br>
 <br>
-Next is the file with credentials: passwords.h (ssid, password, webserver where your firmware is stored) - this file is only used for OTA.<br>
+<s>Next is the file with credentials: passwords.h (ssid, password, webserver where your firmware is stored) - this file is only used for OTA.<br>
 <br>
+<b>EDIT:</b></s> - SEE BELOW UPDATE
+<img width="502" alt="Screenshot 2023-04-07 at 10 25 50" src="https://user-images.githubusercontent.com/46562447/230588907-0c83874e-75f5-4d84-aa21-0d479166bc19.png">
+
 Finally there is a configuration file where you must specify details for each sensor device (such as sensors used, GPIO etc.): devices_config.h<br>
 <br>
 The sequence is:
