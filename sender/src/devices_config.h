@@ -813,66 +813,7 @@
 // ---------------------------------------------------------------------------------------------------
 
 //-----------------------  TEST -----------------------
-// #elif DEVICE_ID == 91                 // 
-//   #define SENSOR_TYPE                 4 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = battery, 4 = push buttons only
-//   #define HOSTNAME                    "esp32091"
-//   #define DEVICE_NAME                 "pushbuttons91"  // 15 characters maximum
-//   #define BOARD_TYPE                  1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-//   #define FW_UPGRADE_GPIO             25   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
-//   #define SLEEP_TIME_S                5  // seconds - 
-  
 
-//   #define PUSH_BUTTONS_ONLY           1
-
-//   #define NUMBER_OF_BUTTONS           6  
-//   uint8_t button_gpio[NUMBER_OF_BUTTONS] =          // put here ...
-//   {
-//     32,33,34,35,36,39
-//   }; 
-//   uint8_t button_pressed = 0;               // 0 means: not pressed, from 1 ... is the button number from the above array, starting from 1 (not from 0)
-
-//   #pragma message "compilation for: esp32091-pushbuttons91"
-// // ---------------------------------------------------------------------------------------------------
-
-
-// #elif DEVICE_ID == 92
-//   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
-//   #define HOSTNAME                    "esp32092"
-//   #define DEVICE_NAME                 "92-105"  // 15 characters maximum
-//   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-//   // #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-//   // #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-//   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
-//   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
-//   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
-//   // #define ENABLE_3V_GPIO              3   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
-//   // #define USE_MAX17048                1   // use "0" to disable
-//   // #define USE_SHT31                   1   // use "0" to disable
-//   // #define USE_TSL2561                 1   // use "0" to disable
-//   #define SLEEP_TIME_S                180 // seconds - 180
-
-//   #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
-//   #define CALIBRATE_HUMIDITY          -5   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
-
-
-//   #pragma message "compilation for: esp32105-Garden"
-// // ---------------------------------------------------------------------------------------------------
-
-
-
-
-// #elif DEVICE_ID == 92                 // Lilygo 1A
-//   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
-//   #define HOSTNAME                    "esp32092"
-//   #define DEVICE_NAME                 "test92"  // 15 characters maximum
-//   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-//   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
-//   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
-//   #define FW_UPGRADE_GPIO             17   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
-//   #define SLEEP_TIME_S                5 // seconds - 180
-
-//   #pragma message "compilation for: esp32092-test"
-// // ---------------------------------------------------------------------------------------------------
 
 // #elif DEVICE_ID == 93                 // 
 //   #define SENSOR_TYPE                 4 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = battery, 4 = "push_b"
@@ -917,30 +858,6 @@
 
 
 // ---------------------------------------------------------------------------------------------------
-
-#elif DEVICE_ID == 92
-  #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
-  #define HOSTNAME                    "esp32092"
-  #define DEVICE_NAME                 "test92"  // 15 characters maximum
-  #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-  #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
-  #define ENABLE_3V_GPIO              3   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
-  #define USE_MAX17048                1   // use "0" to disable
-  #define USE_SHT31                   1   // use "0" to disable
-  #define USE_TSL2561                 1   // use "0" to disable
-  #define SLEEP_TIME_S                180 // seconds - 180
-
-  #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
-  #define CALIBRATE_HUMIDITY          -5   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
-
-
-  #pragma message "compilation for: esp32092-test92"
-// ---------------------------------------------------------------------------------------------------
-
 
 
 
