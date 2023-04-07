@@ -264,11 +264,11 @@ Sleep time (configurable) is initially set to 180s (3 minutes).
 Other important configurable settings (some mandatory, some optional):
 <ul>
   <s><li>WiFi channel - it must be the same for ESPnow communication and gateway to AP (router) communication - gateway and sensor devices</s> - NOT IN USE ANYMORE
-  <li>SSID - gateway and sensor devices - NEEDED TO PERFORM OTA ONLY
-  <li>password - gateway and sensor devices - NEEDED TO PERFORM OTA ONLY
-  <li>MQTT server IP - gateway device - GATEWAY ONLY
-  <li>MQTT username - gateway device - GATEWAY ONLY
-  <li>MQTT password - gateway device - GATEWAY ONLY
+  <li>SSID - gateway and sensor devices (NEEDED ONLY TO PERFORM OTA  on sensor device)
+  <li>password - gateway and sensor devices (NEEDED ONLY TO PERFORM OTA on sensor device)
+  <li>MQTT server IP - gateway device 
+  <li>MQTT username - gateway device 
+  <li>MQTT password - gateway device 
 </ul>
   
   <b> UPDATE: </b>
