@@ -64,6 +64,17 @@ sender.ino
   #include <Adafruit_MAX31855.h>
   Adafruit_MAX31855 thermocouple(CLK_GPIO, CS_GPIO, MISO_GPIO);
 #endif
+
+#if (TOUCHPAD_ONLY == 1)
+  #include "driver/touch_pad.h"
+  #include "soc/rtc_periph.h"
+  #include "soc/sens_periph.h"
+  #include "driver/touch_sensor.h"
+  #include "driver/touch_sensor_common.h"
+  #include "soc/touch_sensor_channel.h"
+  #include "hal/touch_sensor_types.h"
+#endif
+
 // ========================================================================== libraries END
 
 // some consistency checks 
@@ -271,9 +282,17 @@ void get_old_wifi_credentials();
 // lux
 void get_lux(char* lux_char);  
 
+// dummy for touchpad
+void tp_callback();
+
 // ========================================================================== FUNCTIONS declaration END
 
 // ========================================================================== FUNCTIONS implementation
+// dummy for touchpad
+void tp_callback()
+{
+  // it is executed only when touch is detected AND esp32 is awake - not when it slept
+}
 
 void OnDataReceived(const uint8_t * mac, const uint8_t *incomingData, int len) 
 {
@@ -529,20 +548,16 @@ int update_firmware_prepare()
 // hibernate - force to indicate no GPIO wake up - used for low battery
 void hibernate(bool force, int final_sleeping_time_s) 
 {
-  esp_wifi_stop();                                                        // wifi
+  esp_wifi_stop();                                                        // wifi - big impact on current: from 115mA to 42mA
   esp_deep_sleep_disable_rom_logging();                                   // it does not display welcome message - shorter time to wake up
 
-  /* all below makes CP not appearing sometimes, still current without it is 38uA on S2 so that should be OK */
+  // these DON'T interfere with touchpad 
   esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL,         ESP_PD_OPTION_OFF);
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M,        ESP_PD_OPTION_OFF);
   esp_sleep_pd_config(ESP_PD_DOMAIN_VDDSDIO,      ESP_PD_OPTION_OFF);
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
-
-//  // the next 2 lines are NOT working - CP cannot start!
-  // esp_sleep_config_gpio_isolate();
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH,   ESP_PD_OPTION_OFF);
-
 
 
   if (force) // used when battery too low - don't wake up on GPIO
@@ -593,6 +608,82 @@ void hibernate(bool force, int final_sleeping_time_s)
     do_esp_go_to_sleep();
   #endif
 
+  #if (TOUCHPAD_ONLY == 1)
+    uint16_t touch_value;
+    uint16_t thr;
+    uint32_t pad_intr;
+    #define TOUCH_THRESH_NO_USE   (0)
+
+    if (wakeup_reason == ESP_SLEEP_WAKEUP_TOUCHPAD)
+    {
+      Serial.printf("[%s]: sleeping before measuring for=%dms\n",__func__,TOUCHPAD_COOLTIME_MS);
+      delay(TOUCHPAD_COOLTIME_MS);
+    }
+
+    if (touch_pad_init() != ESP_OK) Serial.printf("touch_pad_init ERROT\n");
+    if (touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER) != ESP_OK) Serial.printf("touch_pad_set_fsm_mode ERROR\n");
+    if (touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V) != ESP_OK) 
+    {
+      Serial.printf("touch_pad_set_voltage ERROR\n");
+      Serial.printf("TRIED: refh=%d, refl=%d, atten=%d\n",TOUCH_HVOLT_MAX, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_MAX);
+      touch_high_volt_t refh;
+      touch_low_volt_t refl;
+      touch_volt_atten_t atten;
+      touch_pad_get_voltage(&refh, &refl,&atten);
+      Serial.printf("GOT: refh=%d, refl=%d, atten=%d\n",refh, refl, atten);
+    }
+
+    for (int i = 0; i < NUMBER_OF_BUTTONS; i++)
+    {
+      if (touch_pad_config((touch_pad_t)button_gpio[i], TOUCH_THRESH_NO_USE) != ESP_OK) Serial.printf("touch_pad_config ERROR\n");
+    }
+
+    if (touch_pad_filter_start(TOUCHPAD_MEASUREMENTS_MS) != ESP_OK) Serial.printf("touch_pad_filter_start ERROR\n");
+
+    for (int i = 0; i < NUMBER_OF_BUTTONS; i++)
+    {
+      if (touch_pad_read_filtered((touch_pad_t)button_gpio[i], &touch_value) != ESP_OK) Serial.printf("touch_pad_read_filtered ERROR\n");
+      thr = touch_value * (float)touchpad_thr_multiplier[i];
+      // #ifdef DEBUG
+        Serial.printf("touch pad [%d] val is %d, setting threshold=%d (touchpad_thr_multiplier=%0.2f)\n", i, touch_value,thr,touchpad_thr_multiplier[i]);
+      // #endif
+      if (touch_pad_config((touch_pad_t)button_gpio[i], thr) != ESP_OK) Serial.printf("touch_pad_config ERROR\n"); 
+    }
+  
+    #ifdef DEBUG
+      uint16_t clock_cycle;
+      uint16_t interval_cycle;
+      uint16_t sleep_cycle;
+      uint16_t meas_cycle;
+      touch_pad_t touch_num;
+      uint16_t threshold;
+      touch_trigger_mode_t mode;
+      touch_trigger_src_t src;
+      uint32_t p_period_ms;
+
+      // touch_pad_get_measurement_clock_cycles(&clock_cycle);
+      // touch_pad_get_measurement_interval(&interval_cycle);
+      touch_pad_get_meas_time(&sleep_cycle, &meas_cycle);
+      touch_pad_get_thresh(touch_num, &threshold);
+      touch_pad_get_trigger_mode(&mode);
+      touch_pad_get_trigger_source(&src);
+      touch_pad_get_filter_period(&p_period_ms);
+
+      Serial.printf("[%s]: sleep_cycle=%d\n",__func__,sleep_cycle);
+      Serial.printf("[%s]: meas_cycle=%d\n",__func__,meas_cycle);
+
+      Serial.printf("[%s]: mode=%d\n",__func__,mode);
+      Serial.printf("[%s]: src=%d\n",__func__,src);
+      Serial.printf("[%s]: p_period_ms=%d\n",__func__,p_period_ms);
+    #endif
+
+    touch_pad_clear_status();
+
+    if (touch_pad_intr_enable() != ESP_OK) Serial.printf("touch_pad_intr_enable ERROR\n");
+    if (NUMBER_OF_BUTTONS > 0)  esp_sleep_enable_touchpad_wakeup();
+    esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
+    do_esp_go_to_sleep();
+  #endif
 
   // https://randomnerdtutorials.com/esp32-deep-sleep-arduino-ide-wake-up-sources/ for ext0 and ext1 examples
   #ifdef MOTION_SENSOR_GPIO
@@ -694,6 +785,10 @@ void hibernate(bool force, int final_sleeping_time_s)
   #ifdef PPK2_GPIO
     digitalWrite(PPK2_GPIO,HIGH);
   #endif
+
+  // the next 2 lines are NOT working - CP cannot start! ????
+  // esp_sleep_config_gpio_isolate();
+
   do_esp_go_to_sleep();
 }
 
@@ -741,7 +836,7 @@ void gather_data()
   #endif
 
   // button pressed
-  #if (PUSH_BUTTONS_ONLY == 1)
+  #if ((PUSH_BUTTONS_ONLY == 1) or (TOUCHPAD_ONLY))
     if (button_pressed > 0)
       myData.button_pressed = button_pressed;
   #endif
@@ -923,7 +1018,10 @@ void gather_data()
     Serial.printf("\tcharg=%s\n",myData.charg);
   #endif
 
-  // bootCount calculated in save_config()
+  // bootCount calculated in save_config() + 1
+  // myData.boot = g_bootCount;
+
+  ++g_bootCount;
   myData.boot = g_bootCount;
   #ifdef DEBUG
     Serial.printf("\tboot=%d\n",myData.boot);
@@ -1326,6 +1424,12 @@ void WiFiStationSetup(String rec_ssid, String rec_password, String rec_sleep_s)
   {
     Serial.printf("[%s]: NOT valid sleeptime: %d, using default: %d seconds\n", __func__,sleeptime_s, (SLEEP_TIME_S));
   }
+
+  // THIS SETS PROPERLY THE HOSTNAME - WiFi.setHostname(HOSTNAME); is NOT WORKING - sender
+  esp_netif_t *esp_netif = NULL;
+  esp_netif = esp_netif_next(esp_netif);
+  esp_netif_set_hostname(esp_netif, HOSTNAME);
+
   WiFi.begin(ssid_arr, password_arr);
   Serial.printf("[%s]: Connecting...\n",__func__);
   uint32_t t1 = millis();
@@ -1663,11 +1767,12 @@ void save_config(const char* reason)
   // bootCount
   if ((boot_reason == 1) or (boot_reason == 3))         // reset or power ON
   {
-    g_bootCount = 1;
+    // g_bootCount = 1;
+    g_bootCount = 0;
     extra_reset_time = ESP32_BOOT_TIME_EXTRA;
   } else 
   {
-    ++g_bootCount;
+    // ++g_bootCount;
     extra_reset_time = 0;
   }
 
@@ -1686,7 +1791,7 @@ void save_config(const char* reason)
   }
   
   // #ifdef DEBUG_LIGHT
-    Serial.printf("[%s]: Program finished after %lums.\n",__func__,work_time);
+    Serial.printf("[%s]: Program finished after %lums.\n\n",__func__,work_time);
   // #endif
   
   // testing with PPK2 - end save ontime
@@ -1770,6 +1875,7 @@ void change_mac()
 
 void initiate_all_leds()
 {
+  // 700us
   #ifdef ACT_BLUE_LED_GPIO
     // PWM
     #if (ACT_BLUE_LED_GPIO_USE_PWM == 1)
@@ -1795,6 +1901,7 @@ void initiate_all_leds()
 
 void set_act_blue_led_level(u_int8_t level)  
 {
+  // 70us
   #ifdef ACT_BLUE_LED_GPIO
     #if (ACT_BLUE_LED_GPIO_USE_PWM == 1)
       if (level == 1)
@@ -1830,6 +1937,7 @@ void set_act_blue_led_level(u_int8_t level)
 
 void set_error_red_led_level(u_int8_t level)  
 {
+  // 70us
   u_int8_t red_level;
   #ifdef ERROR_RED_LED_GPIO
     #if (ERROR_RED_LED_GPIO_USE_PWM == 1)
@@ -2069,7 +2177,84 @@ void setup()
     // 5 = not in use
     case ESP_SLEEP_WAKEUP_TOUCHPAD:
     {
-      Serial.printf("WAKEUP_TOUCHPAD\n");
+      #if (TOUCHPAD_ONLY == 1)
+        touch_pad_t touchPin;
+        #ifdef DEBUG
+          Serial.printf("[%s]: wakeup_reason=WAKEUP_TOUCHPAD\n",__func__);
+        #endif
+        touchPin = esp_sleep_get_touchpad_wakeup_status();
+        switch(touchPin)
+        {
+          case TOUCH_PAD_NUM0:
+          {
+            wakeup_gpio = 4;
+            break;
+          }
+          case TOUCH_PAD_NUM1:
+          {
+            wakeup_gpio = 0;
+            break;
+          }
+          case TOUCH_PAD_NUM2:
+          {
+            wakeup_gpio = 2;
+            break;
+          }
+          case TOUCH_PAD_NUM3:
+          {
+            wakeup_gpio = 15;
+            break;
+          }
+          case TOUCH_PAD_NUM4:
+          {
+            wakeup_gpio =13;
+            break;
+          }
+          case TOUCH_PAD_NUM5:
+          {
+            wakeup_gpio = 12;
+            break;
+          }
+          case TOUCH_PAD_NUM6:
+          {
+            wakeup_gpio = 14;
+            break;
+          }
+          case TOUCH_PAD_NUM7:
+          {
+            wakeup_gpio = 27;
+            break;
+          }
+          case TOUCH_PAD_NUM8:
+          {
+            wakeup_gpio = 33;
+            break;
+          }
+          case TOUCH_PAD_NUM9:
+          {
+            wakeup_gpio = 32;
+            break;
+          }
+          default : 
+          {
+            Serial.printf("[%s]: Wakeup NOT caused by touchpad\n",__func__); 
+            wakeup_gpio = 255; // (error)
+            break;
+          }
+        }    
+        if (wakeup_gpio < 255)
+        {
+          set_error_red_led_level(1);
+          for (uint8_t i = 0; i < NUMBER_OF_BUTTONS; i++)
+          {
+            if (i == touchPin)
+            {
+              button_pressed = i + 1;   // start counting buttons from 1 not from 0
+            }
+          }
+          Serial.printf("[%s]: wakeup TOUCH_PAD_NUM%d, GPIO=%d, button_pressed=%d\n",__func__,touchPin,wakeup_gpio,button_pressed);
+        }
+      #endif  
       break;
     }
     // 6 = not in use

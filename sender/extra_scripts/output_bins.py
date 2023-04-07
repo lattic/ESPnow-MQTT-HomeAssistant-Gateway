@@ -3,7 +3,7 @@ import os
 import shutil
 
 # OUTPUT_DIR = "/Users/papio/tmp/00-espnow_bin_files{}".format(os.path.sep)
-OUTPUT_DIR = "/Volumes/scripts/www/esp/01-with_mqtt_discovery/01-Production/0-ESPnow{}".format(os.path.sep)
+OUTPUT_DIR = "/Volumes/firmware/esp/01-with_mqtt_discovery/01-Production/0-ESPnow{}".format(os.path.sep)
 
 def _get_cpp_define_value(env, define):
     define_list = [item[-1] for item in env["CPPDEFINES"] if item[0] == define]

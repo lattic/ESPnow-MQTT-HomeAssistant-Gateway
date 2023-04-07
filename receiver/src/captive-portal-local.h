@@ -210,6 +210,12 @@ void StartWiFiSTA(String rec_ssid, String rec_password)
   char password_arr[20];
   rec_ssid.toCharArray(ssid_arr, rec_ssid.length() + 1);
   rec_password.toCharArray(password_arr, rec_password.length() + 1);
+
+  // THIS SETS PROPERLY THE HOSTNAME - WiFi.setHostname(HOSTNAME); is NOT WORKING - receiver
+  esp_netif_t *esp_netif = NULL;
+  esp_netif = esp_netif_next(esp_netif);
+  esp_netif_set_hostname(esp_netif, HOSTNAME);
+
   WiFi.begin(ssid_arr, password_arr);
 
   uint32_t t1 = millis();
