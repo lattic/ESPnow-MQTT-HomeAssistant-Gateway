@@ -331,6 +331,7 @@ Receiver in action (real device):<br>
 <br>
 
 <h3>Libraries needed:</h3>
+<br><b>Some of the libriaries are for specific device - not all are always needed - check the configuration file for details</b></br>
 <h4>Gateway:</h4>
 <br>
 <img width="472" alt="Screenshot 2023-04-07 at 10 25 37" src="https://user-images.githubusercontent.com/46562447/230583764-1db20160-c8ee-4b0f-8bf0-f44068577fd1.png">
