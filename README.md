@@ -278,8 +278,11 @@ Other important configurable settings (some mandatory, some optional):
   All pareameters can be set up also later by invoking Captive Portal:
   </br>
   
+<img width="899" alt="Screenshot 2023-04-07 at 10 09 44" src="https://user-images.githubusercontent.com/46562447/230581136-f2b3ec57-c3a1-4095-a11a-8f64f85f72e8.png">
 
-<img width="557" alt="Screenshot 2023-02-17 at 11 38 17" src="https://user-images.githubusercontent.com/46562447/219645575-162993f2-8816-417a-9aaf-c6697add16b0.png">
+
+
+
 
 All info on ESP is stored in encrypted form so not readable by "non-super-hacker" ;-)
 
