@@ -257,25 +257,25 @@ I am using Apache minimal add on Home Assistant - since all sensors are in the s
 <h2>Configuration</h2>
 All sensors used in the sensor device (SHT31, TSL2561, MAX17048, checking charging status) are optional and can be disabled in configuration file.
 On top of that, light sensor (TSL2561) can be replaced with phototransistor (i.e. TEPT4400) - also configurable.
-In the simplest (and useless) configuration, sensor sends only... its name to Home Assistant.
+In the simplest (and useless) configuration, sensor sends only... its name and RSSI level to Home Assistant.
 
 Sleep time (configurable) is initially set to 180s (3 minutes).
 
 Other important configurable settings (some mandatory, some optional):
 <ul>
-  <li>WiFi channel - it must be the same for ESPnow communication and gateway to AP (router) communication - gateway and sensor devices
-  <li>SSID - gateway and sensor devices
-  <li>password - gateway and sensor devices
-  <li>MQTT server IP - gateway device
-  <li>MQTT username - gateway device
-  <li>MQTT password - gateway device
+  <s><li>WiFi channel - it must be the same for ESPnow communication and gateway to AP (router) communication - gateway and sensor devices</s> - NOT IN USE ANYMORE
+  <li>SSID - gateway and sensor devices - NEEDED TO PERFORM OTA ONLY
+  <li>password - gateway and sensor devices - NEEDED TO PERFORM OTA ONLY
+  <li>MQTT server IP - gateway device - GATEWAY ONLY
+  <li>MQTT username - gateway device - GATEWAY ONLY
+  <li>MQTT password - gateway device - GATEWAY ONLY
 </ul>
   
   <b> UPDATE: </b>
   <br>
   All below configuration parameters are being set up during first integration of gateway devices over Captive Portal. 
   <br>
-  All pareameters can be set up also later by invoking Captive Portal:
+  All pareameters can be set up also later by invoking Captive Portal (SENSOR DEVICE BELOW):
   </br>
   
 <img width="899" alt="Screenshot 2023-04-07 at 10 09 44" src="https://user-images.githubusercontent.com/46562447/230581136-f2b3ec57-c3a1-4095-a11a-8f64f85f72e8.png">
