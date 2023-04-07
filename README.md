@@ -270,6 +270,7 @@ Other important configurable settings (some mandatory, some optional):
   <li>MQTT username - gateway device 
   <li>MQTT password - gateway device 
 </ul>
+   
   
   <b> UPDATE: </b>
   <br>
@@ -290,6 +291,8 @@ All info on ESP is stored in encrypted form so not readable by "non-super-hacker
   <li>WiFi SSID and password
   <li>MQTT server, port, user, password
    </b></br>
+<br><b>When you invoke OTA for sender device, and wifi credentials are NOT OK, device will start Captive Portal so you can update them accordingly</b></br>
+   
 
 <h2>Software</h2>
 <h3>Sensor device - sender</h3>
