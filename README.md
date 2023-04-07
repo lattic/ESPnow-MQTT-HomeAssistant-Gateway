@@ -301,6 +301,7 @@ Tasks are as described above so the code is in 1 file only: sender.ino <br>
 <br>
 <s>Next is the file with credentials: passwords.h (ssid, password, webserver where your firmware is stored) - this file is only used for OTA.<br>
 <br>
+<br>
 <b>EDIT:</b></s> - SEE BELOW UPDATE
 <img width="502" alt="Screenshot 2023-04-07 at 10 25 50" src="https://user-images.githubusercontent.com/46562447/230588907-0c83874e-75f5-4d84-aa21-0d479166bc19.png">
 <br>
