@@ -286,6 +286,11 @@ Other important configurable settings (some mandatory, some optional):
 
 All info on ESP is stored in encrypted form so not readable by "non-super-hacker" ;-)
 
+<br><b>WHEN GATEWAY CANNOT CONNECT TO WIFI OR MQTT, IT WILL START CAPTIVE PORTAL so that you can change the mandatory parameters such us:
+  <li>WiFi SSID and password
+  <li>MQTT server, port, user, password
+   </b></br>
+
 <h2>Software</h2>
 <h3>Sensor device - sender</h3>
 Tasks are as described above so the code is in 1 file only: sender.ino <br>
