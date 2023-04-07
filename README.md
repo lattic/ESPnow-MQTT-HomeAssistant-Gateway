@@ -366,6 +366,7 @@ Additionally few diagnostic information:
   <li>boot number
   <li>[cumulative] ontime (in seconds) for further postprocessing i.e. in Grafana - it resests to 0 when charging starts
   <li>[cumulative] pretty ontime, i.e.: "1d 17h 23m 12s" (human readable) - it resests to 0 when charging starts
+  <li>some other info as well - some are disabled by default on Home Assistant - enable what you need after integration  
 </ul>
 <br>
 <b>Ontime is calculated</b> based on millis (time just before hibernation - start time) including empirically established difference between real startup time and measured with PPK2 (apparently both: ESP32 and ESP32-S2 are "cheating" with millis, however S2 shows hundreds of millis just after start, while ESP32 shows very low value after start - both are innaccurate and mainly depend on the size of the binary file, that has to be loaded into ESP32 memory during startup by bootloader).
