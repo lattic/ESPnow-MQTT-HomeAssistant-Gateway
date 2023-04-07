@@ -392,8 +392,7 @@ Ontime is also reduced by turning off the bootloader logo during wake up from sl
 <b>Sensor device as discovered by Home Assistant:<br>
 <br>
 
-<img width="687" alt="Screenshot 2023-02-17 at 11 25 52" src="https://user-images.githubusercontent.com/46562447/219639310-1aa8ee80-1a1a-4e67-9c69-e6e585ac8109.png">
-
+<img width="691" alt="Screenshot 2023-04-07 at 15 30 31" src="https://user-images.githubusercontent.com/46562447/230626170-de3ea31b-f531-461d-a1f6-91048dca6f49.png">
 
 <br><br><br>
 <b>Sensor Devices on lovelace dashboard:<br>
