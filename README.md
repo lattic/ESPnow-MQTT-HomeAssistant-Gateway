@@ -383,7 +383,8 @@ Ontime is also reduced by turning off the bootloader logo during wake up from sl
 <b>Gateway device on lovelace dashboard:<br>
 <br>
 
-<img width="337" alt="Screenshot 2023-02-17 at 11 28 08" src="https://user-images.githubusercontent.com/46562447/219639838-aef4fced-90cb-4da4-8a0f-981c0b58fe24.png">
+
+<img width="326" alt="Screenshot 2023-04-07 at 15 04 47" src="https://user-images.githubusercontent.com/46562447/230622286-cf41a8d6-d289-4c77-b8d5-d02fd0cf78ae.png">
 
 
 <br><br>
@@ -394,10 +395,18 @@ Ontime is also reduced by turning off the bootloader logo during wake up from sl
 
 
 <br><br><br>
-<b>Sensor Device on lovelace dashboard:<br>
+<b>Sensor Devices on lovelace dashboard:<br>
 <br>
 
-<img width="390" alt="Screenshot 2022-07-04 at 09 11 21" src="https://user-images.githubusercontent.com/46562447/177112009-923aa439-4b00-4d8e-9aac-3a878f2b3087.png">
+<img width="329" alt="Screenshot 2023-04-07 at 15 04 17" src="https://user-images.githubusercontent.com/46562447/230622427-3e04aafa-6cc3-4b13-a113-7617a93e6824.png">
+
+<br><br>
+
+<img width="330" alt="Screenshot 2023-04-07 at 15 03 26" src="https://user-images.githubusercontent.com/46562447/230622433-68a75766-dd4b-49c6-bb08-48bdaa2fa4bb.png">
+
+<br><br>
+
+<img width="341" alt="Screenshot 2023-04-07 at 15 03 18" src="https://user-images.githubusercontent.com/46562447/230622435-de1b71ef-1517-403d-a31d-3e677ece2985.png">
 
 <br>
 <h3>MQTT structure</h3>
