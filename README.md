@@ -300,14 +300,11 @@ Tasks are as described above so the code is in 1 file only: sender.ino <br>
 <br>
 <br>
 <s>Next is the file with credentials: passwords.h (ssid, password, webserver where your firmware is stored) - this file is only used for OTA.<br>
-<br>
 <br></s>
 <b>EDIT:</b> - SEE BELOW UPDATE
 <br>
-<br>
 <img width="557" alt="Screenshot 2023-04-07 at 11 02 13" src="https://user-images.githubusercontent.com/46562447/230589725-bc4d5020-8979-43b8-a7b7-69bb9259dc32.png">
 
-<br>
 <br>
 Finally there is a configuration file where you must specify details for each sensor device (such as sensors used, GPIO etc.): devices_config.h<br>
 <br>
