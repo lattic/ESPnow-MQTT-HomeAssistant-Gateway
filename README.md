@@ -237,12 +237,13 @@ To achieve this, you need to connect the pins from TP4056 that control charging/
 
 <h2>Firmware update - OTA</h2>
 <h3>Sensor device</h3>
-To perform firmware update there are 3 possibilities - 2 are with web server in use, where you store the binary file (sender.ino.esp32.bin)
+To perform firmware update there are few possibilities:
 <ul>
-  <li>double reset click - built in functions recognise double reset and if so done, performs firmware update - of course you need to visit the sensor to double click it ;-)
-  <li>routine check for new firmware availability on the server: every 24h (configurable) sensor device connects to server and if new file found, performs update
+<s>  <li>double reset click - built in functions recognise double reset and if so done, performs firmware update - of course you need to visit the sensor to double click it ;-)</s> - NOT IN USE ANYMORE
+<s>  <li>routine check for new firmware availability on the server: every 24h (configurable) sensor device connects to server and if new file found, performs update</s> - NOT IN USE ANYMORE
   <li>3rd: wire TX/RX to the FTDI programmer
   <li><b>EDIT:</b>4th: new schematic and code implements second button for OTA specifically   
+  <li>5th: MQTT command to perform OTA after next wake up
 </ul>
 Sensor device during firmware update:<br>
 <br>
