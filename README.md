@@ -330,17 +330,17 @@ Receiver in action (real device):<br>
 
 <br>
 
-<h3>Libraries needed (non standard):</h3>
-<ul>
-  <li>ESP_DoubleResetDetector
-  <li>HTTPClient
-  <li>Update
-  <li>Adafruit_SHT31
-  <li>SparkFunTSL2561
-  <li>SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library
-  <li>PubSubClient
-  <li>ArduinoJson
-</ul>
+<h3>Libraries needed:</h3>
+<h4>Gateway:</h4>
+<br>
+<img width="472" alt="Screenshot 2023-04-07 at 10 25 37" src="https://user-images.githubusercontent.com/46562447/230583764-1db20160-c8ee-4b0f-8bf0-f44068577fd1.png">
+
+<br>
+<h4>Sensor device:</h4>
+<img width="502" alt="Screenshot 2023-04-07 at 10 25 50" src="https://user-images.githubusercontent.com/46562447/230583802-bb2f1fdf-2315-44ad-af18-47eb8c3d7952.png">
+
+<br>
+
 
 <h2>Home Assistant</h2>
 <h3>Information from sensor device on Home Assistant:</h3>
