@@ -275,8 +275,13 @@ Other important configurable settings (some mandatory, some optional):
   <b> UPDATE: </b>
   <br>
   All below configuration parameters are being set up during first integration of gateway devices over Captive Portal. 
+   <br>
+   GATEWAY DEVICE BELOW:
+  </br>
+  <img width="679" alt="Screenshot 2023-04-12 at 14 55 15" src="https://user-images.githubusercontent.com/46562447/231481064-97ac8d4b-6d46-49e4-96fc-f4629f16f071.png">
+
   <br>
-  All pareameters can be set up also later by invoking Captive Portal (SENSOR DEVICE BELOW):
+  SENSOR DEVICE BELOW:
   </br>
   
 <img width="899" alt="Screenshot 2023-04-07 at 10 09 44" src="https://user-images.githubusercontent.com/46562447/230581136-f2b3ec57-c3a1-4095-a11a-8f64f85f72e8.png">
