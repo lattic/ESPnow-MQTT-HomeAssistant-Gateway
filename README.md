@@ -1,5 +1,13 @@
 <h1> ESPnow MQTT Home Assistant Gateway </h1>
 <h2> SKETCHES MOVED TO PLATFORMIO! </h2>
+
+<br><br>
+<h2> Update 2023-04-13:</h2>
+Winner winner chicken dinner - sensor device in Living Room reports 3.73V (16.7%) after 185 days on - that is "OK for me" ;-)
+
+<img width="742" alt="Screenshot 2023-04-13 at 12 12 54" src="https://user-images.githubusercontent.com/46562447/231742020-051a1af2-a520-42f8-b094-59e76f468801.png">
+
+
 <h2> Update 2023-02-23:</h2>
 <br>
 New end device - push buttons - implemented</br>
