@@ -252,7 +252,7 @@ All info on ESP is stored in encrypted form so not readable by "non-super-hacker
 Tasks are as described above so the code is in 1 file only: <s>sender.ino</s> main.cpp <br>
 <br>
 <br>
-<s>Next is the file with credentials: passwords.h (ssid, password, webserver where your firmware is stored) - this file is only used for OTA.<br>
+Next is the file with credentials: passwords.h <s>(ssid, password, webserver where your firmware is stored) - this file is only used for OTA.<br>
 <br></s>
 <b>EDIT:</b> - SEE BELOW UPDATE
 <br>
