@@ -1,72 +1,6 @@
 <h1> ESPnow MQTT Home Assistant Gateway </h1>
 <h2> SKETCHES MOVED TO PLATFORMIO! </h2>
 
-<br><br>
-<h2> Update 2023-04-13:</h2>
-Winner winner chicken dinner - sensor device in Living Room reports 3.73V (16.7%) after 185 days on - that is "OK for me" ;-)
-
-<img width="742" alt="Screenshot 2023-04-13 at 12 12 54" src="https://user-images.githubusercontent.com/46562447/231742020-051a1af2-a520-42f8-b094-59e76f468801.png">
-
-
-<h2> Update 2023-02-23:</h2>
-<br>
-New end device - push buttons - implemented</br>
-Example: small box with 6 push buttons to control the devices around the house (i.e. switches, lights, etc.)</br>
-Powered with small 500mAh battery, sleeps all the time until button pressed.</br>
-Sends button number (that was pushed) to Home Assistant and then Node Red acts accordingly</br></br>
-<img width="510" alt="Screenshot 2023-02-24 at 06 29 26" src="https://user-images.githubusercontent.com/46562447/221108210-a48b4102-6a19-4d7d-ab59-d20b0c0a672f.png">
-
-</br>
-Still using ESPnow to send data to Home Assistant via gateway</br>
-ESP32 is too slow (600ms) - only ESP32-S2 does the job properly (100ms)</br></br>
-<img width="979" alt="Screenshot 2023-02-24 at 08 52 40" src="https://user-images.githubusercontent.com/46562447/221134962-d25dbf69-0d07-4138-8d31-2d20ccbfb63c.png">
-
-
-<br>
-<h2> Update 2023-02-17:</h2>
-<br>
-Force connection to specific gateway - see below commands: 21, 22 and 23</br>
-All commands to sensor devices are available in Node Red dashboard - no more hustle 
-<br>
-<img width="1053" alt="Screenshot 2023-02-17 at 11 48 03" src="https://user-images.githubusercontent.com/46562447/219646236-68ca9795-8753-4aa8-8cf1-a1e3d07dd2b2.png">
-<img width="1070" alt="Screenshot 2023-02-17 at 11 47 44" src="https://user-images.githubusercontent.com/46562447/219646257-c54ecdb5-cac6-4c81-b959-ab73cfad1860.png">
-
-<img width="1074" alt="Screenshot 2023-02-17 at 11 47 35" src="https://user-images.githubusercontent.com/46562447/219646275-b14fa555-819c-479a-8b71-997a13372084.png">
-
-<br>
-<h2> Update 2023-02-12:</h2>
-<br>
-LEDs on sensor devices can be turned OFF/ON by MQTT command. If not OFF, then automatically dimmed by measured light.
-
-
-<br> Implemeneted MQTT commands to receiver (to act on sensor devices):
-<ul>
-<li> - topic:    
-<li>esp32030/cmd/cmd_for_sender - command shall be send to all gateways as nobody knows which gw controls which sensor 
-<li> - message:
-<li>{"mac":"xx:01:01:01:zz:yy","command":"1"} - OTA   
-<li>{"mac":"xx:01:01:01:zz:yy","command":"2"} - restart
-<li>{"mac":"xx:01:01:01:zz:yy","command":"3"} - captive portal
-<li>{"mac":"xx:01:01:01:zz:yy","command":"4"} - factory reset
-<li>{"mac":"xx:01:01:01:zz:yy","command":"10"} - Motion OFF
-<li>{"mac":"xx:01:01:01:zz:yy","command":"11"} - Motion ON
-<li>{"mac":"xx:01:01:01:zz:yy","command":"21"} - force connection to GW1
-<li>{"mac":"xx:01:01:01:zz:yy","command":"22"} - force connection to GW2 (if exists)
-<li>{"mac":"xx:01:01:01:zz:yy","command":"23"} - force connection to GW3 (if exists)
-<li>{"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
-<li>{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs dimm automatically by ESP: lux below 1 ->dc=1, lux between 1 and 10 => dc=10, lux>10 => dc=255 
-</ul>
-<br><br>
-<h2> Update 2023-01-26:</h2>
-<br>
-OTA is here for sleeping devices. Please check changelog.txt on how to.
-<br><br>
-<h2> Update 2022-12-31:</h2>
-<br>
-After 160 days on 1 battery charge, the battery status is as below: 38.66% and 3.8V. But I am recharging it now and putting there on 1st January 2023 to have easy calculation for the entire 2023 - maybe on 1 charge it will work the whole year? Let's see in January 2024... ;-)
-<br><br>
-<img width="874" alt="Screenshot 2022-12-29 at 08 58 59" src="https://user-images.githubusercontent.com/46562447/209928426-62d2dccf-9bdd-463a-887e-6e0784e1f3b3.png">
-<br>
 <h2> Idea:</h2>
 <ul>
   <li>Build universal sensor device (ESP32 based) equipped with temperature, humidity and light sensors, that can live long on 1 battery charge. <b>EDIT: added "motion only device" that has only motion detector - PIR - temperature, humidity and light sensors are OFF</b></li>
@@ -436,3 +370,72 @@ All information from sensor device is sent to Home Assistant MQTT broker in one 
 <br>
 <h2>TODO list</h2>
 Probably nothing at this moment ;)
+
+ 
+
+<br><br>
+<h2> Update 2022-12-31:</h2>
+<br>
+After 160 days on 1 battery charge, the battery status is as below: 38.66% and 3.8V. But I am recharging it now and putting there on 1st January 2023 to have easy calculation for the entire 2023 - maybe on 1 charge it will work the whole year? Let's see in January 2024... ;-)
+<br><br>
+<img width="874" alt="Screenshot 2022-12-29 at 08 58 59" src="https://user-images.githubusercontent.com/46562447/209928426-62d2dccf-9bdd-463a-887e-6e0784e1f3b3.png">
+
+<br><br>
+<h2> Update 2023-01-26:</h2>
+<br>
+OTA is here for sleeping devices. Please check changelog.txt on how to.
+
+<br><br>
+<h2> Update 2023-02-12:</h2>
+<br>
+LEDs on sensor devices can be turned OFF/ON by MQTT command. If not OFF, then automatically dimmed by measured light.
+
+<br> Implemeneted MQTT commands to receiver (to act on sensor devices):
+<ul>
+<li> - topic:    
+<li>esp32030/cmd/cmd_for_sender - command shall be send to all gateways as nobody knows which gw controls which sensor 
+<li> - message:
+<li>{"mac":"xx:01:01:01:zz:yy","command":"1"} - OTA   
+<li>{"mac":"xx:01:01:01:zz:yy","command":"2"} - restart
+<li>{"mac":"xx:01:01:01:zz:yy","command":"3"} - captive portal
+<li>{"mac":"xx:01:01:01:zz:yy","command":"4"} - factory reset
+<li>{"mac":"xx:01:01:01:zz:yy","command":"10"} - Motion OFF
+<li>{"mac":"xx:01:01:01:zz:yy","command":"11"} - Motion ON
+<li>{"mac":"xx:01:01:01:zz:yy","command":"21"} - force connection to GW1
+<li>{"mac":"xx:01:01:01:zz:yy","command":"22"} - force connection to GW2 (if exists)
+<li>{"mac":"xx:01:01:01:zz:yy","command":"23"} - force connection to GW3 (if exists)
+<li>{"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
+<li>{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs dimm automatically by ESP: lux below 1 ->dc=1, lux between 1 and 10 => dc=10, lux>10 => dc=255 
+</ul>
+
+<br><br>
+<h2> Update 2023-02-17:</h2>
+<br>
+Force connection to specific gateway - see below commands: 21, 22 and 23</br>
+All commands to sensor devices are available in Node Red dashboard - no more hustle 
+<br>
+<img width="1053" alt="Screenshot 2023-02-17 at 11 48 03" src="https://user-images.githubusercontent.com/46562447/219646236-68ca9795-8753-4aa8-8cf1-a1e3d07dd2b2.png">
+<img width="1070" alt="Screenshot 2023-02-17 at 11 47 44" src="https://user-images.githubusercontent.com/46562447/219646257-c54ecdb5-cac6-4c81-b959-ab73cfad1860.png">
+
+<img width="1074" alt="Screenshot 2023-02-17 at 11 47 35" src="https://user-images.githubusercontent.com/46562447/219646275-b14fa555-819c-479a-8b71-997a13372084.png">
+
+<br><br>
+<h2> Update 2023-02-23:</h2>
+<br>
+New end device - push buttons - implemented</br>
+Example: small box with 6 push buttons to control the devices around the house (i.e. switches, lights, etc.)</br>
+Powered with small 500mAh battery, sleeps all the time until button pressed.</br>
+Sends button number (that was pushed) to Home Assistant and then Node Red acts accordingly</br></br>
+<img width="510" alt="Screenshot 2023-02-24 at 06 29 26" src="https://user-images.githubusercontent.com/46562447/221108210-a48b4102-6a19-4d7d-ab59-d20b0c0a672f.png">
+
+</br>
+Still using ESPnow to send data to Home Assistant via gateway</br>
+ESP32 is too slow (600ms) - only ESP32-S2 does the job properly (100ms)</br></br>
+<img width="979" alt="Screenshot 2023-02-24 at 08 52 40" src="https://user-images.githubusercontent.com/46562447/221134962-d25dbf69-0d07-4138-8d31-2d20ccbfb63c.png">
+
+<br><br>
+<br><br>
+<h2> Update 2023-04-13:</h2>
+Winner winner chicken dinner - sensor device in Living Room reports 3.73V (16.7%) after 185 days on - that is "OK for me" ;-)
+
+<img width="742" alt="Screenshot 2023-04-13 at 12 12 54" src="https://user-images.githubusercontent.com/46562447/231742020-051a1af2-a520-42f8-b094-59e76f468801.png">
