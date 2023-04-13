@@ -1,0 +1,3 @@
+{
+    "cmake.sourceDirectory": "${workspaceFolder}/.pio/libdeps/esp32023/ArduinoJson/src"
+}
