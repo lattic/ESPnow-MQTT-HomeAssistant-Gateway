@@ -279,7 +279,7 @@ Sender in action (test device):<br>
 Gateway tasks are more complex (as described above) so the code is split into multiple files - per function<br>
 Entire configuration is in config.h file<br>
 <br>
-Next is the file with credentials: passwords.h (ssid, password, mqtt ip and credentials, webserver where your firmware is stored)
+Next is the file with credentials: passwords.h (<s>ssid, password, mqtt ip and credentials, </s> webserver where your firmware is stored)
 <br>
 
 <br>
