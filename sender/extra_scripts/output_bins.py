@@ -5,7 +5,9 @@ import shutil
 # OUTPUT_DIR = "/Users/papio/tmp/00-espnow_bin_files{}".format(os.path.sep)
 # OUTPUT_DIR = "/Volumes/firmware/esp/01-with_mqtt_discovery/01-Production/0-ESPnow{}".format(os.path.sep)
 
-OUTPUT_DIR = "/Volumes/srv/scripts/001-esp-firmware/esp/01-with_mqtt_discovery/01-Production/0-ESPnow{}".format(os.path.sep)
+# OUTPUT_DIR = "/Volumes/srv/scripts/001-esp-firmware/esp/01-with_mqtt_discovery/01-Production/0-ESPnow{}".format(os.path.sep)
+
+OUTPUT_DIR = "/Volumes/scripts/001-esp-firmware/esp/01-with_mqtt_discovery/01-Production/0-ESPnow{}".format(os.path.sep)
 
 
 def _get_cpp_define_value(env, define):
