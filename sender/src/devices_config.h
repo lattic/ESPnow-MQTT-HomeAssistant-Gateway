@@ -859,6 +859,29 @@
 
 // ---------------------------------------------------------------------------------------------------
 
+#elif DEVICE_ID == 92
+  #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
+  #define HOSTNAME                    "esp32092"
+  #define DEVICE_NAME                 "test92"  // 15 characters maximum
+  #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  // #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  // #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  // #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  // #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  // #define ENABLE_3V_GPIO              3   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  // #define USE_MAX17048                1   // use "0" to disable
+  // #define USE_SHT31                   1   // use "0" to disable
+  // #define USE_TSL2561                 1   // use "0" to disable
+  #define SLEEP_TIME_S                10 // seconds - 180
+
+  #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
+  #define CALIBRATE_HUMIDITY          0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
+
+
+  #pragma message "compilation for: esp32092-test"
+// ---------------------------------------------------------------------------------------------------
+
 
 
 #else
