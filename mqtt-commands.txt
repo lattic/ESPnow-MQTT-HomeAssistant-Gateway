@@ -1,0 +1,15 @@
+MQTT commands to receiver:
+- topic:    
+  - esp32030/cmd/cmd_for_sender   // command send to all gateways as nobody knows which gw controls which sensor - sort it out or not?
+- message:
+  - ota:      {"mac":"xx:01:01:01:zz:yy","command":"1"} 
+  - restart:  {"mac":"xx:01:01:01:zz:yy","command":"2"} 
+  - captive:  {"mac":"xx:01:01:01:zz:yy","command":"3"} 
+  - factory:  {"mac":"xx:01:01:01:zz:yy","command":"4"} 
+  - high sensitivity light measurement:  {"mac":"xx:01:01:01:zz:yy","command":"5"} 
+  - low  sensitivity light measurement:  {"mac":"xx:01:01:01:zz:yy","command":"6"} 
+  - Motion OFF:  {"mac":"xx:01:01:01:zz:yy","command":"10"} 
+  - Motion ON:  {"mac":"xx:01:01:01:zz:yy","command":11"} 
+  - LEDs OFF: {"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
+  - LEDs AUTO:{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs will dimm, lux < 1->dc = 1, 1<x<10 = 10, > 10 = 255 
+  - OTA web server:{"mac":"xx:01:01:01:zz:yy","command":"202"}  - OTA web server will start for OTA_WEB_SERVER_TIMEOUT_S seconds (180s by default)
