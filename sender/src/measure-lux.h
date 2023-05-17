@@ -124,7 +124,7 @@ void get_lux(char* lux_char)            // <20us with time = 0
                 nbytes = snprintf(NULL,0,"%0.0f",lux) +1;
                 snprintf(lux_char,nbytes,"%0.0f",lux);
             }
-            if (lux > 100) light_high = true; else light_high = false;
+            if (lux > 30000) light_high = true; else light_high = false;
             #ifdef DEBUG
                 Serial.printf("[%s]: LUX str=%s\n",__func__,lux_char);  
             #endif

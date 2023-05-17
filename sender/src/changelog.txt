@@ -4,20 +4,13 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
-MQTT commands to receiver:
-- topic:    
-  - esp32030/cmd/cmd_for_sender   // command send to all gateways as nobody knows which gw controls which sensor - sort it out or not?
-- message:
-  - ota:      {"mac":"xx:01:01:01:zz:yy","command":"1"} 
-  - restart:  {"mac":"xx:01:01:01:zz:yy","command":"2"} 
-  - captive:  {"mac":"xx:01:01:01:zz:yy","command":"3"} 
-  - factory:  {"mac":"xx:01:01:01:zz:yy","command":"4"} 
-  - high sensitivity light measurement:  {"mac":"xx:01:01:01:zz:yy","command":"5"} 
-  - low  sensitivity light measurement:  {"mac":"xx:01:01:01:zz:yy","command":"6"} 
-  - Motion OFF:  {"mac":"xx:01:01:01:zz:yy","command":"10"} 
-  - Motion ON:  {"mac":"xx:01:01:01:zz:yy","command":11"} 
-  - LEDs OFF: {"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
-  - LEDs AUTO:{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs will dimm, lux < 1->dc = 1, 1<x<10 = 10, > 10 = 255 
+
+2023-05-17
+  2.15.4  - new firmware server path on Macbook Pro "/Volumes/scripts/001..."
+           - OTA web server on ESP32 in case no way to reach firmware server - call it with MQTT command 202
+
+2023-05-17
+  2.15.3   - measure=lux.h - if (lux > 30000) light_high = true;
 
 2023-04-07
   2.15.2   - cleaning config

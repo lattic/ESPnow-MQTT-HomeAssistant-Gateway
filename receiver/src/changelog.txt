@@ -3,28 +3,15 @@ TODO:
 2 - improve CP html, add old values, checking if new are correct etc (check in sender sketch)
 
 
-
-
-MQTT commands to receiver:
-- topic:    
-  - esp32030/cmd/cmd_for_sender   // command send to all gateways as nobody knows which gw controls which sensor - sort it out or not?
-- message:
-  - ota:      {"mac":"xx:01:01:01:zz:yy","command":"1"} 
-  - restart:  {"mac":"xx:01:01:01:zz:yy","command":"2"} 
-  - captive:  {"mac":"xx:01:01:01:zz:yy","command":"3"} 
-  - factory:  {"mac":"xx:01:01:01:zz:yy","command":"4"} 
-  - Motion OFF:  {"mac":"xx:01:01:01:zz:yy","command":"10"} 
-  - Motion ON:  {"mac":"xx:01:01:01:zz:yy","command":11"} 
-  - LEDs OFF: {"mac":"xx:01:01:01:zz:yy","command":"200"}  - LEDs completely OFF 
-  - LEDs AUTO:{"mac":"xx:01:01:01:zz:yy","command":"201"}  - LEDs will dimm, lux < 1->dc = 1, 1<x<10 = 10, > 10 = 255 
-
-
 Webserial:
 - http://HOSTNAME.local/log  
 - commands: start, stop, info, reset, restart, update
 
 OTA:
 - http://HOSTNAME.local:8080/update
+
+2023-03-19
+  2.22.1   - new firmware server path on Mac
 
 2023-03-19
   2.22.0   - set hostname properly

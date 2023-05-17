@@ -28,6 +28,7 @@ sender.ino
 #include <DNSServer.h>
 #include <AsyncTCP.h>
 #include "ESPAsyncWebServer.h"
+#include <ESPmDNS.h>
 
 // timers
 #include "freertos/timers.h"
@@ -134,6 +135,14 @@ BaseType_t xReturned_led_blink;
 // timers
 TimerHandle_t cp_timer_handle     = NULL;
 int id                            = 1;
+
+// OTA web server
+bool ota_web_server_needed = false;
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <AsyncElegantOTA.h>
+AsyncWebServer ota_web_server(8080);
+
 
 // MAX17048 - battery fuel gauge, I2C
 #if (USE_MAX17048 == 1)
@@ -269,7 +278,7 @@ void set_act_blue_led_level(u_int8_t level);
 void set_error_red_led_level(u_int8_t level);  
 
 // captive portal
-void connect_wifi();
+bool connect_wifi();
 void setup_CP_Server();
 void WiFiSoftAPSetup();
 void WiFiStationSetup(String rec_ssid, String rec_password, String rec_sleep_s);
@@ -285,9 +294,81 @@ void get_lux(char* lux_char);
 // dummy for touchpad
 void tp_callback();
 
+// ota web server
+void start_web_server();
+void stop_cp_timer();
+void delete_cp_timer();
+void start_cp_timer(int16_t timeout);
+
 // ========================================================================== FUNCTIONS declaration END
 
 // ========================================================================== FUNCTIONS implementation
+
+void stop_cp_timer()
+{
+    if( xTimerStop( cp_timer_handle, 0 ) != pdPASS )
+    {
+      Serial.printf("[%s]: Timer was NOT stopped\n",__func__);
+    } else
+    {
+      Serial.printf("[%s]: Timer stopped\n",__func__);
+    }
+}
+
+void delete_cp_timer()
+{
+    if( xTimerDelete( cp_timer_handle, 0 ) != pdPASS )
+    {
+      Serial.printf("[%s]: Timer was NOT deleted\n",__func__);
+    } else
+    {
+      Serial.printf("[%s]: Timer deleted\n",__func__);
+      cp_timer_handle  = NULL;
+    }
+}
+
+void start_cp_timer(int16_t timeout)
+{
+  Serial.printf("[%s]: starting with timeout=%d\n",__func__,timeout);
+      // create CP timer if not yet created
+  if (cp_timer_handle  == NULL)
+  {
+    cp_timer_handle = xTimerCreate("MyTimer", pdMS_TO_TICKS(timeout * 1000), pdTRUE, ( void * ) 0, cp_timer);
+    if( xTimerStart(cp_timer_handle, 10 ) != pdPASS )
+    {
+      Serial.printf("[%s]: Timer start error\n",__func__);
+    } else
+    {
+    //   #ifdef DEBUG
+        Serial.printf("[%s]: Timer STARTED for %d seconds\n",__func__,timeout);
+    //   #endif
+    }
+  } else
+  {
+    stop_cp_timer();
+    delete_cp_timer();
+    start_cp_timer(timeout);
+  }
+}
+
+
+
+// ota web server
+void start_web_server()
+{
+  #define OTA_USER "admin"
+  #define OTA_PASSWORD "password"
+  Serial.printf("[%s]: Enabling OTA:...\n",__func__);
+  Serial.printf("[%s]: user=%s, password=%s\n",__func__,OTA_USER,OTA_PASSWORD);
+  ota_web_server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+  {
+    String introtxt = "This is " + String(HOSTNAME)+ ", device ID="+String(DEVICE_ID) +", Version=" + String(ZH_PROG_VERSION) + ", MAC=" + String(WiFi.macAddress());
+    request->send(200, "text/plain", String(introtxt));
+  });
+  AsyncElegantOTA.begin(&ota_web_server, OTA_USER,OTA_PASSWORD);    // Start ElegantOTA
+  ota_web_server.begin();
+}
+
 // dummy for touchpad
 void tp_callback()
 {
@@ -1457,6 +1538,14 @@ void WiFiStationSetup(String rec_ssid, String rec_password, String rec_sleep_s)
     valid_ssid_received = false;
     Serial.printf("[%s]: STA IP address: ",__func__);
     Serial.println(WiFi.localIP());
+    if(!MDNS.begin(HOSTNAME))
+    {
+      Serial.printf("[%s]: Error starting MDNS\n",__func__);
+    } else
+    {
+      Serial.printf("[%s]: MDNS started with %s\n",__func__,HOSTNAME);
+    } 
+
     if( led_blink_handle != NULL )
     {
       Serial.printf("[%s]: Disabling blinking LEDs\n",__func__);
@@ -1496,32 +1585,11 @@ void StartCaptivePortal()
     {
       Serial.printf("[%s]: Task led_blink ALREADY created\n",__func__);
     }
-
-    // create CP timer if not yet created
-    if (cp_timer_handle  == NULL)
-    {
-      cp_timer_handle = xTimerCreate("MyTimer", pdMS_TO_TICKS(CP_TIMEOUT_S * 1000), pdTRUE, ( void * )id, &cp_timer);
-      if( xTimerStart(cp_timer_handle, 10 ) != pdPASS )
-      {
-        Serial.printf("[%s]: CP timer start error\n",__func__);
-      } else
-      {
-        #ifdef DEBUG
-          Serial.printf("[%s]: CP timer STARTED\n",__func__);
-        #endif
-      }
-    } else
-    // CP timer created so restart it
-    {
-      if( xTimerReset( cp_timer_handle, 0 ) != pdPASS )
-      {
-        Serial.printf("[%s]: CP timer was not reset\n",__func__);
-      } else
-      {
-        Serial.printf("[%s]: CP timer RE-STARTED\n",__func__);
-      }
-    }
   #endif
+  
+  // create CP timer if not yet created
+  start_cp_timer(CP_TIMEOUT_S);
+
   Serial.printf("[%s]: Setting up AP Mode\n",__func__);
 
   WiFiSoftAPSetup();
@@ -1539,13 +1607,13 @@ void StartCaptivePortal()
 
 void cp_timer( TimerHandle_t cp_timer_handle )
 {
-  Serial.printf("[%s]: Captive Portal timer expired, RESTARTING...\n",__func__);
+  Serial.printf("[%s]: Timer expired, RESTARTING...\n",__func__);
   // do_esp_restart();      // panicking in save_config()
   ESP.restart();
 }
 
 
-void connect_wifi()
+bool connect_wifi()
 {
   if (g_wifi_ok == 1) is_setup_done = true; else is_setup_done = false;
   ssid = String(g_wifi_ssid);
@@ -1576,6 +1644,8 @@ void connect_wifi()
     }
   }
   Serial.printf("[%s]: Done\n",__func__);
+  save_config("wifi connected");
+  return true;
 }
 
 
@@ -1779,7 +1849,7 @@ void save_config(const char* reason)
   // ontime
   uint32_t work_time = millis() - program_start_time + (ESP32_BOOT_TIME) + (ESP32_TAIL_TIME) + extra_reset_time;
   #ifdef DEBUG
-    Serial.printf("[%s]: millis=%d, program_start_time=%d, ESP32_BOOT_TIME=%d, ESP32_TAIL_TIME=%d, extra_reset_time=%d,  Program finished after %lums.\n",__func__,millis(),program_start_time, ESP32_BOOT_TIME,ESP32_TAIL_TIME,extra_reset_time, work_time);
+    Serial.printf("[%s]: millis=%d, program_start_time=%d, ESP32_BOOT_TIME=%d, ESP32_TAIL_TIME=%d, extra_reset_time=%d,  Program finished after %lums (adjusted).\n",__func__,millis(),program_start_time, ESP32_BOOT_TIME,ESP32_TAIL_TIME,extra_reset_time, work_time);
   #endif
   g_saved_ontime_ms = g_saved_ontime_ms + work_time;
   if (charging_int != 0) 
@@ -1791,7 +1861,7 @@ void save_config(const char* reason)
   }
   
   // #ifdef DEBUG_LIGHT
-    Serial.printf("[%s]: Program finished after %lums.\n\n",__func__,work_time);
+    Serial.printf("[%s]: Program finished after %lums (adjusted).\n\n",__func__,work_time);
   // #endif
   
   // testing with PPK2 - end save ontime
@@ -2005,10 +2075,10 @@ void setup()
 
   // start LEDs  
   initiate_all_leds();
-  #ifdef DEBUG_LIGHT
+  // #ifdef DEBUG_LIGHT
     Serial.printf("\n======= S T A R T =======\n");
     Serial.printf("[%s]: Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__,DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
-  #endif
+  // #endif
   // check if device is charging
   snprintf(charging,4,"%s","N/A");
   #if (defined(CHARGING_GPIO) and defined(POWER_GPIO))
@@ -2756,7 +2826,6 @@ gather_data();
       g_sleeptime_s = 3600;
     }     
     else 
-
     // LEDs OFF   
     if (data_recv.command == 200) 
     {
@@ -2769,7 +2838,14 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to perform set LED PMW DC to 255\n",__func__);
       g_led_pwm = 255;
-    }                       
+    }   
+    else 
+    // ota web server
+    if (data_recv.command == 202) 
+    {
+      Serial.printf("[%s]: Received command from gateway to start web server\n",__func__);
+      ota_web_server_needed =  true;
+    }                          
   } 
   else 
   {
@@ -2789,13 +2865,27 @@ gather_data();
     Serial.printf("[%s]: FW update requested\n",__func__);
     connect_wifi();
     do_update();
+    // restart is above so the below line should never be printed
+    Serial.printf("[%s]: FW update finished - this should never be printed\n",__func__);
   }
 
-  // eventually: go to sleep ;-)
+  if (ota_web_server_needed)
+  {
+    command_received = false;
+    Serial.printf("[%s]: OTA Web server requested\n",__func__);
+    if (connect_wifi())
+    {
+      start_cp_timer(OTA_WEB_SERVER_TIMEOUT_S);
+      start_web_server();
+    }
+  }  
+
+  // eventually: go to sleep if OTA web servers is not needed ;-)
   if (g_sleeptime_s > 0) sleeptime_s = g_sleeptime_s;
+  if (!ota_web_server_needed)
   hibernate(false, sleeptime_s);
 }
 
 
 // loop is empty - sleep is the only option (or restart if ESPnow is not working)
-void loop(){}
+void loop() {}
