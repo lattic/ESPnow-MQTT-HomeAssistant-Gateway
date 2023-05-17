@@ -5,7 +5,7 @@
 <ul>
   <li>Build universal sensor device (ESP32 based) equipped with temperature, humidity and light sensors, that can live long on 1 battery charge. </br>
   <br>
-  <b>EDIT: added "motion only device" that has only motion detector - PIR - temperature, humidity and light sensors are OFF</b></li>
+  <b>EDIT: added "motion only device" that has only motion detector - PIR (temperature, humidity and light sensors are OFF)</b></li>
   <b>EDIT: added "push buttons device" that has only push buttons (1 or many)</b></li>
   </br><br>
   <li>Clone/deploy it to as many sensors as needed (indoor, outdoor etc.) without changing the software or reconfiguration (beyond what is specific to the device i.e. GPIO connection etc.)
