@@ -54,9 +54,10 @@ sender.ino
 
 // lux from TSL2561 - light sensor, I2C
 #if (USE_TSL2561 == 1)
-  #include <SparkFunTSL2561.h>
-  bool light_high = false;
-  SFE_TSL2561 light;
+  #include <Wire.h>
+  #include <Adafruit_Sensor.h>
+  #include <Adafruit_TSL2561_U.h>
+  Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 12345);
   #include "measure-lux.h"
 #endif
 
@@ -2487,25 +2488,19 @@ void setup()
     #ifdef DEBUG
       Serial.printf("[%s]: start USE_TSL2561\n",__func__);
     #endif
-    if (! light.begin())  // it does NOT return false so this checking is meaningless I think
+    if(!tsl.begin())
     {
       #ifdef DEBUG
         Serial.printf("[%s]: TSL2561  NOT detected ... Check your wiring or I2C ADDR!\n",__func__);
       #endif
       tslok = false;
-    }
-    else
+    } else 
     {
-      if (light.setPowerUp())
-      {
-        #ifdef DEBUG
-          Serial.printf("[%s]: tslok =%d\n",__func__,tslok);
-        #endif
-      } else
-      {
-        Serial.printf("[%s]: TSL2561  NOT detected ... Check your wiring or I2C ADDR!\n",__func__);
-      }
+      #ifdef DEBUG
+        Serial.printf("[%s]: tslok =%d\n",__func__,tslok);
+      #endif
     }
+
   #else
     #ifdef DEBUG
       Serial.printf("[%s]: DONT USE_TSL2561\n",__func__);

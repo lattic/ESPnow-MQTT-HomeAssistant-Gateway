@@ -4,10 +4,12 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
+2023-05-18
+  2.15.5  - Adafruit implementation of TSL2561 instead of SparkFunTSL2561
 
 2023-05-17
   2.15.4  - new firmware server path on Macbook Pro "/Volumes/scripts/001..."
-           - OTA web server on ESP32 in case no way to reach firmware server - call it with MQTT command 202
+          - OTA web server on ESP32 in case no way to reach firmware server - call it with MQTT command 202
 
 2023-05-17
   2.15.3   - measure=lux.h - if (lux > 30000) light_high = true;

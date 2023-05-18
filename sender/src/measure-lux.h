@@ -1,142 +1,86 @@
 #pragma once
 
-void get_lux(char* lux_char)            // <20us with time = 0
+void get_lux(char* lux_char)            
 {
-    #ifdef DEBUG
-        unsigned long function_start = micros(); 
-    #endif
-
     snprintf(lux_char,sizeof("N/A"), "%s", "N/A");
+    
+#if (USE_TSL2561 == 1)
+    int nbytes;
+    sensors_event_t event;
+    double lux;
 
-    #if (USE_TSL2561 == 1)
-        size_t nbytes;
-        
-        unsigned int data0, data1; //data0=infrared, data1=visible light
-        double lux;              // Resulting lux value
-        boolean good;            // True if neither sensor is saturated
-        // boolean gain = true;     // Gain setting, 0 = X1, 1 = X16; if with gain and overshoots it goes from 0 again - better false
-        unsigned int ms;         // Integration ("shutter") time in milliseconds
-        // If time = 0, integration will be 13.7ms
-        // If time = 1, integration will be 101ms
-        // If time = 2, integration will be 402ms
-        // If time = 3, use manual start / stop to perform your own integration
-
-        /*
-        for indoor measurements and not battery powered devices the proper setting is:
-        - gain true - x16
-        - time 2 - 402ms
-        - for saturation case: reduce the gain and repeat the measurement - this will increase the time to 0.8s (2x 402ms)
-        */
-        // unsigned char time = 2;
-
-        unsigned char time;
-        boolean gain;
-
-        if (g_lux_high_sens)
-        {
-            if (light_high)
-            {
-                time = 1;
-                gain = false;
-            } else
-            {
-                time = 2;
-                gain = true;
-            }
-        }
-        else 
-        {
-            time = 0;
-            gain = true;
-        }
-
-
-        #ifdef DEBUG
-            Serial.printf("[%s]: INITIAL: light_high=%d, time=%d, gain=%d\n",__func__,light_high,time,gain);
-        #endif
-
-        light.begin();
-        light.setTiming(gain,time,ms);
-        if (!light.setPowerUp()) 
-        {
-            snprintf(lux_char,sizeof("NaN"), "%s", "NaN");
-            Serial.printf("[%s]: LUX error=%s, LEAVING\n",__func__,lux_char);
-            return;
-        }
-
-        #ifdef DEBUG
-            Serial.printf("[%s]: 2nd: light_high=%d, time=%d, gain=%d, ms=%d\n",__func__,light_high,time,gain,ms);
-        #endif
-
-        light.manualStart();
-        delay(ms);
-        light.manualStop();
-
-        if (light.getData(data0,data1))
-        {
-            good = light.getLux(gain,ms,data0,data1,lux);
-            if (!good)              // lets repeat the measurement with low gain=0 (x1)
-            {
-                Serial.printf("[%s]: LUX error in fist measurement: sensor saturated - REPEATING measurement with gain=0 and time=1\n",__func__);
-                Serial.printf("[%s]: First measurement: chan0(wide spectrum)=%d, chan1(infrared)=%d, lux=%f\n",__func__,data0,data1,lux);
-                gain = false; time = 1;
-                light.setTiming(gain,time,ms);
-                light.manualStart();
-                #ifdef DEBUG
-                    Serial.printf("[%s]: 3rd: light_high=%d, time=%d, gain=%d, ms=%d\n",__func__,light_high,time,gain,ms);
-                #endif
-                delay(ms);
-                light.manualStop();
-
-                if (light.getData(data0,data1))
-                {
-                    good = light.getLux(gain,ms,data0,data1,lux);
-                    Serial.printf("[%s]: Second measurement (with low gain): chan0(wide spectrum)=%d, chan1(infrared)=%d, lux=%f\n",__func__,data0,data1,lux);
-                    if (good)
-                    {
-                        nbytes = snprintf(NULL,0,"%0.3f",lux) +1;
-                        snprintf(lux_char,nbytes,"%0.3f",lux);
-                        light_high = true;
-                    } else
-                    {
-                        // saturated again!
-                        Serial.printf("[%s]: LUX error - sensor saturated AGAIN (even with low gain) - providing error code 99999\n",__func__);
-                        snprintf(lux_char,sizeof("99999"), "%s", "99999");
-                        return;                  
-                    }
-                } else
-                {
-                    snprintf(lux_char,sizeof("NaN"), "%s", "NaN");
-                    Serial.printf("[%s]: 2nd measurements: no data: LUX error=%s, LEAVING\n",__func__,lux_char);
-                    return;
-                }
-            }
-            // lux is good below:
-
-            // more digits for low lux
-            if ((lux > 0) and (lux < 10))
-            {
-                nbytes = snprintf(NULL,0,"%0.3f",lux) +1;
-                snprintf(lux_char,nbytes,"%0.3f",lux);
-            } else 
-            // 1 digit after coma for high lux
-            {
-                nbytes = snprintf(NULL,0,"%0.0f",lux) +1;
-                snprintf(lux_char,nbytes,"%0.0f",lux);
-            }
-            if (lux > 30000) light_high = true; else light_high = false;
-            #ifdef DEBUG
-                Serial.printf("[%s]: LUX str=%s\n",__func__,lux_char);  
-            #endif
-        } else 
-        // no response for the first measurement:
-        {
-            snprintf(lux_char,sizeof("NaN"), "%s", "NaN");
-            Serial.printf("[%s]: no data: LUX error=%s, LEAVING\n",__func__,lux_char);
-            return;
-        }
-    #endif
     #ifdef DEBUG
-        Serial.printf("[%s]: took %uus\n",__func__,(micros()-function_start));
+        unsigned long function_start = millis(); 
+    #endif
+
+    
+
+    /* Adafruit implementation of TSL2561 is better than Sparkfun - auto gain is ok
+    for 13ms the max time to measure is around 52ms
+    for 402ms it is 1300ms
+    tsl.enableAutoRange(true) makes sure there are no errors from sensor with this function:
+        tsl.getEvent(&event)
+    */
+
+    /* You can also manually set the gain or enable auto-gain support */
+    // tsl.setGain(TSL2561_GAIN_1X);      /* No gain ... use in bright light to avoid sensor saturation */
+    // tsl.setGain(TSL2561_GAIN_16X);     /* 16x gain ... use in low light to boost sensitivity */
+    // tsl.enableAutoRange(true);            /* Auto-gain ... switches automatically between 1x and 16x */
+  
+    /* Changing the integration time gives you better sensor resolution (402ms = 16-bit data) */
+    // tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_13MS);      /* fast but low resolution */
+    // tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_101MS);  /* medium resolution and speed   */
+    // tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);  /* 16-bit data but slowest conversions */
+
+
+    // very little meaurement accuracy difference between high and low sensitivity
+    // but very big difference with time needed to measure
+    // keep always tsl.enableAutoRange(true); to avoid errors
+
+    if (g_lux_high_sens)    // function time from 453ms - 1357ms - depends on amount of light
+    {
+        tsl.enableAutoRange(true); 
+        tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);
+    } else                  // function time from 18ms - 51ms - depends on amount of light
+    {
+        tsl.enableAutoRange(true); 
+        tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_13MS);
+    }
+
+
+
+    /* Get a new sensor event */ 
+    if (!tsl.getEvent(&event))
+    {
+        Serial.printf("[%s]: LUX fatal error=%s\n",__func__,lux_char);
+    } else
+    {
+        lux = event.light;
+        if ((lux > 0) and (lux < 65536))
+        {
+            nbytes = snprintf(NULL,0,"%0.0f",lux) +1;
+            snprintf(lux_char,nbytes,"%0.0f",lux);
+        } else
+        if (lux <= 0)
+        {
+            /* If event.light = 0 if the sensor is saturated and the values are unreliable 
+            return 0 for the sake of knowing there is no light 
+            check if this ZERO is reliable !!!
+            */
+            snprintf(lux_char,sizeof("0"), "%s", "0");
+            Serial.printf("[%s]: LUX unreliable or LUX=%s\n",__func__,lux_char);
+        } else 
+        if (lux >= 65536)
+        {
+            /* If event.light = 65536 the sensor is saturated. */
+            snprintf(lux_char,sizeof("65536"), "%s", "65536");
+            Serial.printf("[%s]: Sensor overload=%s\n",__func__,lux_char);
+        }  
+    }
+
+#endif
+    #ifdef DEBUG
+        Serial.printf("[%s]: LUX str=%s\n",__func__,lux_char);  
+        Serial.printf("[%s]: took %ums\n",__func__,(millis()-function_start));
     #endif
 }
