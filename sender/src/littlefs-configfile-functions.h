@@ -176,6 +176,7 @@ void convertToJson(const Config &src, JsonVariant dst) {
   dst["c_led_pwm"]              = g_led_pwm;
   dst["c_motion"]               = g_motion;
   dst["c_lux_high_sens"]        = g_lux_high_sens;
+  dst["c_last_working_time_ms"] = g_last_working_time_ms;
 }
 
 
@@ -193,6 +194,7 @@ void convertFromJson(JsonVariantConst src, Config &dst) {
   g_led_pwm                     = src["c_led_pwm"];
   g_motion                      = src["c_motion"];
   g_lux_high_sens               = src["c_lux_high_sens"];
+  g_last_working_time_ms        = src["c_last_working_time_ms"];
 
   strlcpy(g_wifi_ssid, src["c_ssid"], sizeof(g_wifi_ssid));
   strlcpy(g_wifi_password, src["c_password"], sizeof(g_wifi_password));

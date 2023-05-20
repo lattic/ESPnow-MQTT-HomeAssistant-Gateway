@@ -178,6 +178,7 @@ typedef struct struct_message           // 92 bytes
   uint8_t motion_enabled;               // 0 - motion disabled, 1 - motion enabled
   uint8_t light_high_sensitivity;       // 0 - low, light meas. time 13ms, 1 - high, light meas. time 403ms
   uint8_t button_pressed = 0;           // 0 = none, >0 = the button number as per button_gpio[NUMBER_OF_BUTTONS] - NOT GPIO NUMBER! index starts from 1
+  uint16_t working_time_ms;             // last working time in ms
 } struct_message;
 
 struct_message myData;
@@ -1130,6 +1131,13 @@ void gather_data()
     Serial.printf("\tboardtype=%d\n",myData.boardtype);
   #endif
 
+// working_time_ms
+  myData.working_time_ms = g_last_working_time_ms;
+  // #ifdef DEBUG
+    Serial.printf("[%s]: working_time_ms %ums\n",__func__,myData.working_time_ms);
+  // #endif
+
+
   #ifdef DEBUG
     Serial.printf(" Total struct size=%d bytes\n",sizeof(myData));
   #endif
@@ -1814,6 +1822,7 @@ bool load_config()
         g_wifi_ok = 0; 
         g_last_gw = 0; 
         g_led_pwm = 122;
+        g_last_working_time_ms = 0;
 
         snprintf(g_wifi_ssid,sizeof(g_wifi_ssid),"%s","default_ssid");
         snprintf(g_wifi_password,sizeof(g_wifi_password),"%s","default_password");
@@ -1849,6 +1858,7 @@ void save_config(const char* reason)
 
   // ontime
   uint32_t work_time = millis() - program_start_time + (ESP32_BOOT_TIME) + (ESP32_TAIL_TIME) + extra_reset_time;
+  g_last_working_time_ms = work_time;
   #ifdef DEBUG
     Serial.printf("[%s]: millis=%d, program_start_time=%d, ESP32_BOOT_TIME=%d, ESP32_TAIL_TIME=%d, extra_reset_time=%d,  Program finished after %lums (adjusted).\n",__func__,millis(),program_start_time, ESP32_BOOT_TIME,ESP32_TAIL_TIME,extra_reset_time, work_time);
   #endif

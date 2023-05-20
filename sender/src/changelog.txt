@@ -4,6 +4,12 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
+2023-05-20
+  2.16.0  - accepted
+
+2023-05-19
+  2.16.0b1 - new myData structure - working_time_ms
+
 2023-05-18
   2.15.5  - Adafruit implementation of TSL2561 instead of SparkFunTSL2561
 
