@@ -27,7 +27,7 @@ typedef struct struct_message             // main data struct sent from sender t
   uint8_t motion_enabled;                 // 0 - motion disabled, 1 - motion enabled
   uint8_t light_high_sensitivity;         // 0 - low, light meas. time 13ms, 1 - high, light meas. time 403ms
   uint8_t button_pressed = 0;             // 0 = none, >0 = the button number as per button_gpio[NUMBER_OF_BUTTONS] - NOT GPIO NUMBER! index starts from 1
-
+  uint16_t working_time_ms;               // last working time in ms
 } struct_message;
 
 typedef struct struct_message_aux         // auxiliary data structure for sensors - with RSSI and MAC (of sender)

@@ -10,7 +10,13 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
-2023-03-19
+2023-05-20
+  2.23.0   - accepted working_time_ms
+
+2023-05-19
+  2.23.0b1 - new myData structure - working_time_ms
+
+2023-05-19
   2.22.1   - new firmware server path on Mac
 
 2023-03-19

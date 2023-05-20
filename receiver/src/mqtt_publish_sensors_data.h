@@ -143,6 +143,10 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   snprintf(gateway_conf_topic,sizeof(gateway_conf_topic),"homeassistant/sensor/%s/gateway/config",hostname);
   if (debug_mode) Serial.println("gateway_conf_topic="+String(gateway_conf_topic));
 
+  char working_time_ms_conf_topic[80];
+  snprintf(working_time_ms_conf_topic,sizeof(working_time_ms_conf_topic),"homeassistant/sensor/%s/working_time_ms/config",hostname);
+  if (debug_mode) Serial.println("working_time_ms_conf_topic="+String(working_time_ms_conf_topic));
+
 // sensors/entities names
   char temp_name[30];
   snprintf(temp_name,sizeof(temp_name),"%s_temperature",hostname);
@@ -219,6 +223,10 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   char gateway_name[60];
   snprintf(gateway_name,sizeof(gateway_name),"%s_gateway",hostname);
   if (debug_mode) Serial.println("gateway_name="+String(gateway_name));
+
+  char working_time_ms_name[60];
+  snprintf(working_time_ms_name,sizeof(working_time_ms_name),"%s_working_time_ms",hostname);
+  if (debug_mode) Serial.println("working_time_ms_name="+String(working_time_ms_name));
 
 // values/state topic
   char sensors_topic_state[60];
@@ -1132,6 +1140,47 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   }
 
 
+// working_time_ms config
+  config.clear();
+  config["name"] = working_time_ms_name;
+  config["stat_t"] = sensors_topic_state;
+  config["val_tpl"] = "{{value_json.working_time_ms}}";
+  config["uniq_id"] = working_time_ms_name;
+  config["frc_upd"] = "true";
+  config["entity_category"] = "diagnostic";
+  config["unit_of_meas"] = "ms";
+  // config["exp_aft"] = 900;
+
+  CREATE_SENSOR_MQTT_DEVICE
+
+  size_c = serializeJson(config, config_json);
+
+  if (!mqttc.publish(working_time_ms_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  {
+    publish_status = false; total_publish_status = false;
+    Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,working_time_ms_conf_topic);
+  } else
+  {
+    publish_status = true;
+    if (debug_mode) {Serial.printf("[%s]: PUBLISH SUCCESSFULL for %s\n",__func__,working_time_ms_conf_topic);}
+  }
+
+  if (debug_mode) {
+    Serial.println("\n============ DEBUG CONFIG working_time_ms ============");
+    Serial.println("Size of working_time_ms config="+String(size_c)+" bytes");
+    Serial.println("Serialised config_json:");
+    Serial.println(config_json);
+    Serial.println("serializeJsonPretty");
+    serializeJsonPretty(config, Serial);
+    if (publish_status) {
+      Serial.println("\n CONFIG OK");
+    } else
+    {
+      Serial.println("\n CONFIG UNSUCCESSFULL");
+    }
+    Serial.println("============ DEBUG CONFIG working_time_ms END ========\n");
+  }
+
 // common sensors for all types END
 
   return total_publish_status;
@@ -1313,6 +1362,7 @@ bool mqtt_publish_sensors_values()
   payload["light_highsens"]     = myLocalData.light_high_sensitivity;
   payload["gateway"]            = ROLE_NAME;
   payload["button_pressed"]     = myLocalData.button_pressed;
+  payload["working_time_ms"]    = myLocalData.working_time_ms;
 
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);
