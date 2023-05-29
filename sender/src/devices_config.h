@@ -883,6 +883,36 @@
 // ---------------------------------------------------------------------------------------------------
 
 
+#elif DEVICE_ID == 94                 // 
+  #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
+  #define HOSTNAME                    "esp32094"
+  #define DEVICE_NAME                 "094"  // 15 characters maximum
+  #define BOARD_TYPE                  1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define SLEEP_TIME_S                3  // seconds - 
+  #define ACT_BLUE_LED_GPIO           27   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define ERROR_RED_LED_GPIO          27   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+
+
+  // #define USE_MAX17048                1   // use "0" to disable
+  // #define CUSTOM_SDA_GPIO             21
+  // #define CUSTOM_SCL_GPIO             22
+  // #define CHARGING_GPIO               23  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  // #define POWER_GPIO                  17  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+   
+
+  // #define ENABLE_3V_GPIO              32   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+
+  // #define USE_MAX31855                1   // tested ONLY with ESP32S
+  // #define USE_MAX31855_DELAY_MS       200 // to avoid nan or 0
+  // #define MISO_GPIO                   19
+  // #define CLK_GPIO                    18
+  // #define CS_GPIO                     25 
+
+
+  #pragma message "compilation for: esp320094"
+// ---------------------------------------------------------------------------------------------------
+
 
 #else
   #error "Wrong DEVICE_ID chosen"
