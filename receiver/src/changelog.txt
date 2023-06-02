@@ -10,6 +10,12 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+2023-05-30
+  2.24.b2  - config["exp_aft"] = sleep_time_s * 3;
+  
+2023-05-30
+  2.24.b1  - sleep_time_s - testing
+
 2023-05-20
   2.23.0   - accepted working_time_ms
 

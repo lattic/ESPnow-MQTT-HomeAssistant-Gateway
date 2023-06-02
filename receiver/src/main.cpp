@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "2.23.0"
+#define VERSION "2.24.b2"
 
 
 // gateways config file
@@ -90,7 +90,9 @@ bool mqtt_publish_gw_last_updated_sensor_config();
 bool mqtt_publish_gw_last_updated_sensor_values(const char* status);
 
 // mqtt_publish_sensors_data.h - all at once
-bool mqtt_publish_sensors_config(const char* hostname, const char* name, const char* mac, const char* fw, const char* dev_type);
+// bool mqtt_publish_sensors_config(const char* hostname, const char* name, const char* mac, const char* fw, const char* dev_type);
+bool mqtt_publish_sensors_config(const char* hostname, const char* name, const char* mac, const char* fw, const char* dev_type, byte boardtype, uint16_t sleep_time_s);
+
 bool mqtt_publish_sensors_values();
 bool mqtt_publish_button_restart_config();
 bool mqtt_publish_button_update_config();
