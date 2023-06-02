@@ -77,6 +77,23 @@ sender.ino
   #include "hal/touch_sensor_types.h"
 #endif
 
+#if (USE_DALLAS_18B20 == 1)
+  #include "OneWireNg_CurrentPlatform.h"
+  #include "drivers/DSTherm.h"
+  #include "utils/Placeholder.h"
+  static Placeholder<OneWireNg_CurrentPlatform> _ow;
+
+  #include "measure-ds18b20.h"
+#endif
+
+// LCD
+#if (USE_LCD_ZH_ST7789 == 1)
+  #include <TFT_eSPI.h> 
+  #include <SPI.h>
+  TFT_eSPI tft = TFT_eSPI();  // Invoke library
+  TFT_eSprite img = TFT_eSprite(&tft);
+#endif
+
 // ========================================================================== libraries END
 
 // some consistency checks 
@@ -179,6 +196,7 @@ typedef struct struct_message           // 92 bytes
   uint8_t light_high_sensitivity;       // 0 - low, light meas. time 13ms, 1 - high, light meas. time 403ms
   uint8_t button_pressed = 0;           // 0 = none, >0 = the button number as per button_gpio[NUMBER_OF_BUTTONS] - NOT GPIO NUMBER! index starts from 1
   uint16_t working_time_ms;             // last working time in ms
+  uint16_t sleep_time_s;                // 
 } struct_message;
 
 struct_message myData;
@@ -301,6 +319,13 @@ void start_web_server();
 void stop_cp_timer();
 void delete_cp_timer();
 void start_cp_timer(int16_t timeout);
+
+// dallas
+#if (USE_DALLAS_18B20 == 1)
+  static bool printId(const OneWireNg::Id& id);
+  void get_all_ds18b20_addresses();
+  float get_ds18b20();
+#endif  
 
 // ========================================================================== FUNCTIONS declaration END
 
@@ -1015,6 +1040,16 @@ void gather_data()
     }
   #endif
 
+
+  // DALLAS_18B20
+  #if (USE_DALLAS_18B20 == 1) 
+    #ifndef CALIBRATE_TEMPERATURE
+      #define CALIBRATE_TEMPERATURE       0   
+    #endif
+    myData.temp = get_ds18b20() + (CALIBRATE_TEMPERATURE);
+  #endif
+
+
   #ifdef DEBUG
     Serial.printf("\ttemp=%fC\n",myData.temp);
     Serial.printf("\thum=%f%%\n",myData.hum);
@@ -1137,6 +1172,11 @@ void gather_data()
     Serial.printf("[%s]: working_time_ms %ums\n",__func__,myData.working_time_ms);
   // #endif
 
+// sleep_time_s
+  myData.sleep_time_s = g_sleeptime_s;
+  // #ifdef DEBUG
+    Serial.printf("[%s]: sleep_time_s %ds\n",__func__,myData.sleep_time_s);
+  // #endif
 
   #ifdef DEBUG
     Serial.printf(" Total struct size=%d bytes\n",sizeof(myData));
@@ -1788,9 +1828,9 @@ void do_esp_go_to_sleep()
     }
   #endif
 
-  #ifdef DEBUG_LIGHT
+  // #ifdef DEBUG_LIGHT
     Serial.printf("[%s]: Bye...\n========= E N D =========\n",__func__);
-  #endif
+  // #endif
   esp_deep_sleep_start();
 }
 
@@ -1872,7 +1912,7 @@ void save_config(const char* reason)
   }
   
   // #ifdef DEBUG_LIGHT
-    Serial.printf("[%s]: Program finished after %lums (adjusted).\n\n",__func__,work_time);
+    Serial.printf("[%s]: Program finished after %lums (adjusted).\n",__func__,work_time);
   // #endif
   
   // testing with PPK2 - end save ontime
@@ -2558,6 +2598,31 @@ void setup()
       Serial.printf("[%s]: DONT USE_MAX31855\n",__func__);
     #endif
   #endif
+
+
+  //18B20 Dallas OneWireNg Temperature sensors 
+  #if (USE_DALLAS_18B20 == 1) 
+    #ifdef DEBUG
+      Serial.printf("[%s]: start USE_DALLAS_18B20\n",__func__);
+    #endif
+    new (&_ow) OneWireNg_CurrentPlatform(OW_PIN, false);
+    DSTherm drv(_ow);
+    #if (CONFIG_MAX_SRCH_FILTERS > 0)
+      static_assert(CONFIG_MAX_SRCH_FILTERS >= DSTherm::SUPPORTED_SLAVES_NUM,
+          "CONFIG_MAX_SRCH_FILTERS too small");
+      drv.filterSupportedSlaves();
+    #endif
+    #ifdef COMMON_RES
+      //Set common resolution for all sensors.
+      drv.writeScratchpadAll(0, 0, COMMON_RES);
+      drv.copyScratchpadAll(PARASITE_POWER);
+    #endif
+  #else
+    #ifdef DEBUG
+      Serial.printf("[%s]: DONT USE_DALLAS_18B20\n",__func__);
+    #endif
+  #endif
+
 // ===============  SENSORS INITIALISATION END
 
 // Firmware update
@@ -2575,10 +2640,9 @@ void setup()
   #endif
 // Firmware update END
 
-
-
 // gather data
 gather_data();
+
 // off 3V
 #ifdef ENABLE_3V_GPIO
   #ifdef DEBUG
@@ -2587,15 +2651,9 @@ gather_data();
   digitalWrite(ENABLE_3V_GPIO, LOW);
 #endif
 
-
 #ifdef DEBUG_LIGHT
   Serial.printf("[%s]: Temp=%0.2fC, Hum=%0.2f%%, Light=%0.2flx (high sensitivity=%d), batpct=%0.2f%%, charging=%s, ontime=%us\n",__func__,myData.temp,myData.hum,myData.lux,g_lux_high_sens,myData.batpct,myData.charg,myData.ontime);
 #endif
-
-// turn off power for sensors - all code below is only valid if gather_data() was successfull
-  #ifdef ENABLE_3V_GPIO
-    digitalWrite(ENABLE_3V_GPIO, LOW);
-  #endif
 
   if (send_data())
   {
@@ -2887,6 +2945,71 @@ gather_data();
 
   // eventually: go to sleep if OTA web servers is not needed ;-)
   if (g_sleeptime_s > 0) sleeptime_s = g_sleeptime_s;
+
+// LCD
+#if (USE_LCD_ZH_ST7789 == 1)
+  // Serial.printf("[%s]: start LC: %ums\n",__func__,millis());
+  pinMode(ST7789_LCD_LED_GPIO, OUTPUT);
+  #ifdef LCD_3V_GPIO
+    pinMode(LCD_3V_GPIO,OUTPUT);
+    #ifdef DEBUG
+      Serial.printf("[%s]: Enabling 3V to power LCD on GPIO=%d\n",__func__,LCD_3V_GPIO);
+    #endif
+    digitalWrite(LCD_3V_GPIO, HIGH);
+    while (!digitalRead(LCD_3V_GPIO)){delay(1);}
+    // delay(10);
+  #endif
+  // Serial.printf("[%s]: powered LCD at: %ums\n",__func__,millis());
+
+  char temp_char[10];
+  snprintf(temp_char,sizeof(temp_char),"%0.2f",myData.temp);
+
+  tft.init(); // it takes 1s for ST7735 !!!
+  tft.fillScreen(TFT_BLACK);
+  delay(50);  // this delay solves initial flicker
+  digitalWrite(ST7789_LCD_LED_GPIO,HIGH);
+
+  // Serial.printf("[%s]: LED ON at: %ums\n",__func__,millis());
+
+  tft.setRotation(SCREEN_ROTATION);
+
+  int t_w = img.textWidth(temp_char,7);
+  int t_h = img.fontHeight(7);
+
+  Serial.printf("temp. w=%d, h=%d\n",t_w,t_h);
+
+  // int tc_w = img.textWidth("C",4);
+  // int full_text = t_w + tc_w;
+  // Serial.printf("t_w=%d, tc_w=%d, full_text=%d\n",t_w,tc_w,full_text);
+
+
+  tft.setTextPadding(TFT_WIDTH);
+  tft.setTextDatum(TL_DATUM);
+  tft.setTextColor(TFT_WHITE,TFT_BLACK);
+  tft.drawString(temp_char, 0, 0, 7);
+
+  tft.setTextColor(TFT_YELLOW,TFT_BLACK);
+  tft.drawString("C", t_w, 0, 4);
+
+  // Serial.printf("[%s]: printed on LCD at: %ums\n",__func__,millis());
+  // Serial.printf("[%s]: delay started at: %ums\n",__func__,millis());
+  delay(LCD_SCREEN_TIME_S * 1000);
+  // Serial.printf("[%s]: delay finished at: %ums\n",__func__,millis());
+
+  digitalWrite(ST7789_LCD_LED_GPIO,LOW);
+  // Serial.printf("[%s]: LED OFF at: %ums\n",__func__,millis());
+
+  // off 3V
+  #ifdef LCD_3V_GPIO
+    #ifdef DEBUG
+      Serial.printf("[%s]: Disabling 3V on GPIO=%d\n",__func__,LCD_3V_GPIO);
+    #endif
+    digitalWrite(LCD_3V_GPIO, LOW);
+  #endif
+  // Serial.printf("[%s]: powered OFF LCD at: %ums\n",__func__,millis());
+
+#endif
+
   if (!ota_web_server_needed)
   hibernate(false, sleeptime_s);
 }

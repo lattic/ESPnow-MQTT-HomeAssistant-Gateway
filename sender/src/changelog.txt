@@ -4,6 +4,12 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
+2023-06-02
+  2.17.b2  - rework get_lux to avoid saturation
+
+2023-05-30
+  2.17.b1  - sleep_time_s - testing
+
 2023-05-20
   2.16.0  - accepted
 

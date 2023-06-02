@@ -887,27 +887,34 @@
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32094"
   #define DEVICE_NAME                 "094"  // 15 characters maximum
-  #define BOARD_TYPE                  1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-  #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define BOARD_TYPE                  2 // 1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  #define FW_UPGRADE_GPIO             1   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
   #define SLEEP_TIME_S                3  // seconds - 
-  #define ACT_BLUE_LED_GPIO           27   // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define ERROR_RED_LED_GPIO          27   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  // #define ENABLE_3V_GPIO              8   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
 
+  #define USE_DALLAS_18B20            1
+  // GPIO where the DS18B20 is connected to, OW=OneWire
+  #define OW_PIN                      10 // 33
+  #define PARASITE_POWER  false //parasite power(2-wire) or direct (3-wire)
+  #define COMMON_RES      (DSTherm::RES_12_BIT) //9-12 bits resolution
+  #define CONFIG_DS18S20_EXT_RES
+  #define CALIBRATE_TEMPERATURE       0 
+  // 28:30:22:75:D0:1:3C:61 -> DS18B20
 
-  // #define USE_MAX17048                1   // use "0" to disable
-  // #define CUSTOM_SDA_GPIO             21
-  // #define CUSTOM_SCL_GPIO             22
-  // #define CHARGING_GPIO               23  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  // #define POWER_GPIO                  17  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-   
+  #define USE_LCD_ZH_ST7789           1
+  #define SCREEN_ROTATION             1
+  #define ST7789_LCD_LED_GPIO         6
+  #define LCD_3V_GPIO                 8
+  #define LCD_SCREEN_TIME_S           3
 
-  // #define ENABLE_3V_GPIO              32   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  #define PUSH_BUTTONS_ONLY           1
+  #define NUMBER_OF_BUTTONS           1  
+  uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of push buttons
+  {
+    9
+  }; 
+  uint8_t button_pressed = 0;               // 0 means: not pressed, from 1 ... is the button number from the above array, starting from 1 (not from 0)
 
-  // #define USE_MAX31855                1   // tested ONLY with ESP32S
-  // #define USE_MAX31855_DELAY_MS       200 // to avoid nan or 0
-  // #define MISO_GPIO                   19
-  // #define CLK_GPIO                    18
-  // #define CS_GPIO                     25 
 
 
   #pragma message "compilation for: esp320094"
@@ -923,8 +930,8 @@
   #error "push buttons board not yet defined for ESP32-C3"
 #endif
 
-#if (USE_MAX31855 == 1) and (USE_SHT31 == 1)
-  #error only 1 temperature sensor defined - choose USE_SHT31 or USE_MAX31855
+#if ((USE_MAX31855 == 1) and (USE_SHT31 == 1)) or ((USE_MAX31855 == 1) and (USE_DALLAS_18B20 == 1)) or ((USE_DALLAS_18B20 == 1) and (USE_SHT31 == 1))
+  #error only 1 temperature sensor defined - choose USE_SHT31 or USE_MAX31855 or USE_DALLAS_18B20
 #endif
 
 #ifdef ACT_BLUE_LED_GPIO

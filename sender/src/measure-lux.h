@@ -2,7 +2,7 @@
 
 void get_lux(char* lux_char)            
 {
-    snprintf(lux_char,sizeof("N/A"), "%s", "N/A");
+    snprintf(lux_char,sizeof("99999"), "%s", "99999");
     
 #if (USE_TSL2561 == 1)
     int nbytes;
@@ -56,26 +56,28 @@ void get_lux(char* lux_char)
     } else
     {
         lux = event.light;
-        if ((lux > 0) and (lux < 65536))
+        // if ((lux > 0) and (lux < 65536))
+        if (lux > 0) 
         {
             nbytes = snprintf(NULL,0,"%0.0f",lux) +1;
             snprintf(lux_char,nbytes,"%0.0f",lux);
         } else
-        if (lux <= 0)
+        if (lux == 0)
         {
             /* If event.light = 0 if the sensor is saturated and the values are unreliable 
             return 0 for the sake of knowing there is no light 
             check if this ZERO is reliable !!!
             */
-            snprintf(lux_char,sizeof("0"), "%s", "0");
+            snprintf(lux_char,sizeof("99999"), "%s", "99999");
             Serial.printf("[%s]: LUX unreliable or LUX=%s\n",__func__,lux_char);
-        } else 
-        if (lux >= 65536)
-        {
-            /* If event.light = 65536 the sensor is saturated. */
-            snprintf(lux_char,sizeof("65536"), "%s", "65536");
-            Serial.printf("[%s]: Sensor overload=%s\n",__func__,lux_char);
-        }  
+        } 
+        // else 
+        // if (lux >= 65536)
+        // {
+        //     /* If event.light = 65536 the sensor is saturated. */
+        //     snprintf(lux_char,sizeof("65536"), "%s", "65536");
+        //     Serial.printf("[%s]: Sensor overload=%s\n",__func__,lux_char);
+        // }  
     }
 
 #endif
