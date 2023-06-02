@@ -88,6 +88,7 @@ sender.ino
 
 // LCD
 #if (USE_LCD_ZH_ST7789 == 1)
+  #warning "building with LCD"
   #include <TFT_eSPI.h> 
   #include <SPI.h>
   TFT_eSPI tft = TFT_eSPI();  // Invoke library
