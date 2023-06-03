@@ -62,7 +62,7 @@ void get_lux(char* lux_char)
         and no reliable data could be generated! */
         // Serial.println("Sensor overload");
         Serial.printf("[%s]: LUX overload=%d\n",__func__,event.light);
-        snprintf(lux_char,sizeof("99999"), "%s", "99999");
+        snprintf(lux_char,sizeof("N/A"), "%s", "N/A");
         Serial.printf("[%s]: LUX str=%slx\n",__func__,lux_char);  
     }
 
