@@ -228,7 +228,44 @@ config
 
   #pragma message "compilation for: ESPnow_krz103_gateway3"    
 
+//  ************************************* TESTS ***********************************************
 
+// S:
+
+// #elif DEVICE_ID == 29
+//   #define BOARD_TYPE                1             // 1=ESP32 2=ESP32S2 3=ESP32S3 4=ESP32C3
+//   #define HOSTNAME                  "esp32029"    // max 9 characters, used as name in HA
+//   #define IP_ADDRESS                "192.168.1.29"  // fixed IP, not in use anymore for WiFi, only for name in HA
+//   #define ROLE_NAME                 "gw1-hall"      // part of the name in HA (gateway 1)
+
+//   #define LED_GPIO_SENSORS          2   // RED
+//   #define LED_GPIO_GATEWAY          5   // GREEN
+//   #define LED_GPIO_STANDBY          3   // BLUE
+
+//   #define LED_GPIO_SENSORS_USE_PWM  1
+//   #define LED_GPIO_SENSORS_PWM_DC   10
+
+//   #define LED_GPIO_GATEWAY_USE_PWM  1
+//   #define LED_GPIO_GATEWAY_PWM_DC   10
+
+//   #define LED_GPIO_STANDBY_USE_PWM  1
+//   #define LED_GPIO_STANDBY_PWM_DC   10
+
+//   #define PUSH_BUTTON_GPIO          0  // to control ESP
+//   #define PUSH_BUTTON_GPIO_ACT    LOW  // HIGH or LOW, HIGH = 1, LOW = 0, 0 if not defined (so default)
+
+//   uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x29};
+  
+//   #define OTA_ACTIVE                1
+
+//   #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
+
+//   #define USE_WEB_SERIAL            1
+//   #define CP_TIMEOUT_S              180
+
+// #pragma message "compilation for: ESPnow_esp32029_gw1"
+
+// S2 
 #elif DEVICE_ID == 92
   #define BOARD_TYPE                2
   #define HOSTNAME                  "esp32092"
@@ -258,7 +295,6 @@ config
   #define USE_WEB_SERIAL            1
 
   #pragma message "compilation for: ESPnow_esp32092-gwtest"
-
 
 #else
   #error "Wrong DEVICE_ID chosen"
