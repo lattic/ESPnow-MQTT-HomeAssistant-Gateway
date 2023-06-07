@@ -11,6 +11,9 @@ OTA:
 - http://HOSTNAME.local:8080/update
 
 2023-06-07
+  2.25.0  - accepted
+
+2023-06-07
   2.25.b2  - cleaning exp_aft -  sleep_time_s * 3(sensors), no exp_aft for gateways (as here we have hostname_available topic)
 
 2023-06-07
