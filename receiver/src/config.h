@@ -328,6 +328,10 @@ config
 // how often to update HA on GW status
 #define HEARTBEAT_INTERVAL_S        10    //10 in seconds
 
+// availability topic and not available payload
+#define AVAILABILITY_TOPIC          HOSTNAME "/sensor/available"
+#define NOT_AVAILABLE_PAYLOAD       "{\"available\":\"offline\"}"
+
 // FW update timeout
 #define FW_UPDATE_TIME_S            180   // in seconds - 3 minutes shall be enough
 

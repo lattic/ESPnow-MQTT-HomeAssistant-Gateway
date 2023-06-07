@@ -95,9 +95,9 @@ bool mqtt_publish_gw_status_config()
   config["stat_t"] = status_state_topic;
   config["val_tpl"] = "{{value_json.mac}}";
   config["uniq_id"] = mac_name;
-  config["frc_upd"] = "true";
+  config["frc_upd"] = "false";
   config["entity_category"] = "diagnostic";
-  // config["exp_aft"] = 60;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -135,9 +135,9 @@ bool mqtt_publish_gw_status_config()
   config["stat_t"] = status_state_topic;
   config["val_tpl"] = "{{value_json.ip}}";
   config["uniq_id"] = ip_name;
-  config["frc_upd"] = "true";
+  config["frc_upd"] = "false";
   config["entity_category"] = "diagnostic";
-  // config["exp_aft"] = 60;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -154,7 +154,7 @@ bool mqtt_publish_gw_status_config()
   }
 
   if (debug_mode) {
-    Serial.println("\n============ DEBUG CONFIG MAC ============");
+    Serial.println("\n============ DEBUG CONFIG IP ============");
     Serial.println("Size of ip config="+String(size_c)+" bytes");
     Serial.println("Serialised config_json:");
     Serial.println(config_json);
@@ -178,9 +178,9 @@ bool mqtt_publish_gw_status_config()
   config["qos"] = 2;
   config["uniq_id"] = status_name;
   config["val_tpl"] = "{{value_json.status}}";
-  config["frc_upd"] = "true";
+  config["frc_upd"] = "false";
   config["entity_category"] = "diagnostic";
-  // config["exp_aft"] = 60;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -220,9 +220,9 @@ bool mqtt_publish_gw_status_config()
   config["retain"] = "true";
   config["uniq_id"] = uptime_name;
   config["val_tpl"] = "{{value_json.uptime}}";
-  config["frc_upd"] = "true";
+  config["frc_upd"] = "false";
   config["entity_category"] = "diagnostic";
-  // config["exp_aft"] = 60;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -262,9 +262,9 @@ bool mqtt_publish_gw_status_config()
   config["retain"] = "true";
   config["uniq_id"] = version_name;
   config["val_tpl"] = "{{value_json.version}}";
-  config["frc_upd"] = "true";
+  config["frc_upd"] = "false";
   config["entity_category"] = "diagnostic";
-  // config["exp_aft"] = 60;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -305,9 +305,9 @@ bool mqtt_publish_gw_status_config()
   config["unit_of_meas"] = "dBm";
   config["val_tpl"] = "{{value_json.rssi}}";
   config["uniq_id"] = rssi_name;
-  config["frc_upd"] = "true";
+  config["frc_upd"] = "false";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = 60;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -439,9 +439,9 @@ bool mqtt_publish_gw_last_updated_sensor_config()
   config["retain"] = "true";
   config["uniq_id"] = status_name;
   config["val_tpl"] = "{{value_json.status}}";
-  config["frc_upd"] = "true";
+  config["frc_upd"] = "false";
   config["entity_category"] = "diagnostic";
-  // config["exp_aft"] = 600;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -566,7 +566,7 @@ bool mqtt_publish_button_update_config()
   config["retain"] = "true";
   config["uniq_id"] = update_name;
   config["val_tpl"] = "{{value_json.update}}";
-  // config["exp_aft"] = 60;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -638,7 +638,7 @@ bool mqtt_publish_button_restart_config()
   config["retain"] = "true";
   config["uniq_id"] = restart_name;
   config["val_tpl"] = "{{value_json.restart}}";
-  // config["exp_aft"] = 60;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -714,7 +714,7 @@ bool mqtt_publish_switch_publish_config()
   config["uniq_id"] = publish_name;
   config["entity_category"] = "config";
   config["val_tpl"] = "{{value_json.publish}}";
-  // config["exp_aft"] = 60;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -830,6 +830,9 @@ void heartbeat()
   publish_status = publish_status && mqtt_publish_light_config("led_sensors",false);
   publish_status = publish_status && mqtt_publish_light_config("led_gateway",false);
   publish_status = publish_status && mqtt_publish_light_config("led_standby",false);
+
+  // availability topic 
+  publish_status = publish_status && mqtt_publish_text_sensor_value("available","online");
 
 
   if (!mqtt_published_to_ha)
@@ -966,7 +969,7 @@ bool mqtt_publish_button_config(const char* button)
   config["retain"] = "false";
   config["uniq_id"] = button_name;
   config["val_tpl"] = button_val_tpl;
-  // config["exp_aft"] = 60;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -1037,8 +1040,8 @@ bool mqtt_publish_text_sensor_config(const char* text_sensor)
   config["uniq_id"] = text_sensor_name;
   config["val_tpl"] = text_sensor_val_tpl;
   config["stat_t"] = text_sensor_state_topic;
-  config["frc_upd"] = "true";
-  // config["exp_aft"] = 60;
+  config["frc_upd"] = "false";
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -1161,9 +1164,9 @@ bool mqtt_publish_sensor_with_unit_config(const char* sensor_with_unit, const ch
   config["uniq_id"] = sensor_with_unit_name;
   config["val_tpl"] = sensor_with_unit_val_tpl;
   config["stat_t"] = sensor_with_unit_state_topic;
-  config["frc_upd"] = "true";
+  config["frc_upd"] = "false";
   config["unit_of_meas"] = sensor_unit;
-  // config["exp_aft"] = 60;
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
   CREATE_GW_MQTT_DEVICE
 
@@ -1315,8 +1318,8 @@ bool mqtt_publish_light_config(const char* light, bool optimistic)
 
   config["unique_id"]=light_name;
 
-  config["frc_upd"] = "true";
-  // config["exp_aft"] = 600;
+  config["frc_upd"] = "false";
+  // config["exp_aft"] = HEARTBEAT_INTERVAL_S * 3;
 
 
   CREATE_GW_MQTT_DEVICE

@@ -604,7 +604,9 @@ void mqtt_reconnect()
       Serial.printf("[%s]: Attempting MQTT connection for %d time\n",__func__,mqtt_error);
       long sm1=millis(); while(millis() < sm1 + 1000) {}
 
-      if (mqttc.connect(HOSTNAME,mqtt_user_str.c_str(), mqtt_pass_str.c_str()))
+      // availability topic and last will
+      if (mqttc.connect(HOSTNAME,mqtt_user_str.c_str(), mqtt_pass_str.c_str(),AVAILABILITY_TOPIC, 2, true, NOT_AVAILABLE_PAYLOAD))
+
       {
         mqtt_connected = true;
         Serial.printf("[%s]: MQTT connected\n",__func__);

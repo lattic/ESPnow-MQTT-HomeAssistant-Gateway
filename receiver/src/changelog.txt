@@ -10,6 +10,17 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+2023-06-07
+  2.25.b2  - cleaning exp_aft -  sleep_time_s * 3(sensors), no exp_aft for gateways (as here we have hostname_available topic)
+
+2023-06-07
+  2.25.b1  - availability topic on: hostname/sensor/availability that becomes offline if mqtt/sensor/connectivity is lost - around 25s
+           - new sensor: hostname_available i.e.: "sensor.esp32029_available": value = {"available":"online/offline"}
+           - ONLY FOR GATEWAYS
+
+2023-06-07
+  2.24.b3  - config["frc_upd"] = "true"; to config["frc_upd"] = "false";
+
 2023-05-30
   2.24.b2  - config["exp_aft"] = sleep_time_s * 3;
   
