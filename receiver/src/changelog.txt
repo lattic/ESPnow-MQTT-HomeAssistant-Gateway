@@ -11,6 +11,9 @@ OTA:
 - http://HOSTNAME.local:8080/update
 
 2023-06-07
+  2.25.1  - force update  ALWAYS, otherwise no history in Grafana!!!
+
+2023-06-07
   2.25.0  - accepted
 
 2023-06-07
