@@ -10,6 +10,9 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+2023-06-12
+  2.26.b1 - testing S3 as gateway 
+
 2023-06-07
   2.25.1  - force update  ALWAYS, otherwise no history in Grafana!!!
 
