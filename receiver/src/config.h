@@ -302,7 +302,7 @@ config
 #elif DEVICE_ID == 29
   #define BOARD_TYPE                3
   #define HOSTNAME                  "esp32029"
-  #define ROLE_NAME                 "gw1-hall-S3"
+  #define ROLE_NAME                 "gw1-hall"
   #define LED_GPIO_SENSORS          5   // RED
   #define LED_GPIO_GATEWAY          6   // GREEN
   #define LED_GPIO_STANDBY          7   // BLUE
