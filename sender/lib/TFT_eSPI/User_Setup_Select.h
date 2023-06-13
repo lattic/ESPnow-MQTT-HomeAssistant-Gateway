@@ -13,8 +13,11 @@
 // Setup file configured for my ST7789 240x240 - used in 114 LPS and 115 SPS
 // #include "ZH_ST7789-LPS-SPS.h"
 
-// Setup file configured for my ST7735 160x80 - Pimoroni
-#include "ZH_ST7735-Pimoroni-16x80.h"
+// Setup file configured for my ST7735 160x80 - Ali - more pins than Pimoroni
+#include "ZH_ST7735-Ali-160x80.h"
+
+// Setup file configured for my ST7735 160x80 - Pimoroni - les pins than Ali
+// #include "ZH_ST7735-Pimoroni-160x80.h"
 
 // Setup file configured for my ST7789 240x240 - used in new sensor device
 // #include <../0-ZH_library/TFT_eSPI_display_setups/ZH_ST7789-NEW-SENSORS.h>                 
