@@ -889,10 +889,10 @@
   #define DEVICE_NAME                 "094"  // 15 characters maximum
   #define BOARD_TYPE                  2 // 1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define FW_UPGRADE_GPIO             1   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
-  #define SLEEP_TIME_S                3  // seconds - 
+  #define SLEEP_TIME_S                10  // seconds - 
   // #define ENABLE_3V_GPIO              8   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
 
-  #define USE_DALLAS_18B20            1
+  #define USE_DALLAS_18B20            0
   // GPIO where the DS18B20 is connected to, OW=OneWire
   #define OW_PIN                      10 // 33
   #define PARASITE_POWER  false //parasite power(2-wire) or direct (3-wire)
@@ -907,7 +907,7 @@
   #define LCD_3V_GPIO                 8
   #define LCD_SCREEN_TIME_S           3
 
-  #define PUSH_BUTTONS_ONLY           1
+  #define PUSH_BUTTONS_ONLY           0
   #define NUMBER_OF_BUTTONS           1  
   uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of push buttons
   {

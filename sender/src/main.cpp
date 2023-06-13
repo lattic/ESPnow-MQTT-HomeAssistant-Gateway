@@ -2963,7 +2963,8 @@ gather_data();
   // Serial.printf("[%s]: powered LCD at: %ums\n",__func__,millis());
 
   char temp_char[10];
-  snprintf(temp_char,sizeof(temp_char),"%0.2f",myData.temp);
+  // snprintf(temp_char,sizeof(temp_char),"%0.1f",myData.temp);
+  snprintf(temp_char,sizeof(temp_char),"%0.1f",99.9);
 
   tft.init(); // it takes 1s for ST7735 !!!
   tft.fillScreen(TFT_BLACK);
@@ -2987,10 +2988,10 @@ gather_data();
   tft.setTextPadding(TFT_WIDTH);
   tft.setTextDatum(TL_DATUM);
   tft.setTextColor(TFT_WHITE,TFT_BLACK);
-  tft.drawString(temp_char, 0, 0, 7);
+  tft.drawString(temp_char, 10, 10, 7);
 
   tft.setTextColor(TFT_YELLOW,TFT_BLACK);
-  tft.drawString("C", t_w, 0, 4);
+  tft.drawString("C", t_w +10, 10, 4);
 
   // Serial.printf("[%s]: printed on LCD at: %ums\n",__func__,millis());
   // Serial.printf("[%s]: delay started at: %ums\n",__func__,millis());
