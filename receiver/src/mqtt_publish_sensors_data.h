@@ -1016,6 +1016,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 
 // batterypercent config
   config.clear();
+  config["en"] = false;
   config["name"] = batpct_name;
   config["dev_cla"] = "battery";
   config["stat_cla"] = "measurement";

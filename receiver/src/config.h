@@ -10,7 +10,7 @@ config
 
 // configuration template:
 // #if DEVICE_ID == 29
-#if DEVICE_ID == 291
+#if DEVICE_ID == 29
   #define BOARD_TYPE                2             // 1=ESP32 2=ESP32S2 3=ESP32S3 4=ESP32C3
   #define HOSTNAME                  "esp32029"    // max 9 characters, used as name in HA
   #define IP_ADDRESS                "192.168.1.29"  // fixed IP, not in use anymore for WiFi, only for name in HA
@@ -266,68 +266,68 @@ config
 
 // #pragma message "compilation for: ESPnow_esp32029_gw1"
 
-// S2 
-#elif DEVICE_ID == 92
-  #define BOARD_TYPE                2
-  #define HOSTNAME                  "esp32092"
-  #define ROLE_NAME                 "gw92-test"
-  #define LED_GPIO_SENSORS          3   // RED
-  #define LED_GPIO_GATEWAY          5   // GREEN
-  #define LED_GPIO_STANDBY          2   // BLUE
+// // S2 
+// #elif DEVICE_ID == 92
+//   #define BOARD_TYPE                2
+//   #define HOSTNAME                  "esp32092"
+//   #define ROLE_NAME                 "gw92-test"
+//   #define LED_GPIO_SENSORS          3   // RED
+//   #define LED_GPIO_GATEWAY          5   // GREEN
+//   #define LED_GPIO_STANDBY          2   // BLUE
 
-  #define LED_GPIO_SENSORS_USE_PWM  1
-  #define LED_GPIO_SENSORS_PWM_DC   10
+//   #define LED_GPIO_SENSORS_USE_PWM  1
+//   #define LED_GPIO_SENSORS_PWM_DC   10
 
-  #define LED_GPIO_GATEWAY_USE_PWM  1
-  #define LED_GPIO_GATEWAY_PWM_DC   10
+//   #define LED_GPIO_GATEWAY_USE_PWM  1
+//   #define LED_GPIO_GATEWAY_PWM_DC   10
 
-  #define LED_GPIO_STANDBY_USE_PWM  1
-  #define LED_GPIO_STANDBY_PWM_DC   10
+//   #define LED_GPIO_STANDBY_USE_PWM  1
+//   #define LED_GPIO_STANDBY_PWM_DC   10
 
-  #define PUSH_BUTTON_GPIO          0  // to control ESP
-  #define PUSH_BUTTON_GPIO_ACT    LOW  // HIGH or LOW, HIGH = 1, LOW = 0, 0 if not defined (so default)
+//   #define PUSH_BUTTON_GPIO          0  // to control ESP
+//   #define PUSH_BUTTON_GPIO_ACT    LOW  // HIGH or LOW, HIGH = 1, LOW = 0, 0 if not defined (so default)
 
-  uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x92};
+//   uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x92};
   
-  #define OTA_ACTIVE                1
+//   #define OTA_ACTIVE                1
 
-  #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
+//   #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
 
-  #define USE_WEB_SERIAL            1
+//   #define USE_WEB_SERIAL            1
 
-  #pragma message "compilation for: ESPnow_esp32092-gwtest"
+//   #pragma message "compilation for: ESPnow_esp32092-gwtest"
 
 
-// S3 
-#elif DEVICE_ID == 29
-  #define BOARD_TYPE                3
-  #define HOSTNAME                  "esp32029"
-  #define ROLE_NAME                 "gw1-hall"
-  #define LED_GPIO_SENSORS          5   // RED
-  #define LED_GPIO_GATEWAY          6   // GREEN
-  #define LED_GPIO_STANDBY          7   // BLUE
+// // S3 
+// #elif DEVICE_ID == 29
+//   #define BOARD_TYPE                3
+//   #define HOSTNAME                  "esp32029"
+//   #define ROLE_NAME                 "gw1-hall"
+//   #define LED_GPIO_SENSORS          5   // RED
+//   #define LED_GPIO_GATEWAY          6   // GREEN
+//   #define LED_GPIO_STANDBY          7   // BLUE
 
-  #define LED_GPIO_SENSORS_USE_PWM  1
-  #define LED_GPIO_SENSORS_PWM_DC   10
+//   #define LED_GPIO_SENSORS_USE_PWM  1
+//   #define LED_GPIO_SENSORS_PWM_DC   10
 
-  #define LED_GPIO_GATEWAY_USE_PWM  1
-  #define LED_GPIO_GATEWAY_PWM_DC   10
+//   #define LED_GPIO_GATEWAY_USE_PWM  1
+//   #define LED_GPIO_GATEWAY_PWM_DC   10
 
-  #define LED_GPIO_STANDBY_USE_PWM  1
-  #define LED_GPIO_STANDBY_PWM_DC   10
+//   #define LED_GPIO_STANDBY_USE_PWM  1
+//   #define LED_GPIO_STANDBY_PWM_DC   10
 
-  #define PUSH_BUTTON_GPIO          0  // to control ESP
-  #define PUSH_BUTTON_GPIO_ACT    LOW  // HIGH or LOW, HIGH = 1, LOW = 0, 0 if not defined (so default)
+//   #define PUSH_BUTTON_GPIO          0  // to control ESP
+//   #define PUSH_BUTTON_GPIO_ACT    LOW  // HIGH or LOW, HIGH = 1, LOW = 0, 0 if not defined (so default)
 
-  uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x29};
+//   uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x29};
   
-  #define OTA_ACTIVE                1
+//   #define OTA_ACTIVE                1
 
-  #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
+//   #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
 
-  #define USE_WEB_SERIAL            1
+//   #define USE_WEB_SERIAL            1
 
-  #pragma message "compilation for: ESPnow_esp32093-gwtest"
+//   #pragma message "compilation for: ESPnow_esp32093-gwtest"
 
 #else
   #error "Wrong DEVICE_ID chosen"
