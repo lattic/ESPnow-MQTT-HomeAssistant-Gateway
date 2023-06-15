@@ -13,7 +13,7 @@
   #endif
 #endif 
 
-#define ZH_PROG_VERSION "2.17.0"                     // version < 10 chars, description in changelog.txt
+#define ZH_PROG_VERSION "2.18.b1"                     // version < 10 chars, description in changelog.txt
 
 #define FORMAT_FS                   0               // force format of file system - used only on first deployment - FS is also formatted on reset device fucntion
 // #define PPK2_GPIO                   33              // comment out if not used - GPIO to test power and timings using PPK2 - for C3 GPIO 33 is out of range
@@ -23,12 +23,13 @@
 #define SLEEP_TIME_H_BATTERY_EMPTY  24              // sleep hours when battery empty
 #define WAIT_FOR_WIFI               5               // in seconds
 #define MAX17048_DELAY_ON_RESET_MS  200             // as per datasheet: needed before next reading from MAX17048 after reset, only in use when reset/battery change
-#define CP_TIMEOUT_S                180//180             // Captive Portal will terminate after this time
-#define OTA_WEB_SERVER_TIMEOUT_S    180//180             // Captive Portal will terminate after this time
+#define CP_TIMEOUT_S                180             // Captive Portal will terminate after this time
+#define OTA_WEB_SERVER_TIMEOUT_S    180             // Captive Portal will terminate after this time
+#define OTA_WEB_SERVER_PORT         8080            // PORT
 #define uS_TO_S_FACTOR              1000000ULL      // auxuliary 
 
 #define DEBOUNCE_MS_ANY_GPIO        5 // 200        // wait time after pressing ANY GPIO
-#define DEBOUNCE_MS_FW_GPIO         200             // used for FW GPIO only
+#define DEBOUNCE_MS_FW_GPIO         300  // 200     // used for FW GPIO only
 #define DEBOUNCE_MS_PUSHBUTTON      100             // used for PUSH BUTTON GPIO only
 
 // charging constants - maximum 4 characters

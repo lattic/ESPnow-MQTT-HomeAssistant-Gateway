@@ -4,6 +4,10 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
+
+2023-06-14
+  2.18.b1  - pool thermometer + some reworks with PUSH_BUTTONS_ONLY and LCD
+
 2023-06-07
   2.17.0   - get_lux rework accepted
 

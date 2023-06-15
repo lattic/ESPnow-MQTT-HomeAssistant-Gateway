@@ -313,14 +313,16 @@
   #define ERROR_RED_LED_GPIO          37   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   
 
-  #define PUSH_BUTTONS_ONLY           1
+  #define PUSH_BUTTONS                1   // PULL GPIO DOWN, ACTIVE HIGH as it is programmed like this in the hibernate()
 
   #define NUMBER_OF_BUTTONS           5  
   uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of push buttons
   {
     3,4,5,6,7
   }; 
-  uint8_t button_pressed = 0;               // 0 means: not pressed, from 1 ... is the button number from the above array, starting from 1 (not from 0)
+  uint8_t button_pressed = 0;               // 0 means: not pressed
+                                            // 1 means: button_gpio[0] pressed, 2 means: button_gpio[1]
+                                            // count from 1 not from 0 as 0 means not pressed
 
   #pragma message "compilation for: esp32042-pushb_6x_desk"
 // ---------------------------------------------------------------------------------------------------
@@ -892,7 +894,7 @@
   #define SLEEP_TIME_S                10  // seconds - 
   // #define ENABLE_3V_GPIO              8   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
 
-  #define USE_DALLAS_18B20            0
+  #define USE_DALLAS_18B20            1
   // GPIO where the DS18B20 is connected to, OW=OneWire
   #define OW_PIN                      10 // 33
   #define PARASITE_POWER  false //parasite power(2-wire) or direct (3-wire)
@@ -901,20 +903,25 @@
   #define CALIBRATE_TEMPERATURE       0 
   // 28:30:22:75:D0:1:3C:61 -> DS18B20
 
-  #define USE_LCD_ZH_ST7789           1
+  #define USE_ST7735_160_80_ALI       1
   #define SCREEN_ROTATION             1
-  #define ST7789_LCD_LED_GPIO         6
+  #define LCD_LED_GPIO                6
   #define LCD_3V_GPIO                 8
   #define LCD_SCREEN_TIME_S           3
+  #define POWER_SAVINGS_WIFI          1   // use 0 if not in use (WiFi)
+  #define POWER_SAVINGS_CPU           1   // use 0 if not in use (PU freq)
 
-  #define PUSH_BUTTONS_ONLY           0
-  #define NUMBER_OF_BUTTONS           1  
-  uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of push buttons
-  {
-    9
-  }; 
-  uint8_t button_pressed = 0;               // 0 means: not pressed, from 1 ... is the button number from the above array, starting from 1 (not from 0)
+  // #define PUSH_BUTTONS                1   // PULL GPIO DOWN, ACTIVE HIGH as it is programmed like this in the hibernate()
+  // #define NUMBER_OF_BUTTONS           1  
+  // uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of push buttons
+  // {
+  //   9
+  // }; 
+  // // uint8_t button_pressed = 0;               // 0 means: not pressed, from 1 to last button number that is pressed - not GPIO - is the button number from the above array, starting from 1 (not from 0)
 
+  // uint8_t button_pressed = 0;               // 0 means: not pressed
+  //                                           // 1 means: button_gpio[0] pressed, 2 means: button_gpio[1]
+  //                                           // count from 1 not from 0 as 0 means not pressed
 
 
   #pragma message "compilation for: esp320094"
@@ -926,7 +933,7 @@
 #endif
 
 // common parameters
-#if (PUSH_BUTTONS_ONLY == 1) and (BOARD_TYPE == 4)
+#if (PUSH_BUTTONS == 1) and (BOARD_TYPE == 4)
   #error "push buttons board not yet defined for ESP32-C3"
 #endif
 

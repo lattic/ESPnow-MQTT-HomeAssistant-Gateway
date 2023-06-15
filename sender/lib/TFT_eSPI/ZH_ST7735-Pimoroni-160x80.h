@@ -1,5 +1,6 @@
 // Setup for ESP32 and ST7735 80 x 160 TFT
 #define USER_SETUP_ID 43
+#define ST7735_160_80_PIMORONI
 // See SetupX_Template.h for all options available
 
 #define ST7735_DRIVER
@@ -18,22 +19,14 @@
 //  #define TFT_RGB_ORDER TFT_BGR  // Colour order Blue-Green-Red
 
 #ifdef ESP32
-#define TFT_MISO 40
-#define TFT_MOSI 4
-#define TFT_SCLK 5
-#define TFT_CS    2  // Chip select control pin
-#define TFT_DC    3  // Data Command control pin
-#define TFT_RST   40  // Reset pin (could connect to RST pin)
-//#define TFT_RST  -1  // Set TFT_RST to -1 if display RESET is connected to ESP32 board RST
+    #define TFT_MISO 40
+    #define TFT_MOSI 4
+    #define TFT_SCLK 5
+    #define TFT_CS    2  // Chip select control pin
+    #define TFT_DC    3  // Data Command control pin
+    #define TFT_RST   40  // Reset pin (could connect to RST pin)
 #else
-// Display GND       to NodeMCU pin GND (0V)
-// Display VCC       to NodeMCU 5V or 3.3V
-// Display SCK       to NodeMCU pin D5
-// Display SDI/MOSI  to NodeMCU pin D7
-// Display BLK       to NodeMCU pin VIN
-#define TFT_CS   PIN_D8  // Chip select control pin D8
-#define TFT_DC   PIN_D3  // Data Command control pin
-#define TFT_RST  PIN_D4  // Reset pin (could connect to NodeMCU RST, see next line)
+    #error "only ESP32 compatible"
 #endif
 
 #define LOAD_GLCD   // Font 1. Original Adafruit 8 pixel font needs ~1820 bytes in FLASH

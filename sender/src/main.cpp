@@ -87,12 +87,15 @@ sender.ino
 #endif
 
 // LCD
-#if (USE_LCD_ZH_ST7789 == 1)
+#if (USE_ST7735_160_80_ALI == 1)
   #warning "building with LCD"
   #include <TFT_eSPI.h> 
   #include <SPI.h>
   TFT_eSPI tft = TFT_eSPI();  // Invoke library
   TFT_eSprite img = TFT_eSprite(&tft);
+  #ifndef ST7735_160_80_ALI
+    #error "wrong display configured- check TFT_eSPI library and use the one with ST7735_160_80_ALI in it"
+  #endif 
 #endif
 
 // ========================================================================== libraries END
@@ -160,7 +163,7 @@ bool ota_web_server_needed = false;
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
-AsyncWebServer ota_web_server(8080);
+AsyncWebServer ota_web_server(OTA_WEB_SERVER_PORT);
 
 
 // MAX17048 - battery fuel gauge, I2C
@@ -386,8 +389,9 @@ void start_web_server()
 {
   #define OTA_USER "admin"
   #define OTA_PASSWORD "password"
-  Serial.printf("[%s]: Enabling OTA:...\n",__func__);
+  Serial.printf("[%s]: Enabling OTA on port=%d...\n",__func__,OTA_WEB_SERVER_PORT);
   Serial.printf("[%s]: user=%s, password=%s\n",__func__,OTA_USER,OTA_PASSWORD);
+  Serial.printf("[%s]: Go to: http://%s:%d/update\n",__func__,WiFi.localIP().toString(),OTA_WEB_SERVER_PORT);
   ota_web_server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
   {
     String introtxt = "This is " + String(HOSTNAME)+ ", device ID="+String(DEVICE_ID) +", Version=" + String(ZH_PROG_VERSION) + ", MAC=" + String(WiFi.macAddress());
@@ -686,7 +690,7 @@ void hibernate(bool force, int final_sleeping_time_s)
   #endif
   uint64_t bitmask_dec = 0;
 
-  #if (PUSH_BUTTONS_ONLY == 1)
+  #if (PUSH_BUTTONS == 1)
     for (uint8_t i = 0; i < NUMBER_OF_BUTTONS; i++)
     {
       bitmask_dec = bitmask_dec + pow(2, button_gpio[i]);
@@ -945,7 +949,7 @@ void gather_data()
   #endif
 
   // button pressed
-  #if ((PUSH_BUTTONS_ONLY == 1) or (TOUCHPAD_ONLY))
+  #if ((PUSH_BUTTONS == 1) or (TOUCHPAD_ONLY))
     if (button_pressed > 0)
       myData.button_pressed = button_pressed;
   #endif
@@ -1821,7 +1825,7 @@ void do_esp_go_to_sleep()
 {
   save_config("Config saved before going to sleep");
   
-  #if (PUSH_BUTTONS_ONLY == 1)
+  #if (PUSH_BUTTONS == 1)
     if (button_pressed)
     {
       Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_PUSHBUTTON);
@@ -1898,7 +1902,13 @@ void save_config(const char* reason)
   }
 
   // ontime
-  uint32_t work_time = millis() - program_start_time + (ESP32_BOOT_TIME) + (ESP32_TAIL_TIME) + extra_reset_time;
+  // add extra 350ms if CPU reduced
+  #if (POWER_SAVINGS_CPU == 1)
+    uint32_t work_time = millis() - program_start_time + (ESP32_BOOT_TIME) + (ESP32_TAIL_TIME) + extra_reset_time + 350;
+  #else
+    uint32_t work_time = millis() - program_start_time + (ESP32_BOOT_TIME) + (ESP32_TAIL_TIME) + extra_reset_time;
+  #endif 
+  
   g_last_working_time_ms = work_time;
   #ifdef DEBUG
     Serial.printf("[%s]: millis=%d, program_start_time=%d, ESP32_BOOT_TIME=%d, ESP32_TAIL_TIME=%d, extra_reset_time=%d,  Program finished after %lums (adjusted).\n",__func__,millis(),program_start_time, ESP32_BOOT_TIME,ESP32_TAIL_TIME,extra_reset_time, work_time);
@@ -2274,7 +2284,7 @@ void setup()
             break;
           }
         #endif
-        #if (PUSH_BUTTONS_ONLY == 1)
+        #if (PUSH_BUTTONS == 1)
           for (uint8_t i = 0; i < NUMBER_OF_BUTTONS; i++)
           {
             if (wakeup_gpio == button_gpio[i])
@@ -2926,6 +2936,29 @@ gather_data();
 
   if (fw_update)
   {
+    #if (USE_ST7735_160_80_ALI == 1) 
+      pinMode(LCD_LED_GPIO, OUTPUT);
+      #ifdef LCD_3V_GPIO
+        pinMode(LCD_3V_GPIO,OUTPUT);
+        #ifdef DEBUG
+          Serial.printf("[%s]: Enabling 3V to power LCD on GPIO=%d\n",__func__,LCD_3V_GPIO);
+        #endif
+        digitalWrite(LCD_3V_GPIO, HIGH);
+        while (!digitalRead(LCD_3V_GPIO)){delay(1);}
+      #endif
+
+      tft.init(); // it takes 1s for ST7735 !!!
+      tft.fillScreen(TFT_BLACK);
+      delay(50);  // this delay solves initial flicker
+      digitalWrite(LCD_LED_GPIO,HIGH);
+
+      tft.setRotation(SCREEN_ROTATION);
+      tft.setTextPadding(TFT_WIDTH);
+      tft.setTextDatum(TL_DATUM);
+      tft.setTextColor(TFT_RED,TFT_BLACK);
+      tft.drawString("FW update", 10, 30, 4);
+
+    #endif
     Serial.printf("[%s]: FW update requested\n",__func__);
     connect_wifi();
     do_update();
@@ -2948,68 +2981,112 @@ gather_data();
   if (g_sleeptime_s > 0) sleeptime_s = g_sleeptime_s;
 
 // LCD
-#if (USE_LCD_ZH_ST7789 == 1)
-  // Serial.printf("[%s]: start LC: %ums\n",__func__,millis());
-  pinMode(ST7789_LCD_LED_GPIO, OUTPUT);
-  #ifdef LCD_3V_GPIO
-    pinMode(LCD_3V_GPIO,OUTPUT);
-    #ifdef DEBUG
-      Serial.printf("[%s]: Enabling 3V to power LCD on GPIO=%d\n",__func__,LCD_3V_GPIO);
+#if (USE_ST7735_160_80_ALI == 1) 
+  // display temperature on: reset, power on, gpio short push AND if not OTA webserver needed!
+  if (((boot_reason == 1) or (boot_reason == 3) or (wakeup_gpio == FW_UPGRADE_GPIO)) and (!ota_web_server_needed))
+  {
+    // power savign features: 
+    // before savings: 
+    //  - total time: 4900ms, avg current: 84mA = 411.6
+    //  - tft.init = time: 1000ms, current: 76.3mA
+    //  - display  = time: 3000ms, current: 89mA
+    // tail: 345ms
+    // WiFi OFF reduction: 
+    //  - total time: 4900ms, avg current: 44.5mA = 218
+    //  - tft.init = time: 1000ms, current: 26.7mA
+    //  - display  = time: 3000ms, current: 41.25mA
+    // tail: 345ms
+    // WiFi OFF and 10MHz CPU instead of 240MHz reduction:
+    //  - total time: 5400ms, avg current: 32.5mA = 175.5   // 5300, 31.6
+    //  - tft.init = time: 1000ms, current: 8.8mA           // 1000, 8.7, 
+    //  - display  = time: 3000ms, current: 23mA            // 3000, 23
+    // tail: 346ms, 68.4mA
+
+    // no LCD: 43.62mC
+    // with LCD no savings: 411mC
+    // with LCD no savings: 177mC
+
+    #if (POWER_SAVINGS_WIFI == 1)
+      WiFi.mode(WIFI_OFF);
     #endif
-    digitalWrite(LCD_3V_GPIO, HIGH);
-    while (!digitalRead(LCD_3V_GPIO)){delay(1);}
-    // delay(10);
-  #endif
-  // Serial.printf("[%s]: powered LCD at: %ums\n",__func__,millis());
+    #if (POWER_SAVINGS_CPU == 1)
+      #ifdef DEBUG
+        Serial.printf("[%s]: getXtalFrequencyMhz()=%d\n",__func__,getXtalFrequencyMhz());
+        Serial.printf("[%s]: getCpuFrequencyMhz()=%d\n",__func__,getCpuFrequencyMhz());
+        Serial.printf("[%s]: getApbFrequency()=%d\n",__func__,getApbFrequency());
+      #endif
 
-  char temp_char[10];
-  // snprintf(temp_char,sizeof(temp_char),"%0.1f",myData.temp);
-  snprintf(temp_char,sizeof(temp_char),"%0.1f",99.9);
+      Serial.printf("[%s]: getCpuFrequencyMhz()=%d\n",__func__,getCpuFrequencyMhz());
 
-  tft.init(); // it takes 1s for ST7735 !!!
-  tft.fillScreen(TFT_BLACK);
-  delay(50);  // this delay solves initial flicker
-  digitalWrite(ST7789_LCD_LED_GPIO,HIGH);
+      // Serial has to start again after CPU frequency is changed
+      Serial.flush();
+      Serial.end();
+      setCpuFrequencyMhz(10);
+      Serial.begin(115200);
 
-  // Serial.printf("[%s]: LED ON at: %ums\n",__func__,millis());
+      Serial.printf("[%s]: getCpuFrequencyMhz()=%d\n",__func__,getCpuFrequencyMhz());
 
-  tft.setRotation(SCREEN_ROTATION);
-
-  int t_w = img.textWidth(temp_char,7);
-  int t_h = img.fontHeight(7);
-
-  Serial.printf("temp. w=%d, h=%d\n",t_w,t_h);
-
-  // int tc_w = img.textWidth("C",4);
-  // int full_text = t_w + tc_w;
-  // Serial.printf("t_w=%d, tc_w=%d, full_text=%d\n",t_w,tc_w,full_text);
-
-
-  tft.setTextPadding(TFT_WIDTH);
-  tft.setTextDatum(TL_DATUM);
-  tft.setTextColor(TFT_WHITE,TFT_BLACK);
-  tft.drawString(temp_char, 10, 10, 7);
-
-  tft.setTextColor(TFT_YELLOW,TFT_BLACK);
-  tft.drawString("C", t_w +10, 10, 4);
-
-  // Serial.printf("[%s]: printed on LCD at: %ums\n",__func__,millis());
-  // Serial.printf("[%s]: delay started at: %ums\n",__func__,millis());
-  delay(LCD_SCREEN_TIME_S * 1000);
-  // Serial.printf("[%s]: delay finished at: %ums\n",__func__,millis());
-
-  digitalWrite(ST7789_LCD_LED_GPIO,LOW);
-  // Serial.printf("[%s]: LED OFF at: %ums\n",__func__,millis());
-
-  // off 3V
-  #ifdef LCD_3V_GPIO
-    #ifdef DEBUG
-      Serial.printf("[%s]: Disabling 3V on GPIO=%d\n",__func__,LCD_3V_GPIO);
+      #ifdef DEBUG
+        Serial.printf("[%s]: getXtalFrequencyMhz()=%d\n",__func__,getXtalFrequencyMhz());
+        Serial.printf("[%s]: getCpuFrequencyMhz()=%d\n",__func__,getCpuFrequencyMhz());
+        Serial.printf("[%s]: getApbFrequency()=%d\n",__func__,getApbFrequency());
+      #endif
     #endif
-    digitalWrite(LCD_3V_GPIO, LOW);
-  #endif
-  // Serial.printf("[%s]: powered OFF LCD at: %ums\n",__func__,millis());
 
+    // power savign features END
+
+
+
+    // Serial.printf("[%s]: start LC: %ums\n",__func__,millis());
+    Serial.printf("[%s]: DISPLAYING TEMPERATURE for %d seconds\n",__func__,LCD_SCREEN_TIME_S);
+    pinMode(LCD_LED_GPIO, OUTPUT);
+    #ifdef LCD_3V_GPIO
+      pinMode(LCD_3V_GPIO,OUTPUT);
+      #ifdef DEBUG
+        Serial.printf("[%s]: Enabling 3V to power LCD on GPIO=%d\n",__func__,LCD_3V_GPIO);
+      #endif
+      digitalWrite(LCD_3V_GPIO, HIGH);
+      while (!digitalRead(LCD_3V_GPIO)){delay(1);}
+    #endif
+    // Serial.printf("[%s]: powered LCD at: %ums\n",__func__,millis());
+
+    char temp_char[10];
+    snprintf(temp_char,sizeof(temp_char),"%0.1f",myData.temp);
+
+    tft.init(); // it takes 1s for ST7735 !!!
+    tft.fillScreen(TFT_BLACK);
+    delay(50);  // this delay solves initial flicker
+    digitalWrite(LCD_LED_GPIO,HIGH);
+
+    tft.setRotation(SCREEN_ROTATION);
+
+    int t_w = img.textWidth(temp_char,7);
+    int t_h = img.fontHeight(7);
+
+    // Serial.printf("temp. w=%d, h=%d\n",t_w,t_h);
+
+    tft.setTextPadding(TFT_WIDTH);
+    tft.setTextDatum(TL_DATUM);
+    tft.setTextColor(TFT_WHITE,TFT_BLACK);
+    tft.drawString(temp_char, 10, 10, 7);
+
+    tft.setTextColor(TFT_YELLOW,TFT_BLACK);
+    tft.drawString("C", t_w +10, 10, 4);
+
+    delay(LCD_SCREEN_TIME_S * 1000);
+
+
+    digitalWrite(LCD_LED_GPIO,LOW);
+
+    // off 3V
+    #ifdef LCD_3V_GPIO
+      #ifdef DEBUG
+        Serial.printf("[%s]: Disabling 3V on GPIO=%d\n",__func__,LCD_3V_GPIO);
+      #endif
+      digitalWrite(LCD_3V_GPIO, LOW);
+    #endif
+    // Serial.printf("[%s]: powered OFF LCD at: %ums\n",__func__,millis());
+  }
 #endif
 
   if (!ota_web_server_needed)
