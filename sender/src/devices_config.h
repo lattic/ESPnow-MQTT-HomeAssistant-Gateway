@@ -891,14 +891,15 @@
   #define DEVICE_NAME                 "094"  // 15 characters maximum
   #define BOARD_TYPE                  2 // 1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define FW_UPGRADE_GPIO             1   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
-  #define SLEEP_TIME_S                10  // seconds - 
+  #define SLEEP_TIME_S                300  // seconds - 
   // #define ENABLE_3V_GPIO              8   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  #define ACT_BLUE_LED_GPIO           37
+  #define ERROR_RED_LED_GPIO          35
 
   #define USE_DALLAS_18B20            1
-  // GPIO where the DS18B20 is connected to, OW=OneWire
-  #define OW_PIN                      10 // 33
-  #define PARASITE_POWER  false //parasite power(2-wire) or direct (3-wire)
-  #define COMMON_RES      (DSTherm::RES_12_BIT) //9-12 bits resolution
+  #define OW_PIN                      10 // GPIO where the DS18B20 is connected to, OW=OneWire
+  #define PARASITE_POWER              false //parasite power(2-wire) or direct (3-wire)
+  #define COMMON_RES                  (DSTherm::RES_12_BIT) //9-12 bits resolution
   #define CONFIG_DS18S20_EXT_RES
   #define CALIBRATE_TEMPERATURE       0 
   // 28:30:22:75:D0:1:3C:61 -> DS18B20
@@ -910,19 +911,7 @@
   #define LCD_SCREEN_TIME_S           3
   #define POWER_SAVINGS_WIFI          1   // use 0 if not in use (WiFi)
   #define POWER_SAVINGS_CPU           1   // use 0 if not in use (PU freq)
-
-  // #define PUSH_BUTTONS                1   // PULL GPIO DOWN, ACTIVE HIGH as it is programmed like this in the hibernate()
-  // #define NUMBER_OF_BUTTONS           1  
-  // uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of push buttons
-  // {
-  //   9
-  // }; 
-  // // uint8_t button_pressed = 0;               // 0 means: not pressed, from 1 to last button number that is pressed - not GPIO - is the button number from the above array, starting from 1 (not from 0)
-
-  // uint8_t button_pressed = 0;               // 0 means: not pressed
-  //                                           // 1 means: button_gpio[0] pressed, 2 means: button_gpio[1]
-  //                                           // count from 1 not from 0 as 0 means not pressed
-
+  #define POWER_SAVINGS_CPU_TAIL_EXTRA_MS  450 // extra ending time due to slow CPU
 
   #pragma message "compilation for: esp320094"
 // ---------------------------------------------------------------------------------------------------

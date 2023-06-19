@@ -72,10 +72,10 @@
     
     // Serial.printf("[%s]: Temperature=%0.2fC\n",__func__,temp_float);
 
-    // #ifdef DEBUG
+    #ifdef DEBUG
       Serial.printf("[%s]: Temperature=%0.2fC\n",__func__,temp_float);
       Serial.printf("[%s]: took %ums\n",__func__,(millis()-function_start));
-    // #endif
+    #endif
 
     return temp_float;
   }

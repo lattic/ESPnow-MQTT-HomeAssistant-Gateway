@@ -241,6 +241,9 @@ Config config;
 //ciphering
 char* cipher_key = (char*)CIPHER_KEY;   
 
+// for power saving features
+bool power_savings_cpu_used = false;
+
 
 // captive portal html page
 class CaptiveRequestHandler : public AsyncWebHandler {
@@ -665,12 +668,14 @@ void hibernate(bool force, int final_sleeping_time_s)
   esp_deep_sleep_disable_rom_logging();                                   // it does not display welcome message - shorter time to wake up
 
   // these DON'T interfere with touchpad 
-  esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL,         ESP_PD_OPTION_OFF);
-  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M,        ESP_PD_OPTION_OFF);
-  esp_sleep_pd_config(ESP_PD_DOMAIN_VDDSDIO,      ESP_PD_OPTION_OFF);
-  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
-  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
-  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH,   ESP_PD_OPTION_OFF);
+  // these DON'T improve sleeping current
+  // these make RTC unusable
+        // esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL,         ESP_PD_OPTION_OFF);
+        // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC8M,        ESP_PD_OPTION_OFF);
+        // esp_sleep_pd_config(ESP_PD_DOMAIN_VDDSDIO,      ESP_PD_OPTION_OFF);
+        // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
+        // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
+        // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH,   ESP_PD_OPTION_OFF);
 
 
   if (force) // used when battery too low - don't wake up on GPIO
@@ -1173,15 +1178,15 @@ void gather_data()
 
 // working_time_ms
   myData.working_time_ms = g_last_working_time_ms;
-  // #ifdef DEBUG
+  #ifdef DEBUG
     Serial.printf("[%s]: working_time_ms %ums\n",__func__,myData.working_time_ms);
-  // #endif
+  #endif
 
 // sleep_time_s
   myData.sleep_time_s = g_sleeptime_s;
-  // #ifdef DEBUG
+  #ifdef DEBUG
     Serial.printf("[%s]: sleep_time_s %ds\n",__func__,myData.sleep_time_s);
-  // #endif
+  #endif
 
   #ifdef DEBUG
     Serial.printf(" Total struct size=%d bytes\n",sizeof(myData));
@@ -1834,7 +1839,7 @@ void do_esp_go_to_sleep()
   #endif
 
   // #ifdef DEBUG_LIGHT
-    Serial.printf("[%s]: Bye...\n========= E N D =========\n",__func__);
+    Serial.printf("[%s]: millis=%lums, Bye...\n========= E N D =========\n",__func__,millis());
   // #endif
   esp_deep_sleep_start();
 }
@@ -1903,8 +1908,8 @@ void save_config(const char* reason)
 
   // ontime
   // add extra 350ms if CPU reduced
-  #if (POWER_SAVINGS_CPU == 1)
-    uint32_t work_time = millis() - program_start_time + (ESP32_BOOT_TIME) + (ESP32_TAIL_TIME) + extra_reset_time + 350;
+  #if ((POWER_SAVINGS_CPU == 1) and (power_savings_cpu_used))
+    uint32_t work_time = millis() - program_start_time + (ESP32_BOOT_TIME) + (ESP32_TAIL_TIME) + extra_reset_time + POWER_SAVINGS_CPU_TAIL_EXTRA_MS;
   #else
     uint32_t work_time = millis() - program_start_time + (ESP32_BOOT_TIME) + (ESP32_TAIL_TIME) + extra_reset_time;
   #endif 
@@ -1923,7 +1928,7 @@ void save_config(const char* reason)
   }
   
   // #ifdef DEBUG_LIGHT
-    Serial.printf("[%s]: Program finished after %lums (adjusted).\n",__func__,work_time);
+    Serial.printf("[%s]: millis=%lums, Program finished after %lums (adjusted).\n",__func__,millis(), work_time);
   // #endif
   
   // testing with PPK2 - end save ontime
@@ -2139,7 +2144,7 @@ void setup()
   initiate_all_leds();
   // #ifdef DEBUG_LIGHT
     Serial.printf("\n======= S T A R T =======\n");
-    Serial.printf("[%s]: Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__,DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
+    Serial.printf("[%s]: millis=%lums, Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__,program_start_time, DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
   // #endif
   // check if device is charging
   snprintf(charging,4,"%s","N/A");
@@ -3010,7 +3015,9 @@ gather_data();
       WiFi.mode(WIFI_OFF);
     #endif
     #if (POWER_SAVINGS_CPU == 1)
+      power_savings_cpu_used = true;
       #ifdef DEBUG
+        Serial.printf("[%s]: power_savings_cpu_used=%d\n",__func__,power_savings_cpu_used);
         Serial.printf("[%s]: getXtalFrequencyMhz()=%d\n",__func__,getXtalFrequencyMhz());
         Serial.printf("[%s]: getCpuFrequencyMhz()=%d\n",__func__,getCpuFrequencyMhz());
         Serial.printf("[%s]: getApbFrequency()=%d\n",__func__,getApbFrequency());
@@ -3035,9 +3042,6 @@ gather_data();
 
     // power savign features END
 
-
-
-    // Serial.printf("[%s]: start LC: %ums\n",__func__,millis());
     Serial.printf("[%s]: DISPLAYING TEMPERATURE for %d seconds\n",__func__,LCD_SCREEN_TIME_S);
     pinMode(LCD_LED_GPIO, OUTPUT);
     #ifdef LCD_3V_GPIO
@@ -3048,10 +3052,21 @@ gather_data();
       digitalWrite(LCD_3V_GPIO, HIGH);
       while (!digitalRead(LCD_3V_GPIO)){delay(1);}
     #endif
-    // Serial.printf("[%s]: powered LCD at: %ums\n",__func__,millis());
 
     char temp_char[10];
-    snprintf(temp_char,sizeof(temp_char),"%0.1f",myData.temp);
+    bool temp_error = false;
+    
+    if ((myData.temp < -33) and (myData.temp > -34))
+    {
+      temp_error = true;
+      Serial.printf("[%s]: TEMPERATURE ERROR!\n",__func__);
+    } else 
+    {
+      snprintf(temp_char,sizeof(temp_char),"%0.1f",myData.temp);
+      #ifdef DEBUG
+        Serial.printf("[%s]: TEMPERATURE OK %0.2f\n",__func__,myData.temp);
+      #endif
+    }
 
     tft.init(); // it takes 1s for ST7735 !!!
     tft.fillScreen(TFT_BLACK);
@@ -3063,15 +3078,19 @@ gather_data();
     int t_w = img.textWidth(temp_char,7);
     int t_h = img.fontHeight(7);
 
-    // Serial.printf("temp. w=%d, h=%d\n",t_w,t_h);
-
     tft.setTextPadding(TFT_WIDTH);
     tft.setTextDatum(TL_DATUM);
-    tft.setTextColor(TFT_WHITE,TFT_BLACK);
-    tft.drawString(temp_char, 10, 10, 7);
-
-    tft.setTextColor(TFT_YELLOW,TFT_BLACK);
-    tft.drawString("C", t_w +10, 10, 4);
+    if (!temp_error)
+    {
+      tft.setTextColor(TFT_WHITE,TFT_BLACK);
+      tft.drawString(temp_char, 10, 10, 7);
+      tft.setTextColor(TFT_YELLOW,TFT_BLACK);
+      tft.drawString("C", t_w +10, 10, 4);
+    } else 
+    {
+      tft.setTextColor(TFT_RED,TFT_BLACK);
+      tft.drawString("ERROR", 30, 30, 4);
+    }
 
     delay(LCD_SCREEN_TIME_S * 1000);
 
@@ -3085,7 +3104,6 @@ gather_data();
       #endif
       digitalWrite(LCD_3V_GPIO, LOW);
     #endif
-    // Serial.printf("[%s]: powered OFF LCD at: %ums\n",__func__,millis());
   }
 #endif
 
