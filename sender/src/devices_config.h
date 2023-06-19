@@ -328,6 +328,38 @@
 // ---------------------------------------------------------------------------------------------------
 
 
+#elif DEVICE_ID == 43                 // 
+  #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
+  #define HOSTNAME                    "esp32043"
+  #define DEVICE_NAME                 "swimming pool"  // 15 characters maximum
+  #define BOARD_TYPE                  2 // 1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  #define FW_UPGRADE_GPIO             1   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define SLEEP_TIME_S                300  // seconds - 
+  // #define ENABLE_3V_GPIO              8   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  #define ACT_BLUE_LED_GPIO           37
+  #define ERROR_RED_LED_GPIO          35
+
+  #define USE_DALLAS_18B20            1
+  #define OW_PIN                      10 // GPIO where the DS18B20 is connected to, OW=OneWire
+  #define PARASITE_POWER              false //parasite power(2-wire) or direct (3-wire)
+  #define COMMON_RES                  (DSTherm::RES_12_BIT) //9-12 bits resolution
+  #define CONFIG_DS18S20_EXT_RES
+  #define CALIBRATE_TEMPERATURE       0 
+  // 28:30:22:75:D0:1:3C:61 -> DS18B20
+
+  #define USE_ST7735_160_80_ALI       1
+  #define SCREEN_ROTATION             1
+  #define LCD_LED_GPIO                6
+  #define LCD_3V_GPIO                 8
+  #define LCD_SCREEN_TIME_S           3
+  #define POWER_SAVINGS_WIFI          1   // use 0 if not in use (WiFi)
+  #define POWER_SAVINGS_CPU           1   // use 0 if not in use (PU freq)
+  #define POWER_SAVINGS_CPU_TAIL_EXTRA_MS  450 // extra ending time due to slow CPU
+
+  #pragma message "compilation for: esp32043"
+// ---------------------------------------------------------------------------------------------------
+
+
 #elif DEVICE_ID == 49
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32049"
@@ -884,37 +916,6 @@
   #pragma message "compilation for: esp32092-test"
 // ---------------------------------------------------------------------------------------------------
 
-
-#elif DEVICE_ID == 94                 // 
-  #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
-  #define HOSTNAME                    "esp32094"
-  #define DEVICE_NAME                 "094"  // 15 characters maximum
-  #define BOARD_TYPE                  2 // 1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-  #define FW_UPGRADE_GPIO             1   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
-  #define SLEEP_TIME_S                300  // seconds - 
-  // #define ENABLE_3V_GPIO              8   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
-  #define ACT_BLUE_LED_GPIO           37
-  #define ERROR_RED_LED_GPIO          35
-
-  #define USE_DALLAS_18B20            1
-  #define OW_PIN                      10 // GPIO where the DS18B20 is connected to, OW=OneWire
-  #define PARASITE_POWER              false //parasite power(2-wire) or direct (3-wire)
-  #define COMMON_RES                  (DSTherm::RES_12_BIT) //9-12 bits resolution
-  #define CONFIG_DS18S20_EXT_RES
-  #define CALIBRATE_TEMPERATURE       0 
-  // 28:30:22:75:D0:1:3C:61 -> DS18B20
-
-  #define USE_ST7735_160_80_ALI       1
-  #define SCREEN_ROTATION             1
-  #define LCD_LED_GPIO                6
-  #define LCD_3V_GPIO                 8
-  #define LCD_SCREEN_TIME_S           3
-  #define POWER_SAVINGS_WIFI          1   // use 0 if not in use (WiFi)
-  #define POWER_SAVINGS_CPU           1   // use 0 if not in use (PU freq)
-  #define POWER_SAVINGS_CPU_TAIL_EXTRA_MS  450 // extra ending time due to slow CPU
-
-  #pragma message "compilation for: esp320094"
-// ---------------------------------------------------------------------------------------------------
 
 
 #else
