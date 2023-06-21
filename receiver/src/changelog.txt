@@ -10,6 +10,12 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+2023-06-21
+  2.27.b2 - valid flag in data structure - continuing
+
+2023-06-20
+  2.27.b1 - valid flag in data structure - don't publish to HA if valid = 0 (default value = 1) 
+
 2023-06-14
   2.26.0  - testing S3 as gateway - accepted
             more - config["en"] = false; -  battery

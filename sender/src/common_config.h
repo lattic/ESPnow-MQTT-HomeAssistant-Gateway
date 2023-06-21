@@ -13,7 +13,7 @@
   #endif
 #endif 
 
-#define ZH_PROG_VERSION "2.18.0"                     // version < 10 chars, description in changelog.txt
+#define ZH_PROG_VERSION "2.19.b2"                     // version < 10 chars, description in changelog.txt
 
 #define FORMAT_FS                   0               // force format of file system - used only on first deployment - FS is also formatted on reset device fucntion
 // #define PPK2_GPIO                   33              // comment out if not used - GPIO to test power and timings using PPK2 - for C3 GPIO 33 is out of range
@@ -73,8 +73,3 @@ uint8_t FixedMACAddress[] =         {0x2a, 0x01, 0x01, 0x01, 0x00, 0x01};
 
 
 #endif /* common_config_h */
-
-/*
-      ledcSetup(LED_GPIO_SENSORS_PWM_CHANNEL, LED_GPIO_SENSORS_PWM_FREQ, LED_GPIO_SENSORS_PWM_RESOLUTION);
-      ledcAttachPin(LED_GPIO_SENSORS, LED_GPIO_SENSORS_PWM_CHANNEL);
-*/

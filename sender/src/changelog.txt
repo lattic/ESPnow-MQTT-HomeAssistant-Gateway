@@ -4,6 +4,12 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
+2023-06-21
+  2.19.b2 - valid flag in data structure - continuing
+
+2023-06-20
+  2.19.b1 - valid flag in data structure - don't publish to HA if valid = 0 (default value = 1) 
+
 2023-06-19
   2.18.0  - pool thermometer became esp32043
 

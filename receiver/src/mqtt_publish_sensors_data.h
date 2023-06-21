@@ -1238,10 +1238,7 @@ bool mqtt_publish_sensors_values()
   // aux variable to format floats
   char temp_value[50];
   // no wifi
-  if (!wifi_connected)
-  {
-    return false;
-  }
+  if (!wifi_connected) return false;
   // lock local data - give back at the end of the entire fucntion
   if( xSemaphoreTake( myLocalData_protect, ( TickType_t ) 10 ) == pdTRUE )
   {
@@ -1348,6 +1345,15 @@ bool mqtt_publish_sensors_values()
     Serial.print("end influxdb, it took: ");Serial.println(millis()-influx_start);
   #endif
   // publish influxdb END
+
+  // check validity of the data
+  if (myLocalData.valid == 0)
+  {
+    Serial.printf("[%s]: %s data is INVALID - NOT PUBLISHING AND LEAVING\n",__func__,myLocalData.host);
+    set_sensors_led_level(0);
+    xSemaphoreGive( myLocalData_protect );
+    return false;
+  }
 
   if (!mqtt_publish_sensors_config(myLocalData.host,myLocalData.name,myLocalData_aux.macStr,myLocalData.ver,myLocalData.sender_type,myLocalData.boardtype, myLocalData.sleep_time_s))
   {

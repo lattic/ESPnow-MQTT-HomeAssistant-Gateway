@@ -16,6 +16,7 @@ struct Config
   uint8_t   c_motion = 1;             // motion enabled - toggle
   uint8_t   c_lux_high_sens = 0;      // lux high sensitivity - toggle
   uint16_t  c_last_working_time_ms;   // to see how long it worked for
+  uint8_t   c_valid = 1;              // valid measurerements
 };
 
 // Global variables: all with "g_" to distinguish from config variables
@@ -31,5 +32,6 @@ uint8_t     g_led_pwm;                // DC for LED PWM
 uint8_t     g_motion = 1;             // motion enabled - toggle
 uint8_t     g_lux_high_sens = 0;      // lux high sensitivity - toggle
 uint16_t    g_last_working_time_ms;   // to see how long it worked for
+uint8_t     g_valid = 1;              // valid measurerements
 
 #endif /* #ifndef littlefs_configfile_structure_h */

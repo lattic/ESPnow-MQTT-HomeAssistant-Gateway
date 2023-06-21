@@ -201,6 +201,7 @@ typedef struct struct_message           // 92 bytes
   uint8_t button_pressed = 0;           // 0 = none, >0 = the button number as per button_gpio[NUMBER_OF_BUTTONS] - NOT GPIO NUMBER! index starts from 1
   uint16_t working_time_ms;             // last working time in ms
   uint16_t sleep_time_s;                // 
+  uint8_t valid = 1;                    // make it invalid in case some info is missing, incorrect or flagged, don't publish to HA if invalid
 } struct_message;
 
 struct_message myData;
@@ -949,29 +950,42 @@ void gather_data()
   #ifdef PPK2_GPIO
     digitalWrite(PPK2_GPIO,LOW);
   #endif
-  #ifdef DEBUG
-    Serial.printf("[%s]:\n",__func__);
-  #endif
 
+  // valid measurements
+  myData.valid = g_valid;  
+  #ifdef DEBUG
+    Serial.printf("[%s]: myData.valid=%d\n",__func__,myData.valid);
+  #endif
+  if (myData.valid == 0) Serial.printf("[%s]: Data is marked INVALID(%d)! - it will NOT go to Home Assistant from Receiver\n",__func__,myData.valid);
+  
   // button pressed
   #if ((PUSH_BUTTONS == 1) or (TOUCHPAD_ONLY))
     if (button_pressed > 0)
+    {
       myData.button_pressed = button_pressed;
+    }
+  #endif
+  #ifdef DEBUG
+    Serial.printf("[%s]: myData.button_pressed=%d\n",__func__,myData.button_pressed);
   #endif
 
   // sender_type
   snprintf(myData.sender_type,sizeof(myData.sender_type),"%s",sender_type_char[SENSOR_TYPE]);
-
   #ifdef DEBUG
-    Serial.printf(" Data gatehered:\n\tsender_type=%s\n",myData.sender_type);
-    // Serial.printf("\tmotion=%d\n",myData.motion);
+    Serial.printf("[%s]: myData.sender_type=%s\n",__func__,myData.sender_type);
   #endif
 
   // wifi_ok
   myData.wifi_ok = g_wifi_ok;
+  #ifdef DEBUG
+    Serial.printf("[%s]: myData.wifi_ok=%d\n",__func__,myData.wifi_ok);
+  #endif
 
   // lux high sensitivity
   myData.light_high_sensitivity = g_lux_high_sens;
+  #ifdef DEBUG
+    Serial.printf("[%s]: myData.light_high_sensitivity=%d\n",__func__,myData.light_high_sensitivity);
+  #endif
 
   // motion enabled/disable
   #ifdef MOTION_SENSOR_GPIO
@@ -979,23 +993,26 @@ void gather_data()
   #else
     myData.motion_enabled = 0;
   #endif
+  #ifdef DEBUG
+    Serial.printf("[%s]: myData.motion_enabled=%d\n",__func__,myData.motion_enabled);
+  #endif
 
   // hostname
   strcpy(myData.host, HOSTNAME);
   #ifdef DEBUG
-    Serial.printf("\thost=%s\n",myData.host);
+    Serial.printf("[%s]: myData.host=%s\n",__func__,myData.host);
   #endif
 
   // name
   strcpy(myData.name, DEVICE_NAME);
   #ifdef DEBUG
-    Serial.printf("\tname=%s\n",myData.name);
+    Serial.printf("[%s]: myData.name=%s\n",__func__,myData.name);
   #endif
 
   // motion
   myData.motion = motion;
   #ifdef DEBUG
-    Serial.printf("\tmotion=%d\n",myData.motion);
+    Serial.printf("[%s]: myData.motion=%d\n",__func__,myData.motion);
   #endif
 
   // sht31
@@ -1049,20 +1066,21 @@ void gather_data()
       }
     }
   #endif
-
-
+  
   // DALLAS_18B20
   #if (USE_DALLAS_18B20 == 1) 
     #ifndef CALIBRATE_TEMPERATURE
       #define CALIBRATE_TEMPERATURE       0   
     #endif
     myData.temp = get_ds18b20() + (CALIBRATE_TEMPERATURE);
+    #ifdef DEBUG
+      Serial.printf("[%s]: myData.temp=%0.2f\n",__func__,myData.temp);
+    #endif
   #endif
 
-
   #ifdef DEBUG
-    Serial.printf("\ttemp=%fC\n",myData.temp);
-    Serial.printf("\thum=%f%%\n",myData.hum);
+    Serial.printf("[%s]: myData.temp=%0.2f\n",__func__,myData.temp);
+    Serial.printf("[%s]: myData.hum=%0.2f\n",__func__,myData.hum);
   #endif
 
   // lux
@@ -1092,7 +1110,7 @@ void gather_data()
     // g_led_pwm = 50;           // default for sensors with no lux measurements (if there is LED even there)
   #endif
   #ifdef DEBUG
-    Serial.printf("\tlux=%flx\n",myData.lux);
+    Serial.printf("[%s]: myData.lux=%0.2f\n",__func__,myData.lux);
   #endif
 
   // battery
@@ -1116,15 +1134,16 @@ void gather_data()
       } else
       {
         #ifdef DEBUG
-          Serial.printf("\tbattery level=OK\n");
+          Serial.printf("[%s]: Battery level OK\n",__func__);
         #endif
       }
     }
   #endif
+
   #ifdef DEBUG
-    Serial.printf("\tbat=%fV\n",myData.bat);
-    Serial.printf("\tbatpct=%f%%\n",myData.batpct);
-    Serial.printf("\tbatchr=%f%%\n",myData.batchr);
+    Serial.printf("[%s]: myData.bat=%0.2f\n",__func__,myData.bat);
+    Serial.printf("[%s]: myData.batpct=%0.2f\n",__func__,myData.batpct);
+    Serial.printf("[%s]: myData.batchr=%0.2f\n",__func__,myData.batchr);
   #endif
 
   // version
@@ -1137,13 +1156,13 @@ void gather_data()
     strcpy(myData.ver, ZH_PROG_VERSION);
   }
   #ifdef DEBUG
-    Serial.printf("\tver=%s\n",myData.ver);
+    Serial.printf("[%s]: myData.ver=%s\n",__func__,myData.ver);
   #endif
 
   // charging - already gathered in setup()
   snprintf(myData.charg,5,"%s",charging);
   #ifdef DEBUG
-    Serial.printf("\tcharg=%s\n",myData.charg);
+    Serial.printf("[%s]: myData.charg=%s\n",__func__,myData.charg);
   #endif
 
   // bootCount calculated in save_config() + 1
@@ -1152,7 +1171,7 @@ void gather_data()
   ++g_bootCount;
   myData.boot = g_bootCount;
   #ifdef DEBUG
-    Serial.printf("\tboot=%d\n",myData.boot);
+    Serial.printf("[%s]: myData.boot=%d\n",__func__,myData.boot);
   #endif
 
   // ontime in seconds rather than ms - updated in save_config() - this is previous reading - it does not include the current run
@@ -1164,8 +1183,6 @@ void gather_data()
       myData.ontime = 0;
    }
 
-
-  
   #ifdef DEBUG
     Serial.printf("[%s]: ontime=%lus\n",__func__,myData.ontime);
   #endif
@@ -1173,7 +1190,7 @@ void gather_data()
   // boardtype
   myData.boardtype = BOARD_TYPE;
   #ifdef DEBUG
-    Serial.printf("\tboardtype=%d\n",myData.boardtype);
+    Serial.printf("[%s]: myData.boardtype=%d\n",__func__,myData.boardtype);
   #endif
 
 // working_time_ms
@@ -1189,7 +1206,7 @@ void gather_data()
   #endif
 
   #ifdef DEBUG
-    Serial.printf(" Total struct size=%d bytes\n",sizeof(myData));
+    Serial.printf("[%s]: Total struct size=%d bytes\n",__func__,sizeof(myData));
   #endif
 
   // testing with PPK2 - end gather_data
@@ -2924,7 +2941,20 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to start web server\n",__func__);
       ota_web_server_needed =  true;
-    }                          
+    }        
+    else 
+    // invalid measurements - don't update HA
+    if (data_recv.command == 203) 
+    {
+      Serial.printf("[%s]: Received command from gateway to make measurements INVALID\n",__func__);
+      g_valid =  0;
+    }  
+    // valid measurements - update HA
+    if (data_recv.command == 204) 
+    {
+      Serial.printf("[%s]: Received command from gateway to make measurements VALID\n",__func__);
+      g_valid =  1;
+    }                    
   } 
   else 
   {
