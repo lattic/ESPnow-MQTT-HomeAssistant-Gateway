@@ -5,6 +5,7 @@
 <ul>
   <li>Build universal sensor device (ESP32 based) equipped with temperature, humidity and light sensors, that can live long on 1 battery charge. </br>
   <br>
+  <b>EDIT: added possibility to measure battery status (Volts and % remaining) using ADC and GPIO instead of LiPo Gauge</b></li>  
   <b>EDIT: added "motion only device" that has only motion detector - PIR (temperature, humidity and light sensors are OFF)</b></li>
   <b>EDIT: added "push buttons device" that has only push buttons (1 or many)</b></li>
   </br><br>
