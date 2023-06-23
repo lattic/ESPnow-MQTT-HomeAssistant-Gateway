@@ -323,6 +323,23 @@
   uint8_t button_pressed = 0;               // 0 means: not pressed
                                             // 1 means: button_gpio[0] pressed, 2 means: button_gpio[1]
                                             // count from 1 not from 0 as 0 means not pressed
+  // ADC usage
+  #define USE_ADC                       1     // 1 - use, 0 -  don't use - it can be used for many purposes - not only battery measurements
+  #if (USE_ADC ==1)
+    #define BATTERY_FROM_ADC            1     //  to indicate MAX17048 is not in use but ADC, make 0 if ADC is used for other purpose (non battery)
+    #define ADC_GPIO                    10    //  int: GPIO for ADC
+    #define ADC_DIVIDER                 6.60f //4.255/0.678 // ((3.949 / 0.58) * (3.9 / 1.5))   //  float: adjust ADC - multiplication/resistors divider factor
+    #define ADC_ATTEN                   0     //  int: 0, 2, 6, 11 db
+    #define ADC_CALIBRATION             0.86f // difference between measured Volts and real volts on ADC_GPIO
+
+    // automatic adjustment of ADC_BITS
+    #if (BOARD_TYPE > 1)                      //  int: 13 for S2, 12 for S
+      #define ADC_BITS                  13      
+    #else
+      #define ADC_BITS                  12     
+    #endif
+  #endif
+  // ADC usage END
 
   #pragma message "compilation for: esp32042-pushb_6x_desk"
 // ---------------------------------------------------------------------------------------------------
@@ -332,7 +349,7 @@
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32043"
   #define DEVICE_NAME                 "swimming pool"  // 15 characters maximum
-  #define BOARD_TYPE                  2 // 1   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define FW_UPGRADE_GPIO             1   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
   #define SLEEP_TIME_S                300  // seconds - 
   // #define ENABLE_3V_GPIO              8   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
@@ -355,7 +372,7 @@
   #define POWER_SAVINGS_WIFI          1   // use 0 if not in use (WiFi)
   #define POWER_SAVINGS_CPU           1   // use 0 if not in use (PU freq)
   #define POWER_SAVINGS_CPU_TAIL_EXTRA_MS  450 // extra ending time due to slow CPU
-
+  
   #pragma message "compilation for: esp32043"
 // ---------------------------------------------------------------------------------------------------
 
@@ -927,8 +944,14 @@
   #error "push buttons board not yet defined for ESP32-C3"
 #endif
 
+// only 1 temperature sensor
 #if ((USE_MAX31855 == 1) and (USE_SHT31 == 1)) or ((USE_MAX31855 == 1) and (USE_DALLAS_18B20 == 1)) or ((USE_DALLAS_18B20 == 1) and (USE_SHT31 == 1))
-  #error only 1 temperature sensor defined - choose USE_SHT31 or USE_MAX31855 or USE_DALLAS_18B20
+  #error "only 1 temperature sensor can be defined - choose USE_SHT31 or USE_MAX31855 or USE_DALLAS_18B20"
+#endif
+
+// only 1 way of measuring battery
+#if ((BATTERY_FROM_ADC == 1) and (USE_MAX17048 == 1))
+  #error "only 1 battery sensor can be defined - BATTERY_FROM_ADC USE_SHT31 or USE_MAX17048" 
 #endif
 
 #ifdef ACT_BLUE_LED_GPIO

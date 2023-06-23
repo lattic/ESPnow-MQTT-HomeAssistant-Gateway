@@ -98,6 +98,14 @@ sender.ino
   #endif 
 #endif
 
+#if (USE_ADC == 1)
+  #include "measure-volts-adc.h"
+  double get_volts(int pin, int attennuation, int iteration, float resistors_calibration); 
+  #if (BATTERY_FROM_ADC == 1)
+    uint8_t get_bat_pcnt (double volts);
+  #endif  
+#endif
+
 // ========================================================================== libraries END
 
 // some consistency checks 
@@ -1139,6 +1147,12 @@ void gather_data()
       }
     }
   #endif
+
+  #if (BATTERY_FROM_ADC == 1)
+    myData.bat = get_volts(ADC_GPIO, ADC_ATTEN, 250, ADC_DIVIDER);
+    myData.batpct = get_bat_pcnt(myData.bat);
+  #endif
+  
 
   #ifdef DEBUG
     Serial.printf("[%s]: myData.bat=%0.2f\n",__func__,myData.bat);
@@ -2794,6 +2808,7 @@ gather_data();
       if (NUMBER_OF_GATEWAYS > 1) // only if there is more than 1 gw, otherwise it makes no sense
       {
         g_last_gw = 0;
+        do_esp_restart();
       }
     }  
     else  
@@ -2804,6 +2819,7 @@ gather_data();
       if (NUMBER_OF_GATEWAYS > 1) // only if there is more than 1 gw, otherwise it makes no sense
       {
         g_last_gw = 1;
+        do_esp_restart();
       }
     }  
     else 
@@ -2814,6 +2830,7 @@ gather_data();
       if (NUMBER_OF_GATEWAYS > 2) // only if there is more than 2 gw, otherwise it makes no sense
       {
         g_last_gw = 2;
+        do_esp_restart();
       }
     }  
     else  
@@ -2822,6 +2839,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 1s\n",__func__);
       g_sleeptime_s = 1;
+      do_esp_restart();
     }     
     else
     // SLEEP_TIME_S=3s   
@@ -2829,6 +2847,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 3s\n",__func__);
       g_sleeptime_s = 3;
+      do_esp_restart();
     }     
     else
     // SLEEP_TIME_S=5s   
@@ -2836,6 +2855,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 5s\n",__func__);
       g_sleeptime_s = 5;
+      do_esp_restart();
     }     
     else
     // SLEEP_TIME_S=10s   
@@ -2843,6 +2863,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 10s\n",__func__);
       g_sleeptime_s = 10;
+      do_esp_restart();
     }     
     else
     // SLEEP_TIME_S=15s   
@@ -2850,6 +2871,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 15s\n",__func__);
       g_sleeptime_s = 15;
+      do_esp_restart();
     }     
     else    
     // SLEEP_TIME_S=30s   
@@ -2857,6 +2879,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 30s\n",__func__);
       g_sleeptime_s = 30;
+      do_esp_restart();
     }     
     else
     // SLEEP_TIME_S=60s   
@@ -2864,6 +2887,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 60s\n",__func__);
       g_sleeptime_s = 60;
+      do_esp_restart();
     }     
     else 
     // SLEEP_TIME_S=90s   
@@ -2871,6 +2895,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 90s\n",__func__);
       g_sleeptime_s = 90;
+      do_esp_restart();
     }     
     else  
     // SLEEP_TIME_S=120s   
@@ -2878,6 +2903,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 120s\n",__func__);
       g_sleeptime_s = 120;
+      do_esp_restart();
     }     
     else 
     // SLEEP_TIME_S=180s   
@@ -2885,6 +2911,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 180s\n",__func__);
       g_sleeptime_s = 180;
+      do_esp_restart();
     }     
     else 
     // SLEEP_TIME_S=300s   
@@ -2892,6 +2919,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 300s\n",__func__);
       g_sleeptime_s = 300;
+      do_esp_restart();
     }     
     else 
     // SLEEP_TIME_S=600s   
@@ -2899,6 +2927,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 600s\n",__func__);
       g_sleeptime_s = 600;
+      do_esp_restart();
     }     
     else
     // SLEEP_TIME_S=900s   
@@ -2906,6 +2935,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 900s\n",__func__);
       g_sleeptime_s = 900;
+      do_esp_restart();
     }     
     else  
     // SLEEP_TIME_S=1800s   
@@ -2913,6 +2943,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 1800s\n",__func__);
       g_sleeptime_s = 1800;
+      do_esp_restart();
     }     
     else 
     // SLEEP_TIME_S=3600s   
@@ -2920,6 +2951,7 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to set sleeptime to 3600s\n",__func__);
       g_sleeptime_s = 3600;
+      do_esp_restart();
     }     
     else 
     // LEDs OFF   
@@ -2948,12 +2980,14 @@ gather_data();
     {
       Serial.printf("[%s]: Received command from gateway to make measurements INVALID\n",__func__);
       g_valid =  0;
+      do_esp_restart();
     }  
     // valid measurements - update HA
     if (data_recv.command == 204) 
     {
       Serial.printf("[%s]: Received command from gateway to make measurements VALID\n",__func__);
       g_valid =  1;
+      do_esp_restart();
     }                    
   } 
   else 
