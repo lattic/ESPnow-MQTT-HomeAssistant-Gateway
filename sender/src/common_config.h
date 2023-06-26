@@ -13,7 +13,7 @@
   #endif
 #endif 
 
-#define ZH_PROG_VERSION "2.20.b1"                     // version < 10 chars, description in changelog.txt
+#define ZH_PROG_VERSION "2.20.0"                     // version < 10 chars, description in changelog.txt
 
 #define FORMAT_FS                   0               // force format of file system - used only on first deployment - FS is also formatted on reset device fucntion
 // #define PPK2_GPIO                   33              // comment out if not used - GPIO to test power and timings using PPK2 - for C3 GPIO 33 is out of range

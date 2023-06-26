@@ -1091,6 +1091,11 @@ void gather_data()
     Serial.printf("[%s]: myData.hum=%0.2f\n",__func__,myData.hum);
   #endif
 
+  if ((myData.temp < -33) and (myData.temp > -34))
+  {
+    Serial.printf("[%s]: TEMPERATURE ERROR!\n",__func__);
+  } 
+
   // lux
   myData.lux = 0.0f;
   #if (USE_TSL2561 == 1)
@@ -1950,6 +1955,7 @@ void save_config(const char* reason)
     Serial.printf("[%s]: millis=%d, program_start_time=%d, ESP32_BOOT_TIME=%d, ESP32_TAIL_TIME=%d, extra_reset_time=%d,  Program finished after %lums (adjusted).\n",__func__,millis(),program_start_time, ESP32_BOOT_TIME,ESP32_TAIL_TIME,extra_reset_time, work_time);
   #endif
   g_saved_ontime_ms = g_saved_ontime_ms + work_time;
+  // also used charging_int = 10 to reset ontime
   if (charging_int != 0) 
   {
     #ifdef DEBUG
@@ -2834,6 +2840,13 @@ gather_data();
       }
     }  
     else  
+    // reset ontime using charging_int = 10 - workaround as charing_int > 0 will reset ontime in save_config()
+    if (data_recv.command == 24) 
+    {
+      Serial.printf("[%s]: Received command from gateway to reset ontime\n",__func__);
+      charging_int = 10;
+    }  
+    else 
     // SLEEP_TIME_S=1s   
     if (data_recv.command == 30) 
     {
@@ -3123,7 +3136,6 @@ gather_data();
     if ((myData.temp < -33) and (myData.temp > -34))
     {
       temp_error = true;
-      Serial.printf("[%s]: TEMPERATURE ERROR!\n",__func__);
     } else 
     {
       snprintf(temp_char,sizeof(temp_char),"%0.1f",myData.temp);

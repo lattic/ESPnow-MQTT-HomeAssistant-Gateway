@@ -4,6 +4,9 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
+2023-06-27
+  2.20.0  - command=24 resets ontime/pretty_ontime, ADC finished and accepted 
+
 2023-06-23
   2.20.b1 - added ADC battery measurements (Volts and %) - check esp32042 as an example
 

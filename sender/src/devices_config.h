@@ -372,6 +372,24 @@
   #define POWER_SAVINGS_WIFI          1   // use 0 if not in use (WiFi)
   #define POWER_SAVINGS_CPU           1   // use 0 if not in use (PU freq)
   #define POWER_SAVINGS_CPU_TAIL_EXTRA_MS  450 // extra ending time due to slow CPU
+
+  // ADC usage
+  #define USE_ADC                       1     // 1 - use, 0 -  don't use - it can be used for many purposes - not only battery measurements
+  #if (USE_ADC ==1)
+    #define BATTERY_FROM_ADC            1     //  to indicate MAX17048 is not in use but ADC, make 0 if ADC is used for other purpose (non battery)
+    #define ADC_GPIO                    9    //  int: GPIO for ADC
+    #define ADC_DIVIDER                 (6.60f/1.017f) //  float: adjust ADC - multiplication/resistors divider factor
+    #define ADC_ATTEN                   0     //  int: 0, 2, 6, 11 db
+    #define ADC_CALIBRATION             0.793f // difference between measured Volts and real volts on ADC_GPIO
+
+    // automatic adjustment of ADC_BITS
+    #if (BOARD_TYPE > 1)                      //  int: 13 for S2, 12 for S
+      #define ADC_BITS                  13      
+    #else
+      #define ADC_BITS                  12     
+    #endif
+  #endif
+  // ADC usage END  
   
   #pragma message "compilation for: esp32043"
 // ---------------------------------------------------------------------------------------------------
