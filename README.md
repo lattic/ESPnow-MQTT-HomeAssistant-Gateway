@@ -35,6 +35,12 @@
   <br> With PIR sensor (motion detector)
   <img width="1035" alt="Screenshot 2022-09-20 at 06 46 07" src="https://user-images.githubusercontent.com/46562447/191176937-c55b9155-91a6-47ca-bb4a-603c4fac15da.png">
 
+  <br> With ADC and resistors, DS18B20 temperature sensor and LCD (swimming pool temperature sensor with display):
+  <img width="1104" alt="Screenshot 2023-06-28 at 12 11 44" src="https://github.com/homonto/ESPnow-MQTT-HomeAssistant-Gateway/assets/46562447/0b48a184-bb47-457e-9263-4e496aabc0d7">
+
+
+  
+
 
 <br>
 <br>
