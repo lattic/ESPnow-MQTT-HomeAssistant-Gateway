@@ -23,9 +23,9 @@
 <br>
 <h3> To satisfy the requirements I've chosen: </h3>
 <ul>
-  <li>SHT31 temperature and humidity sensor, SDA, around 1.5$ on Aliexpress (breakout)<b>EDIT: alternatively DS18B20 or MAX31855</b>
+  <li>SHT31 temperature and humidity sensor, SDA, around 1.5$ on Aliexpress (breakout) <b>EDIT: alternatively DS18B20 or MAX31855</b>
   <li>TSL2561 light sensor, SDA, around 1.5$ on Aliexpress (breakout)
-  <li>MAX17048 LiPo battery sensor, SDA 1-5$ (depending if chip only or breakout)<b>EDIT: alternatively ADC with resistors</b>
+  <li>MAX17048 LiPo battery sensor, SDA 1-5$ (depending if chip only or breakout) <b>EDIT: alternatively ADC with resistors</b>
   <li>ESP32S-WROOM or ESP32-S2 WROOM, around 2$ on Aliexpress (bare metal - <b>do NOT use the development board with additional components! - they cannot go to uA due to the on board elements, i.e. LDO, LED etc.)</b>
   <li>few additional components as per schematics (see below)
 </ul>
