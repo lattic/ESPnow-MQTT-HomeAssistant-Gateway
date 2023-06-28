@@ -21,8 +21,6 @@ bool savePlainConfigFile(const char *filename, const Config &config, const char*
 
 //functions
 
-//LittleFS:
-
 //reads file and returns as string
 String cr_getFile(fs::FS &fs, const char * path) {
   File file = fs.open(path);
@@ -36,29 +34,27 @@ String cr_getFile(fs::FS &fs, const char * path) {
 
 //list directory
 void cr_listDir(fs::FS &fs, const char * dirname, uint8_t levels){
-    Serial.printf("Listing directory: %s\r\n", dirname);
+    Serial.printf("[%s]: Listing directory: %s ",__func__,dirname);
     File root = fs.open(dirname);
     if(!root){
-        Serial.println("- failed to open directory");
+        Serial.printf("- failed to open directory\n");
         return;
     }
     if(!root.isDirectory()){
-        Serial.println(" - not a directory");
+        Serial.printf(" - not a directory\n");
         return;
     }
     File file = root.openNextFile();
+    Serial.printf("\n");
     while(file){
         if(file.isDirectory()){
-            Serial.print("  DIR : ");
-            Serial.println(file.name());
+            Serial.printf("[%s]:   DIR : %s\n",__func__,file.name());
+
             if(levels){
                 cr_listDir(fs, file.name(), levels -1);
             }
         } else {
-            Serial.print("  FILE: ");
-            Serial.print(file.name());
-            Serial.print("\tSIZE: ");
-            Serial.println(file.size());
+            Serial.printf("[%s]: FILE: %s, SIZE: %d\n",__func__,file.name(),file.size());
         }
         file = root.openNextFile();
     }
@@ -70,30 +66,32 @@ void cr_printFile(const char *filename) {
   File file = LittleFS.open(filename, "r");
   if (!file) {
     #ifdef DEBUG
-      Serial.println("Failed to open file" + String(filename));
+      Serial.printf("[%s]: Failed to open file %s\n",__func__,filename);
     #endif
     return;
   }
-  Serial.println("Content of file: " + String(filename));
+  Serial.printf("[%s]: Content of file: %s\n",__func__,filename);
   while (file.available()) {
-    Serial.print((char)file.read());
+    Serial.printf("%s",(char)file.read());
+
   }
-  Serial.println();
+  Serial.printf("\n");
 }
 
 
 //delete file
 void cr_deleteFile(fs::FS &fs, const char * filename){
     #ifdef DEBUG
-      Serial.printf("Deleting file: %s\r\n", filename);
+      // Serial.printf("Deleting file: %s\r\n", filename);
+      Serial.printf("[%s]: Deleting file: %s ",__func__,filename);
     #endif
     if(fs.remove(filename)){
         #ifdef DEBUG
-          Serial.println("- file deleted");
+          Serial.printf("- file deleted\n");
         #endif
     } else {
         #ifdef DEBUG
-          Serial.println("- delete failed");
+          Serial.printf("- delete failed\n");
         #endif
     }
 }
@@ -102,24 +100,24 @@ void cr_deleteFile(fs::FS &fs, const char * filename){
 //writes any string to file
 bool cr_writeFileStr(fs::FS &fs, const char * filename, String content){
     #ifdef DEBUG
-      Serial.print("Writing to file: " + String(filename));
+      Serial.printf("[%s]: Writing to file: %s ",__func__,filename);
     #endif
     File file = fs.open(filename, FILE_WRITE);
     if(!file){
         #ifdef DEBUG
-          Serial.println(" - failed to open file for writing");
+          Serial.printf(" - failed to open file for writing\n");
         #endif
         return false;
     }
     if(file.print(content)){
         #ifdef DEBUG
-          Serial.println(" - file written");
+          Serial.printf(" - file written\n");
         #endif
         file.close();
         return true;
     } else {
         #ifdef DEBUG
-          Serial.println(" - write failed");
+          Serial.printf(" - write failed\n");
         #endif
         file.close();
         return false;
@@ -127,43 +125,11 @@ bool cr_writeFileStr(fs::FS &fs, const char * filename, String content){
 
 }
 
-
-/*
-struct Config 
-{
-Config variables - all variables with "c_" to distinguish from global variables
-  uint16_t  c_sleeptime_s;            // just test
-  uint32_t  c_bootCount;              // bootCount
-  uint32_t  c_saved_ontime_ms;        // ontime in ms
-  uint8_t   c_channel;                // WiFi channel
-  uint8_t   c_wifi_ok = 0;            // WiFi successful data provided
-  uint8_t   c_last_gw = 0;            // last used gateway
-  char      c_ssid[33];               // WiFi ssid
-  char      c_password[65];           // WiFi password
-  uint8_t   c_led_pwm;                // DC for LED PWM
-  motion...
-  lux high sens...
-};
-
-Global variables - all variables with "g_" to distinguish from config variables
-uint16_t    g_sleeptime_s;            // just test
-uint32_t    g_bootCount;              // bootCount
-uint32_t    g_saved_ontime_ms;        // ontime in ms
-uint8_t     g_wifi_channel;           // WiFi channel
-uint8_t     g_wifi_ok = 0;            // WiFi successful data provided
-uint8_t     g_last_gw = 0;            // last used gateway
-char        g_wifi_ssid[33];          // WiFi ssid
-char        g_wifi_password[65];      // WiFi password
-uint8_t     g_led_pwm;                // DC for LED PWM
-motion...
-lux highh sens...
-*/
-
 //JSON functions
 //converts to Json
 void convertToJson(const Config &src, JsonVariant dst) {
   #ifdef DEBUG
-    Serial.printf("[%s]: ...\n",__func__);
+    Serial.printf("[%s]: converting data to JSONn",__func__);
   #endif
   dst["c_sleeptime_s"]          = g_sleeptime_s;
   dst["c_bootCount"]            = g_bootCount;
@@ -184,7 +150,7 @@ void convertToJson(const Config &src, JsonVariant dst) {
 // converts from Json
 void convertFromJson(JsonVariantConst src, Config &dst) {
   #ifdef DEBUG
-    Serial.printf("[%s]: ...\n",__func__);
+    Serial.printf("[%s]: converting JSON to data\n",__func__);
   #endif
   g_sleeptime_s                 = src["c_sleeptime_s"];
   g_bootCount                   = src["c_bootCount"];
@@ -206,131 +172,127 @@ void convertFromJson(JsonVariantConst src, Config &dst) {
 // Load the configuration from a file "filename" to variable "config" - encrypted text version
 bool loadEncConfigFile(const char *filename, Config &config) 
 {
-  // unsigned long function_start = micros();
   DynamicJsonDocument doc(JSON_CONFIG_FILE_SIZE);
   DeserializationError err = deserializeJson(doc, cipher->decryptString(cr_getFile(LittleFS, filename)).c_str());
-  if (err) {
-    Serial.printf("[%s]: Failed to deserialize configuration: %s\n",__func__,err.f_str());
+  if (err) 
+  {
+    Serial.printf("[%s]: Failed to deserialize encrypted configuration: %s\n",__func__,err.f_str());
     return false;
-  }
+  } 
+  #ifdef DEBUG
+    Serial.printf("[%s]: Loaded encrypted config file %s\n",__func__,filename);
+  #endif
+
   // Extract config from the JSON document
   config = doc.as<Config>();
   #ifdef DEBUG
-    Serial.println("loaded data to variable=\"config\" from file: " + String(filename));
+    Serial.printf("[%s]: loaded data to variable=\"config\" from file: %s \n",__func__,filename);
     char doc_json[JSON_CONFIG_FILE_SIZE];
     int size_pl = serializeJson(doc, doc_json);
-    Serial.println("\n============ DEBUG: CONFIG FILE LOADED ============");
-    Serial.println("Size of config file doc="+String(size_pl)+" bytes");
-    // Serial.println("serializeJsonPretty");
+    Serial.printf("[%s]: ============ DEBUG: CONFIG FILE LOADED ============\n",__func__);
+    Serial.printf("[%s]: Size of config file: %s=%d bytes \n",__func__,filename,size_pl);
     serializeJsonPretty(doc, Serial);
-    Serial.println("\n============ DEBUG: CONFIG FILE LOADED END ============\n");
+    Serial.printf("\n[%s]: ============ DEBUG: CONFIG FILE LOADED END ============\n",__func__);
   #endif
-  // Serial.printf("[%s]: took %uus\n",__func__,(micros()-function_start));
   return true;
 }
 
 // Load the configuration from a file "filename" to variable "config" - plain text version
 bool loadPlainConfigFile(const char *filename, Config &config) 
 {
-  // unsigned long function_start = micros();
   File file = LittleFS.open(filename, "r");
   if (!file) {
-    Serial.printf("[%s]: Failed to open config file\n",__func__);
+    Serial.printf("[%s]: Failed to open config file %s\n",__func__,filename);
     return false;
-  }
+  } 
+  #ifdef DEBUG
+    Serial.printf("[%s]: Loaded config file %s\n",__func__,filename);
+  #endif
   DynamicJsonDocument doc(JSON_CONFIG_FILE_SIZE);
   DeserializationError err = deserializeJson(doc, file);
-  if (err) {
+  if (err) 
+  {
     Serial.printf("[%s]: Failed to deserialize configuration: %s\n",__func__,err.f_str());
     return false;
   }
   // Extract config from the JSON document
   config = doc.as<Config>();
-  // Serial.println("loaded to variable=\"config\"  from file: " + String(filename));
   #ifdef DEBUG
-    Serial.println("loaded data to variable=\"config\" from file: " + String(filename));
+    Serial.printf("[%s]: loaded data to variable=\"config\" from file: %s \n",__func__,filename);
     char doc_json[JSON_CONFIG_FILE_SIZE];
     int size_pl = serializeJson(doc, doc_json);
-    Serial.println("\n============ DEBUG: CONFIG FILE LOADED ============");
-    Serial.println("Size of config file doc="+String(size_pl)+" bytes");
-    // Serial.println("serializeJsonPretty");
+    Serial.printf("[%s]: ============ DEBUG: CONFIG FILE LOADED ============\n",__func__);
+    Serial.printf("[%s]: Size of config file: %s=%d bytes \n",__func__,filename,size_pl);
     serializeJsonPretty(doc, Serial);
-    Serial.println("\n============ DEBUG: CONFIG FILE LOADED END ============\n");
-  #endif
-  // Serial.printf("[%s]: took %uus\n",__func__,(micros()-function_start));
+    Serial.printf("\n[%s]: ============ DEBUG: CONFIG FILE LOADED END ============\n",__func__);
+  #endif  
+
   return true;
 }
 
 // Save configuration to a file from variable "config" to file "filename" - encrypted text version
 bool saveEncConfigFile(const char *filename, const Config &config, const char* reason) 
 {
-  // unsigned long function_start = micros();
   DynamicJsonDocument doc(JSON_CONFIG_FILE_SIZE);
   doc.set(config);
-                    // doc["c_ontime"] = ontime;
   String serialized_to_string;
-  // bool success = serializeJsonPretty(doc2, serialized_to_string); //flat or pretty format
   bool success = serializeJson(doc, serialized_to_string);
-  if (!success) {
+  if (!success) 
+  {
     Serial.printf("[%s]: Failed to serialize configuration to string\n",__func__);
     return false;
+  } 
+
+  String text = cipher->encryptString(serialized_to_string);
+  if (cr_writeFileStr(LittleFS, filename, text))
+  {
+    #ifdef DEBUG
+      Serial.printf("[%s]: ============ DEBUG: CONFIG FILE SAVED ============\n",__func__);
+      Serial.printf("[%s]: Configuration saved to file: %s due to: \"%s\"\n",__func__,filename,reason);
+      char doc_json[JSON_CONFIG_FILE_SIZE];
+      int size_pl = serializeJson(doc, doc_json);
+      Serial.printf("[%s]: Size of config file: %s=%d bytes \n",__func__,filename,size_pl);
+      serializeJsonPretty(doc, Serial);
+      Serial.printf("\n[%s]: ============ DEBUG: CONFIG FILE SAVED END ============\n",__func__);
+    #endif
+    return true;
+  } else 
+  {
+    Serial.printf("[%s]: writing to file %S FAILED\n",__func__,filename);
+    return false;
   }
-   else {
-    String text = cipher->encryptString(serialized_to_string);
-    if (cr_writeFileStr(LittleFS, filename, text)){
-      #ifdef DEBUG
-        Serial.println("\n============ DEBUG: CONFIG FILE SAVED ============");
-        Serial.println("Configuration saved to file: " + String(filename) + " due to: " + String(reason) );
-        char doc_json[JSON_CONFIG_FILE_SIZE];
-        int size_pl = serializeJson(doc, doc_json);
-        Serial.println("Size of config file doc="+String(size_pl)+" bytes");
-        Serial.println("serializeJsonPretty");
-        serializeJsonPretty(doc, Serial);
-        Serial.println("\n============ DEBUG: CONFIG FILE SAVED END ============");
-      #endif
-      // Serial.printf("[%s]: took %uus\n",__func__,(micros()-function_start));
-      return true;
-    } else {
-      //writing failed
-        Serial.printf("[%s]: writing to file FAILED\n",__func__);
-      return false;
-    }
-  }
+
 }
 
 // Save configuration to a file from variable "config" to file "filename" - plain text version
 bool savePlainConfigFile(const char *filename, const Config &config, const char* reason) 
 {
-  // unsigned long function_start = micros();
   File file = LittleFS.open(filename, "w");
-  if (!file) {
+  if (!file) 
+  {
     Serial.printf("[%s]: Failed to write to config file\n",__func__);
     return false;
   }
-  // serializeJson(doc, file);
   DynamicJsonDocument doc(JSON_CONFIG_FILE_SIZE);
   doc.set(config);
   // Serialize JSON to file
-  // bool success = serializeJsonPretty(doc, file) > 0;
   bool success = serializeJson(doc, file) > 0;
-  if (!success) {
-      //writing failed
+  if (!success) 
+  {
     Serial.printf("[%s]: writing to file FAILED\n",__func__);
     return false;
-  } else {
-      #ifdef DEBUG
-        Serial.println("\n============ DEBUG: CONFIG FILE SAVED ============");
-        Serial.println("Configuration saved to file: " + String(filename) + " due to: " + String(reason) );
-        char doc_json[JSON_CONFIG_FILE_SIZE];
-        int size_pl = serializeJson(doc, doc_json);
-        Serial.println("Size of config file doc="+String(size_pl)+" bytes");
-        Serial.println("serializeJsonPretty");
-        serializeJsonPretty(doc, Serial);
-        Serial.println("\n============ DEBUG: CONFIG FILE SAVED END ============");
-      #endif
-      // Serial.printf("[%s]: took %uus\n",__func__,(micros()-function_start));
-      return true;
-  }
+  } 
+  #ifdef DEBUG
+    Serial.printf("[%s]: ============ DEBUG: CONFIG FILE SAVED ============\n",__func__);
+    Serial.printf("[%s]: Configuration saved to file: %s due to: \"%s\"\n",__func__,filename,reason);
+    char doc_json[JSON_CONFIG_FILE_SIZE];
+    int size_pl = serializeJson(doc, doc_json);
+    Serial.printf("[%s]: Size of config file: %s=%d bytes \n",__func__,filename,size_pl);
+    serializeJsonPretty(doc, Serial);
+    Serial.printf("\n[%s]: ============ DEBUG: CONFIG FILE SAVED END ============\n",__func__);
+  #endif
+  return true;
+
 }
 
 

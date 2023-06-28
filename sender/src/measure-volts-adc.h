@@ -4,7 +4,6 @@
 
   double get_volts(int pin, int attennuation, int iteration, float resistors_calibration) 
   {
-    long sm = millis(); 
     int i = 0;
     uint32_t read_digital = 0;
     float milivolts = 0;
@@ -49,7 +48,6 @@
     adcAttachPin(pin);
     analogReadResolution(ADC_BITS);
 
-    // analogSetAttenuation(ADC_0db);
 
     for ( i = 0; i < iteration; i++) {
         read_digital += analogRead(pin);
@@ -63,12 +61,8 @@
 
     volts = (resistors_calibration *  milivolts) /1000 ; 
 
-    long em = millis(); //END measurement time
-    long mt=em-sm;
-
     #ifdef DEBUG
         Serial.printf("[%s]: battery millivolts=%f, battery volts=%0.2f\n",__func__,milivolts, volts);
-        Serial.println("VOLT MEASUREMENT TIME:"+String(mt)+"ms");
     #endif
 
     return volts;

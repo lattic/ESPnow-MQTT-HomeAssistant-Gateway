@@ -1240,7 +1240,7 @@ void gather_data()
 
 
 // send data to gateway over ESPnow
-bool send_data()      // unsigned long s1=millis();Serial.println("sending took " + String(millis()-s1) + "ms");
+bool send_data()     
 {
   char receiver_mac[18];
   int channel, last_gw;
@@ -1528,11 +1528,11 @@ void setup_CP_Server()
       inputMessage = request->getParam("password")->value();
       inputParam = "password";
       password = inputMessage;
-      Serial.printf("[%s]: password received: ",__func__);Serial.println(password);
+      Serial.printf("[%s]: password received: %s\n",__func__,password.c_str());
       if (strlen(password.c_str()) == 0)
       {
         password = old_password;
-        Serial.printf("[%s]: password is blank, reusing the old value: ",__func__); Serial.println(password);
+        Serial.printf("[%s]: password is blank, reusing the old value: %s\n",__func__,password.c_str()); 
       } else
       {
         password = inputMessage;
@@ -1570,8 +1570,8 @@ void WiFiSoftAPSetup()
   snprintf(cp_ssid,sizeof(cp_ssid),"%s",HOSTNAME);
   WiFi.mode(WIFI_AP);
   WiFi.softAP(cp_ssid);
-  Serial.printf("[%s]: AP IP address: ",__func__);
-  Serial.println(WiFi.softAPIP());
+  Serial.printf("[%s]: AP IP address: %s\n",__func__,WiFi.softAPIP().toString().c_str());
+
   Serial.printf("[%s]: SSID: %s\n",__func__,cp_ssid);
   Serial.printf("[%s]: NO PASSWORD\n",__func__);
 }
@@ -1612,11 +1612,9 @@ void WiFiStationSetup(String rec_ssid, String rec_password, String rec_sleep_s)
   while (WiFi.status() != WL_CONNECTED) 
   {
     delay(20);
-    // Serial.print(".");
     if (millis() - t1 > WAIT_FOR_WIFI * 1000)
     {
-      Serial.println();
-      Serial.printf("[%s]: Timeout connecting to WiFi. The SSID or Password seem incorrect\n",__func__);
+      Serial.printf("\n[%s]: Timeout connecting to WiFi. The SSID or Password seem incorrect\n",__func__);
       valid_ssid_received = false;
       valid_password_received = false;
       valid_sleeptime_s_str_received = false;
@@ -1631,14 +1629,14 @@ void WiFiStationSetup(String rec_ssid, String rec_password, String rec_sleep_s)
     is_setup_done = true;
     Serial.printf("\n[%s]: WiFi connected to: %s\n",__func__,rec_ssid);
     valid_ssid_received = false;
-    Serial.printf("[%s]: STA IP address: ",__func__);
-    Serial.println(WiFi.localIP());
+    Serial.printf("[%s]: STA IP address: %s\n",__func__,WiFi.localIP().toString().c_str());
+
     if(!MDNS.begin(HOSTNAME))
     {
       Serial.printf("[%s]: Error starting MDNS\n",__func__);
     } else
     {
-      Serial.printf("[%s]: MDNS started with %s\n",__func__,HOSTNAME);
+      Serial.printf("[%s]: MDNS started with hostname: %s\n",__func__,HOSTNAME);
     } 
 
     if( led_blink_handle != NULL )
@@ -1648,7 +1646,8 @@ void WiFiStationSetup(String rec_ssid, String rec_password, String rec_sleep_s)
       delay(5);
     } else
     {
-      Serial.printf("[%s]: LEDs still bllinking or were never blinking\n",__func__);
+      // Serial.printf("[%s]: LEDs still bllinking or were never blinking\n",__func__);
+      Serial.printf("[%s]: LEDs were never blinking\n",__func__);
     }
     Serial.printf("[%s]: Done\n",__func__);
     snprintf(g_wifi_ssid,sizeof(g_wifi_ssid),"%s",ssid_arr);
@@ -1713,6 +1712,7 @@ bool connect_wifi()
   if (g_wifi_ok == 1) is_setup_done = true; else is_setup_done = false;
   ssid = String(g_wifi_ssid);
   password = String(g_wifi_password);
+
   if (g_sleeptime_s > 0) sleeptime_s_str = String(g_sleeptime_s); else sleeptime_s_str = String(SLEEP_TIME_S);
 
   if (!is_setup_done)
@@ -1722,9 +1722,10 @@ bool connect_wifi()
   else
   {
     Serial.printf("[%s]: Using saved SSID and PASS to attempt WiFi Connection...\n",__func__);
-    Serial.printf("[%s]: SSID: ",__func__);Serial.println(ssid);
-    Serial.printf("[%s]: PASS: ",__func__);Serial.println(password);
-    Serial.printf("[%s]: Sleep time : ",__func__);Serial.println(sleeptime_s_str);
+
+    Serial.printf("[%s]: SSID: %s\n",__func__,g_wifi_ssid);                     
+    Serial.printf("[%s]: PASS: %s\n",__func__,g_wifi_password);                
+    Serial.printf("[%s]: Sleep time: %s\n",__func__,sleeptime_s_str);   
     WiFiStationSetup(ssid, password, sleeptime_s_str);
   }
 
@@ -1964,9 +1965,9 @@ void save_config(const char* reason)
     g_saved_ontime_ms = 0; // reset on charging
   }
   
-  // #ifdef DEBUG_LIGHT
+  #ifndef DEBUG
     Serial.printf("[%s]: millis=%lums, Program finished after %lums (adjusted).\n",__func__,millis(), work_time);
-  // #endif
+  #endif
   
   // testing with PPK2 - end save ontime
   #ifdef PPK2_GPIO
@@ -1991,7 +1992,7 @@ void get_old_wifi_credentials()
   old_sleeptime_s_str = g_sleeptime_s;
 
   Serial.printf("[%s]: old_ssid:            %s\n",__func__,old_ssid);
-  Serial.printf("[%s]: old_password:        ",__func__); Serial.println(old_password);
+  Serial.printf("[%s]: old_password:        %s\n",__func__,g_wifi_password); 
   Serial.printf("[%s]: old_sleeptime_s_str: %s seconds\n",__func__,old_sleeptime_s_str);
 
   Serial.printf("[%s]: Resetting wifi credentials...\n",__func__);
@@ -2154,14 +2155,29 @@ void set_error_red_led_level(u_int8_t level)
 void setup()
 {
   program_start_time = millis();
-    Serial.begin(115200);
+  
+  // testing with PPK2 - start
+  #ifdef PPK2_GPIO
+    pinMode(PPK2_GPIO,OUTPUT);
+    digitalWrite(PPK2_GPIO,HIGH);
+  #endif
+
+  Serial.begin(115200);
+  delay(1);
+
+  // start LEDs  
+  initiate_all_leds();
+
+  // #ifdef DEBUG_LIGHT
+  Serial.printf("\n======= S T A R T =======\n");
+  Serial.printf("[%s]: millis=%lums, Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__,program_start_time, DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
+  // #endif
 
   // ciphered config
   cipher->setKey(cipher_key);     //for encryption/decryption of config file
 // load config file
   if (!load_config())
   {
-    Serial.begin(115200);
     Serial.printf("[%s]: Loading config file FAILED, restarting\n",__func__);
     do_esp_restart();
   } else 
@@ -2171,18 +2187,6 @@ void setup()
     #endif
   }
 
-  // testing with PPK2 - start
-  #ifdef PPK2_GPIO
-    pinMode(PPK2_GPIO,OUTPUT);
-    digitalWrite(PPK2_GPIO,HIGH);
-  #endif
-
-  // start LEDs  
-  initiate_all_leds();
-  // #ifdef DEBUG_LIGHT
-    Serial.printf("\n======= S T A R T =======\n");
-    Serial.printf("[%s]: millis=%lums, Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__,program_start_time, DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
-  // #endif
   // check if device is charging
   snprintf(charging,4,"%s","N/A");
   #if (defined(CHARGING_GPIO) and defined(POWER_GPIO))
@@ -2256,7 +2260,7 @@ void setup()
     // 1 = reset/power on
     case ESP_RST_POWERON:
     {
-      Serial.printf("power on or reset\n");
+      Serial.printf("[%s]: power on or reset\n",__func__);
       set_act_blue_led_level(1);
       set_error_red_led_level(1);
       break;
@@ -2264,7 +2268,7 @@ void setup()
     // 3 = Software reset via esp_restart
     case ESP_RST_SW:
     {
-      Serial.printf("Software reset via esp_restart\n");
+      Serial.printf("[%s]: Software reset via esp_restart\n",__func__);
       set_act_blue_led_level(1);
       set_error_red_led_level(1);
       break;
@@ -2273,13 +2277,13 @@ void setup()
     case ESP_RST_DEEPSLEEP:
     {
       #ifdef DEBUG_LIGHT
-        Serial.printf("wake up from deep sleep \n");
+        Serial.printf("[%s]: wake up from deep sleep \n",__func__);
       #endif
       break;
     }
     default:
     {
-      Serial.printf("other boot cause=%d\n");
+      Serial.printf("[%s]: other boot cause=%d\n",__func__);
       break;
     }
   }
@@ -2292,13 +2296,13 @@ void setup()
     // 0 = not deep sleep
     case ESP_SLEEP_WAKEUP_UNDEFINED:
     {
-      Serial.printf("wake up was not caused by exit from deep sleep\n");
+      Serial.printf("[%s]: wake up was not caused by exit from deep sleep\n",__func__);
       break;
     }
     // 2 = not in use
     case ESP_SLEEP_WAKEUP_EXT0:
     {
-      Serial.printf("2: external signal using RTC_IO (motion detected)\n");
+      Serial.printf("[%s]: external signal using RTC_IO (motion detected)\n",__func__);
       break;
     }
     // 3 = PUSH BUTTONS or fw update (FW_UPGRADE_GPIO) or motion detected (MOTION_SENSOR_GPIO) - not for ESP32-C3!
@@ -2309,7 +2313,7 @@ void setup()
         delay(DEBOUNCE_MS_ANY_GPIO);
         wakeup_gpio_mask = esp_sleep_get_ext1_wakeup_status();
         wakeup_gpio = log(wakeup_gpio_mask)/log(2);
-        Serial.printf("3: external signal using GPIO=%d, GPIO_MASK=%ju\n",wakeup_gpio,wakeup_gpio_mask);
+        Serial.printf("[%s]: external signal using GPIO=%d, GPIO_MASK=%ju\n",__func__,wakeup_gpio,wakeup_gpio_mask);
         set_error_red_led_level(1);
         #ifdef FW_UPGRADE_GPIO
           if (wakeup_gpio == FW_UPGRADE_GPIO)

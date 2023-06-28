@@ -15,41 +15,41 @@
           Serial.print(" -> ");
           Serial.print(name);
       }
-      Serial.println();
+      Serial.printf("\n");
 
       return (name != NULL);
   }
 
 
-  void get_all_ds18b20_addresses(){ //this function shows all addresses of the connected DS18B20 sensors
-    long sm = millis();
-
-    Serial.println("get_ds18b20_address:");
+  void get_all_ds18b20_addresses() //this function shows all addresses of the connected DS18B20 sensors
+  { 
+    Serial.printf("[%s]: \n",__func__);
+    
     DSTherm drv(_ow);
     Placeholder<DSTherm::Scratchpad> _scrpd;
 
     /* ...and read them one-by-one */
-    for (const auto& id: (OneWireNg&)_ow) {
-      if (DSTherm::getFamilyName(id)){
-        if (drv.readScratchpad(id, &_scrpd) == OneWireNg::EC_SUCCESS){
+    for (const auto& id: (OneWireNg&)_ow) 
+    {
+      if (DSTherm::getFamilyName(id))
+      {
+        if (drv.readScratchpad(id, &_scrpd) == OneWireNg::EC_SUCCESS)
+        {
           printId(id);
         }
-        else {
-          Serial.println("  Invalid CRC!");
+        else 
+        {
+          Serial.printf("[%s]: Invalid CRC!\n",__func__);
         }
       }
     }
-    Serial.println("get_all_ds18b20_addresses TOOK: "+String(millis()-sm)+"ms");
   }
 
 
-  // void get_ds18b20(long temps[]){ //in millidegrees
   float get_ds18b20()
   {    
     float temp_float;
-    // #ifdef DEBUG
-      unsigned long function_start = millis(); 
-    // #endif
+    
     //uncomment this function to shows all addresses of the connected DS18B20 sensors
     // get_all_ds18b20_addresses();
 
@@ -69,12 +69,9 @@
     {
       temp_float = (float) -33.33;
     }
-    
-    // Serial.printf("[%s]: Temperature=%0.2fC\n",__func__,temp_float);
 
     #ifdef DEBUG
       Serial.printf("[%s]: Temperature=%0.2fC\n",__func__,temp_float);
-      Serial.printf("[%s]: took %ums\n",__func__,(millis()-function_start));
     #endif
 
     return temp_float;
