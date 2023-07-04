@@ -1,8 +1,10 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "2.27.b2"
+#define VERSION "2.27.0"
 
+
+#pragma message "Compiling VERSION = " VERSION
 
 // gateways config file
 #include "config.h"

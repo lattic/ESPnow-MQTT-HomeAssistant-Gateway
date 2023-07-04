@@ -10,6 +10,9 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+2023-07-04
+  2.27.0  - valid flag in data structure - accepted
+
 2023-06-21
   2.27.b2 - valid flag in data structure - continuing
 
