@@ -1,5 +1,6 @@
 /*
 TODO:
-1: implement sending messages from sensor devices to the receiver that has the best RSSI
+1: sender:  implement sending messages from sensor devices to the receiver that has the best RSSI
+2: sender:  when command received, add checking if target state is already there, i.e. if motion disabled, don't disable again
 
 */

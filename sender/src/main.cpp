@@ -2732,6 +2732,8 @@ gather_data();
   {
     // delayMicroseconds(1);
   }
+
+  // add checking if target state is already there, i.e. if motion disabled, don't disable again
   if (command_received) 
   {
     #ifdef DEBUG
