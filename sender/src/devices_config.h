@@ -98,6 +98,10 @@
   #define USE_TSL2561                 0   // use "0" to disable
   #define SLEEP_TIME_S                1 * 3600 // seconds - 6 hours
 
+  #define CHARGING_GPIO               6  // wire RED MCU,   wire YELLOW connector,    LED RED,    CHRG PIN7 on TP4056
+  #define POWER_GPIO                  5  // wire BLACK MCU, wire WHITE  connector,    LED GREEN,  STDB PIN6 on TP4056
+  // charging resistor: 5k1
+  
   #pragma message "compilation for: esp32026-TRV4-Printers"
 // ---------------------------------------------------------------------------------------------------
 
@@ -435,6 +439,10 @@
   #define USE_SHT31                   0   // use "0" to disable
   #define USE_TSL2561                 0   // use "0" to disable
   #define SLEEP_TIME_S                1 * 3600 // seconds - 6 hours
+
+  #define CHARGING_GPIO               6  // wire RED MCU,   wire YELLOW connector,    LED RED,    CHRG PIN7 on TP4056
+  #define POWER_GPIO                  5  // wire BLACK MCU, wire WHITE  connector,    LED GREEN,  STDB PIN6 on TP4056
+  // charging resistor: 5k1
 
   #pragma message "compilation for: esp32055-TRV3-toilet-up"
 // ---------------------------------------------------------------------------------------------------
