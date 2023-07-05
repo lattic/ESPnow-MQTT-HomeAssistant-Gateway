@@ -15,12 +15,12 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
 
   uint16_t exp_after_s;             // calculated to avoid unavailability when "exp_aft" was < than 30s cooling time (exp_aft minimum = 60s)
 
-  if (sleep_time_s < 60)
+  if (sleep_time_s <= 30)
   {
     exp_after_s = 60;
   } else 
   {
-    exp_after_s = sleep_time_s;
+    exp_after_s = sleep_time_s * 2;
   }
 
   StaticJsonDocument<JSON_CONFIG_SIZE> config;

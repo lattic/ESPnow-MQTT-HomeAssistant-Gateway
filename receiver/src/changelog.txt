@@ -11,7 +11,7 @@ OTA:
 - http://HOSTNAME.local:8080/update
 
 2023-07-05
-  2.27.1  - exp_aft minimum for sensors = 60s
+  2.27.1  - exp_aft minimum for sensors = 60s, else 2x sleep time
 
 2023-07-04
   2.27.0  - valid flag in data structure - accepted
