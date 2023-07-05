@@ -13,6 +13,16 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   bool publish_status = false;      //changes locally in each config publish
   bool total_publish_status = true; //changes globally in each config publish when any fails
 
+  uint16_t exp_after_s;             // calculated to avoid unavailability when "exp_aft" was < than 30s cooling time (exp_aft minimum = 60s)
+
+  if (sleep_time_s < 60)
+  {
+    exp_after_s = 60;
+  } else 
+  {
+    exp_after_s = sleep_time_s;
+  }
+
   StaticJsonDocument<JSON_CONFIG_SIZE> config;
   JsonObject dev;
   int size_c;
@@ -255,7 +265,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
     config["val_tpl"] = "{{value_json.temperature}}";
     config["uniq_id"] = temp_name;
     config["frc_upd"] = "true";
-    config["exp_aft"] = sleep_time_s * 3;
+    config["exp_aft"] = exp_after_s;  
 
     CREATE_SENSOR_MQTT_DEVICE
 
@@ -298,7 +308,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
     config["val_tpl"] = "{{value_json.humidity}}";
     config["uniq_id"] = hum_name;
     config["frc_upd"] = "true";
-    config["exp_aft"] = sleep_time_s * 3;
+    config["exp_aft"] = exp_after_s;
 
     CREATE_SENSOR_MQTT_DEVICE
 
@@ -341,7 +351,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
     config["unit_of_meas"] = "lx";
     config["val_tpl"] = "{{value_json.lux}}";
     config["frc_upd"] = "true";
-    config["exp_aft"] = sleep_time_s * 3;
+    config["exp_aft"] = exp_after_s;
 
     CREATE_SENSOR_MQTT_DEVICE
 
@@ -403,7 +413,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
     config["val_tpl"] = "{{value_json.motion_enabled}}";
     config["uniq_id"] = motion_enabled_name;
     config["frc_upd"] = "true";
-    config["exp_aft"] = sleep_time_s * 3;
+    config["exp_aft"] = exp_after_s;
 
     CREATE_SENSOR_MQTT_DEVICE
 
@@ -443,7 +453,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
     config["val_tpl"] = "{{value_json.motion}}";
     config["uniq_id"] = motion_name;
     config["frc_upd"] = "true";
-    config["exp_aft"] = sleep_time_s * 3;
+    config["exp_aft"] = exp_after_s;
 
     CREATE_SENSOR_MQTT_DEVICE
 
@@ -488,7 +498,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = charging_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -528,7 +538,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = boot_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -569,7 +579,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["unit_of_meas"] = "s";
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -609,7 +619,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = pretty_ontime_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -651,7 +661,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = name_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -691,7 +701,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = mac_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -734,7 +744,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = rssi_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -774,7 +784,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = version_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -815,7 +825,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = dev_type_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -855,7 +865,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = wifi_ok_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -896,7 +906,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = button_pressed_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -938,7 +948,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = light_highsens_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -982,7 +992,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = bat_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -1026,7 +1036,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = batpct_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -1069,7 +1079,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = batchr_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -1110,7 +1120,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["uniq_id"] = gateway_name;
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -1152,7 +1162,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
   config["unit_of_meas"] = "ms";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 
@@ -1194,7 +1204,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["frc_upd"] = "true";
   config["entity_category"] = "diagnostic";
   config["unit_of_meas"] = "s";
-  config["exp_aft"] = sleep_time_s * 3;
+  config["exp_aft"] = exp_after_s;
 
   CREATE_SENSOR_MQTT_DEVICE
 

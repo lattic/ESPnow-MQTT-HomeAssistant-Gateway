@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "2.27.0"
+#define VERSION "2.27.1"
 
 
 #pragma message "Compiling VERSION = " VERSION
