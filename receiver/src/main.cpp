@@ -3,7 +3,6 @@
 // #define DEBUG
 #define VERSION "2.27.1"
 
-
 #pragma message "Compiling VERSION = " VERSION
 
 // gateways config file
