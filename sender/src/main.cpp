@@ -336,6 +336,9 @@ void stop_cp_timer();
 void delete_cp_timer();
 void start_cp_timer(int16_t timeout);
 
+// commands:
+void set_new_sleep_time_s(int time_s);
+
 // dallas
 #if (USE_DALLAS_18B20 == 1)
   static bool printId(const OneWireNg::Id& id);
@@ -2157,6 +2160,18 @@ void set_error_red_led_level(u_int8_t level)
   #endif
 }
 
+void set_new_sleep_time_s(int time_s)
+{
+  if (g_sleeptime_s != time_s)
+  {
+    Serial.printf("[%s]: Received command from gateway to set sleeptime to %ds\n",__func__,time_s);
+    g_sleeptime_s = time_s;
+    do_esp_restart();
+  } else 
+  {
+    Serial.printf("[%s]: Received command from gateway to set sleeptime to %ds but it is already the same. NOTHING DONE then.\n",__func__,time_s);
+  }
+}
 
 void setup()
 {
@@ -2719,9 +2734,7 @@ void setup()
   #endif
 
   // wait for command from gateway
-  #ifdef DEBUG
-    u_int32_t start_waiting = millis();
-  #endif
+  u_int32_t start_waiting = millis();
 
   if (send_data())
   {
@@ -2739,7 +2752,6 @@ void setup()
     // delayMicroseconds(1);
   }
 
-  // add checking if target state is already there, i.e. if motion disabled, don't disable again
   if (command_received) 
   {
     #ifdef DEBUG
@@ -2789,69 +2801,86 @@ void setup()
     // lux high sensitivity
     if (data_recv.command == 5) 
     {
-      Serial.printf("[%s]: Received command from gateway to set lux measurement to high sensitivity\n",__func__);
-      g_lux_high_sens = 1;
-      do_esp_restart();
+      if (g_lux_high_sens != 1)
+      {
+        Serial.printf("[%s]: Received command from gateway to set lux measurement to high sensitivity\n",__func__);
+        g_lux_high_sens = 1;
+        do_esp_restart();
+      } else Serial.printf("[%s]: Received command from gateway to set lux measurement to high sensitivity but it is high already\n",__func__);
     }  
     else 
     // lux low sensitivity
     if (data_recv.command == 6) 
     {
-      Serial.printf("[%s]: Received command from gateway to set lux measurement to low sensitivity\n",__func__);
-      g_lux_high_sens = 0;
-      do_esp_restart();
+      if (g_lux_high_sens != 0)
+      {
+        Serial.printf("[%s]: Received command from gateway to set lux measurement to low sensitivity\n",__func__);
+        g_lux_high_sens = 0;
+        do_esp_restart();
+      } else Serial.printf("[%s]: Received command from gateway to set lux measurement to low sensitivity but it is low already\n",__func__);
     }      
     else    
     // Motion OFF
     if (data_recv.command == 10) 
     {
-      #ifdef DEBUG
+      if (g_motion != 0)
+      {
         Serial.printf("[%s]: Received command from gateway to turn OFF motion\n",__func__);
-      #endif
-      g_motion = 0;
-      do_esp_restart();
+        g_motion = 0;
+        do_esp_restart();
+      } else Serial.printf("[%s]: Received command from gateway to turn OFF motion but it is OFF already\n",__func__);
     }  
     else 
     // Motion ON
     if (data_recv.command == 11) 
     {
-      #ifdef DEBUG
+      if (g_motion != 1)
+      {
         Serial.printf("[%s]: Received command from gateway to turn ON motion\n",__func__);
-      #endif
-      g_motion = 1;
-      do_esp_restart();
-    }      
+        g_motion = 1;
+        do_esp_restart();
+      } else Serial.printf("[%s]: Received command from gateway to turn ON motion but it is ON already\n",__func__);
+    }     
     else 
     // gw1
     if (data_recv.command == 21) 
     {
-      Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 1\n",__func__);
       if (NUMBER_OF_GATEWAYS > 1) // only if there is more than 1 gw, otherwise it makes no sense
       {
-        g_last_gw = 0;
-        do_esp_restart();
+        if (g_last_gw != 0)
+        {
+          Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 1\n",__func__);
+          g_last_gw = 0;
+          do_esp_restart();
+        } else Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 1 but it is gateway 1 already\n",__func__);
       }
     }  
     else  
     // gw2
     if (data_recv.command == 22) 
     {
-      Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 2\n",__func__);
       if (NUMBER_OF_GATEWAYS > 1) // only if there is more than 1 gw, otherwise it makes no sense
       {
-        g_last_gw = 1;
-        do_esp_restart();
+        if (g_last_gw != 1)
+        {
+          Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 2\n",__func__);
+          g_last_gw = 1;
+          do_esp_restart();
+        } else Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 2 but it is gateway 2 already\n",__func__);
       }
     }  
     else 
     // gw3
     if (data_recv.command == 23) 
     {
-      Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 3\n",__func__);
       if (NUMBER_OF_GATEWAYS > 2) // only if there is more than 2 gw, otherwise it makes no sense
       {
-        g_last_gw = 2;
-        do_esp_restart();
+        if (g_last_gw != 2)
+        {
+          Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 3\n",__func__);
+          g_last_gw = 2;
+          do_esp_restart();
+        } else Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 3 but it is gateway 3 already\n",__func__);
       }
     }  
     else  
@@ -2863,124 +2892,49 @@ void setup()
     }  
     else 
     // SLEEP_TIME_S=1s   
-    if (data_recv.command == 30) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 1s\n",__func__);
-      g_sleeptime_s = 1;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 30)  set_new_sleep_time_s(1);
     else
     // SLEEP_TIME_S=3s   
-    if (data_recv.command == 31) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 3s\n",__func__);
-      g_sleeptime_s = 3;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 31)  set_new_sleep_time_s(3);
     else
     // SLEEP_TIME_S=5s   
-    if (data_recv.command == 32) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 5s\n",__func__);
-      g_sleeptime_s = 5;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 32)  set_new_sleep_time_s(5);
     else
     // SLEEP_TIME_S=10s   
-    if (data_recv.command == 33) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 10s\n",__func__);
-      g_sleeptime_s = 10;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 33)  set_new_sleep_time_s(10);
     else
     // SLEEP_TIME_S=15s   
-    if (data_recv.command == 34) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 15s\n",__func__);
-      g_sleeptime_s = 15;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 34)  set_new_sleep_time_s(15);
     else    
     // SLEEP_TIME_S=30s   
-    if (data_recv.command == 35) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 30s\n",__func__);
-      g_sleeptime_s = 30;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 35)  set_new_sleep_time_s(30);         
     else
     // SLEEP_TIME_S=60s   
-    if (data_recv.command == 36) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 60s\n",__func__);
-      g_sleeptime_s = 60;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 36)  set_new_sleep_time_s(60);    
     else 
     // SLEEP_TIME_S=90s   
-    if (data_recv.command == 37) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 90s\n",__func__);
-      g_sleeptime_s = 90;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 37)  set_new_sleep_time_s(90);   
     else  
     // SLEEP_TIME_S=120s   
-    if (data_recv.command == 38) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 120s\n",__func__);
-      g_sleeptime_s = 120;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 38)  set_new_sleep_time_s(120);    
     else 
     // SLEEP_TIME_S=180s   
-    if (data_recv.command == 39) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 180s\n",__func__);
-      g_sleeptime_s = 180;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 39)  set_new_sleep_time_s(180);    
     else 
     // SLEEP_TIME_S=300s   
-    if (data_recv.command == 40) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 300s\n",__func__);
-      g_sleeptime_s = 300;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 40)  set_new_sleep_time_s(300);   
     else 
     // SLEEP_TIME_S=600s   
-    if (data_recv.command == 41) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 600s\n",__func__);
-      g_sleeptime_s = 600;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 41)  set_new_sleep_time_s(600);   
     else
     // SLEEP_TIME_S=900s   
-    if (data_recv.command == 42) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 900s\n",__func__);
-      g_sleeptime_s = 900;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 42)  set_new_sleep_time_s(900);    
     else  
     // SLEEP_TIME_S=1800s   
-    if (data_recv.command == 43) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 1800s\n",__func__);
-      g_sleeptime_s = 1800;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 43)  set_new_sleep_time_s(1800);  
     else 
     // SLEEP_TIME_S=3600s   
-    if (data_recv.command == 44) 
-    {
-      Serial.printf("[%s]: Received command from gateway to set sleeptime to 3600s\n",__func__);
-      g_sleeptime_s = 3600;
-      do_esp_restart();
-    }     
+    if (data_recv.command == 44)  set_new_sleep_time_s(3600);   
     else 
     // LEDs OFF   
     if (data_recv.command == 200) 
@@ -3006,17 +2960,23 @@ void setup()
     // invalid measurements - don't update HA
     if (data_recv.command == 203) 
     {
-      Serial.printf("[%s]: Received command from gateway to make measurements INVALID\n",__func__);
-      g_valid =  0;
-      do_esp_restart();
+      if (g_valid != 0)
+        {
+          Serial.printf("[%s]: Received command from gateway to make measurements INVALID\n",__func__);
+          g_valid = 0;
+          do_esp_restart();
+        } else Serial.printf("[%s]: Received command from gateway to make measurements INVALID but is already INVALID.\n",__func__);
     }  
     // valid measurements - update HA
     if (data_recv.command == 204) 
     {
-      Serial.printf("[%s]: Received command from gateway to make measurements VALID\n",__func__);
-      g_valid =  1;
-      do_esp_restart();
-    }                    
+      if (g_valid != 1)
+        {
+          Serial.printf("[%s]: Received command from gateway to make measurements VALID\n",__func__);
+          g_valid = 1;
+          do_esp_restart();
+        } else Serial.printf("[%s]: Received command from gateway to make measurements VALID but is already VALID.\n",__func__);
+    }                   
   } 
   else 
   {
