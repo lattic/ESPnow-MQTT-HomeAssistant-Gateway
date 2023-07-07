@@ -5,6 +5,9 @@ button operation:
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
 2023-07-07
+  2.20.4 - few improvements in setup()
+
+2023-07-07
   2.20.3 - few improvements in hibernate()
 
 2023-06-30

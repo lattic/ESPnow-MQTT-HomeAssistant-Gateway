@@ -843,6 +843,9 @@ void hibernate(bool force, int final_sleeping_time_s)
         #endif
 
       #endif
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: Sleeping due to cooling after motion\n",__func__);
+      #endif
     } else
     {
       //send ESP to deep unconditional sleep for predefined time -  wake up on timer...(heartbeat)
@@ -882,8 +885,7 @@ void hibernate(bool force, int final_sleeping_time_s)
         }
       #endif
       #ifdef DEBUG_LIGHT
-        Serial.printf("[%s]: going to sleep until next motion detected\n",__func__);
-        Serial.printf("[%s]:  or for %ds (heartbeat)\n",__func__,final_sleeping_time_s);
+        Serial.printf("[%s]: Sleeping due to heartbeat\n",__func__);
       #endif
     }
   #else
@@ -908,7 +910,7 @@ void hibernate(bool force, int final_sleeping_time_s)
       #endif
     #endif
     #ifdef DEBUG_LIGHT
-      Serial.printf("[%s]: going to sleep for %ds (heartbeat)\n",__func__,final_sleeping_time_s);
+      Serial.printf("[%s]: Sleeping due to heartbeat\n",__func__);
     #endif
   #endif
   // testing with PPK2 - go to sleep
@@ -2257,7 +2259,7 @@ void setup()
   boot_reason = esp_reset_reason();
   wakeup_reason = esp_sleep_get_wakeup_cause();
   #ifdef DEBUG_LIGHT
-    Serial.printf("[%s]: Boot cause=%d - ",__func__,boot_reason);
+    Serial.printf("[%s]: Boot cause=%d\n",__func__,boot_reason);
   #endif
   switch(boot_reason)
   {
@@ -2293,7 +2295,7 @@ void setup()
   }
 
   #ifdef DEBUG_LIGHT
-    Serial.printf("[%s]: Wakeup cause=%d - ",__func__,wakeup_reason);
+    Serial.printf("[%s]: Wakeup cause=%d\n",__func__,wakeup_reason);
   #endif
   switch(wakeup_reason)
   {
@@ -2702,19 +2704,24 @@ void setup()
 // Firmware update END
 
 // gather data
-gather_data();
+  gather_data();
 
-// off 3V
-#ifdef ENABLE_3V_GPIO
-  #ifdef DEBUG
-    Serial.printf("[%s]: Disabling 3V on GPIO=%d\n",__func__,ENABLE_3V_GPIO);
+  // off 3V
+  #ifdef ENABLE_3V_GPIO
+    #ifdef DEBUG
+      Serial.printf("[%s]: Disabling 3V on GPIO=%d\n",__func__,ENABLE_3V_GPIO);
+    #endif
+    digitalWrite(ENABLE_3V_GPIO, LOW);
   #endif
-  digitalWrite(ENABLE_3V_GPIO, LOW);
-#endif
 
-#ifdef DEBUG_LIGHT
-  Serial.printf("[%s]: Temp=%0.2fC, Hum=%0.2f%%, Light=%0.2flx (high sensitivity=%d), batpct=%0.2f%%, charging=%s, ontime=%us\n",__func__,myData.temp,myData.hum,myData.lux,g_lux_high_sens,myData.batpct,myData.charg,myData.ontime);
-#endif
+  #ifdef DEBUG_LIGHT
+    Serial.printf("[%s]: Temp=%0.2fC, Hum=%0.2f%%, Light=%0.2flx (high sensitivity=%d), batpct=%0.2f%%, charging=%s, ontime=%us\n",__func__,myData.temp,myData.hum,myData.lux,g_lux_high_sens,myData.batpct,myData.charg,myData.ontime);
+  #endif
+
+  // wait for command from gateway
+  #ifdef DEBUG
+    u_int32_t start_waiting = millis();
+  #endif
 
   if (send_data())
   {
@@ -2726,14 +2733,9 @@ gather_data();
     Serial.printf("[%s]: Sendig data FAILED\n",__func__);
   }
 
-  // wait for command from gateway
-  #ifdef DEBUG
-    Serial.printf("[%s]: Waiting for command from gateway...\n",__func__);
-  #endif
-  // unsigned long t_wait_answer_start = millis();
-  u_int32_t start_waiting = micros();
   while(!command_received && micros() <= start_waiting + (WAIT_FOR_COMMAND_MS * 1000))
   {
+    // give a bit of time to gateway to send command back in case there is a queue in gateway
     // delayMicroseconds(1);
   }
 
@@ -2741,8 +2743,11 @@ gather_data();
   if (command_received) 
   {
     #ifdef DEBUG
-      Serial.printf("[%s]: Received command from gateway = %d\n",__func__,data_recv.command); 
-    #endif
+      u_int32_t end_waiting = millis();
+      u_int32_t waiting_time = end_waiting - start_waiting;
+      Serial.printf("[%s]: Received command from gateway=%d, it took %lums (including sending to gw).\n",__func__,data_recv.command,waiting_time); 
+    #endif    
+
     // act on commands here
     // OTA
     if (data_recv.command == 1) 
@@ -3015,14 +3020,10 @@ gather_data();
   } 
   else 
   {
-    Serial.printf("[%s]: Command from gateway NOT received within %dms\n",__func__,WAIT_FOR_COMMAND_MS);
+    #ifdef DEBUG
+      Serial.printf("[%s]: NOTHING RECEIVED from gateway within %dms\n",__func__,WAIT_FOR_COMMAND_MS);
+    #endif // DEBUG
   }
-
-  #ifdef DEBUG
-    u_int32_t end_waiting = micros();
-    u_int32_t waiting_time = end_waiting - start_waiting;
-    Serial.printf("[%s]: Waiting for command from gateway took: %luus\n",__func__,waiting_time);
-  #endif 
 
   disable_espnow();
 
