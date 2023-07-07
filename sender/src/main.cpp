@@ -732,6 +732,8 @@ void hibernate(bool force, int final_sleeping_time_s)
 
     esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
     
+
+    Serial.printf("[%s]: Going to sleep for %d seconds\n",__func__,final_sleeping_time_s);
     do_esp_go_to_sleep();
   #endif
 
@@ -809,6 +811,8 @@ void hibernate(bool force, int final_sleeping_time_s)
     if (touch_pad_intr_enable() != ESP_OK) Serial.printf("touch_pad_intr_enable ERROR\n");
     if (NUMBER_OF_BUTTONS > 0)  esp_sleep_enable_touchpad_wakeup();
     esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
+
+    Serial.printf("[%s]: Going to sleep for %d seconds\n",__func__,final_sleeping_time_s);
     do_esp_go_to_sleep();
   #endif
 
@@ -818,7 +822,8 @@ void hibernate(bool force, int final_sleeping_time_s)
     // when motion detected we don't allow second wakup on motion - first cooling time only or FW update
     {
       //send ESP to deep unconditional sleep for predefined time -  wake up on timer (cooling period)
-      esp_sleep_enable_timer_wakeup(COOLING_SLEEP_DURATION_S * uS_TO_S_FACTOR);
+      final_sleeping_time_s = COOLING_SLEEP_DURATION_S;
+      esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
       //... or on GPIO ext1 (FW update)
       #ifdef FW_UPGRADE_GPIO //if FW_UPGRADE_GPIO  defined, wake up on it
         bitmask_dec = pow(2,FW_UPGRADE_GPIO);
@@ -838,8 +843,6 @@ void hibernate(bool force, int final_sleeping_time_s)
         #endif
 
       #endif
-
-      Serial.printf("[%s]: going to sleep for %ds (cooling time)\n",__func__,COOLING_SLEEP_DURATION_S);
     } else
     {
       //send ESP to deep unconditional sleep for predefined time -  wake up on timer...(heartbeat)
@@ -916,6 +919,7 @@ void hibernate(bool force, int final_sleeping_time_s)
   // the next 2 lines are NOT working - CP cannot start! ????
   // esp_sleep_config_gpio_isolate();
 
+  Serial.printf("[%s]: Going to sleep for %d seconds\n",__func__,final_sleeping_time_s);
   do_esp_go_to_sleep();
 }
 

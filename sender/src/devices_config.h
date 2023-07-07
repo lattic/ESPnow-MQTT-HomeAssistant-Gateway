@@ -416,6 +416,26 @@
 // ---------------------------------------------------------------------------------------------------
 
 
+#elif DEVICE_ID == 44
+  #define SENSOR_TYPE                 1 // 0 = "env", 1 = "motion", 2 =  "env+mot"
+  #define HOSTNAME                    "esp32044"
+  #define DEVICE_NAME                 "Garage mid m."  // 15 characters maximum
+  #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
+  // #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  // #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define ENABLE_3V_GPIO              3   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  #define USE_MAX17048                1   // use "0" to disable
+  #define USE_SHT31                   0   // use "0" to disable
+  #define USE_TSL2561                 0   // use "0" to disable
+  #define SLEEP_TIME_S                3600 // seconds - 180
+
+  #pragma message "compilation for: esp32044-Garage middle m."
+// ---------------------------------------------------------------------------------------------------
+
 #elif DEVICE_ID == 49
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32049"
