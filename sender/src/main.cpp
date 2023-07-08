@@ -1884,9 +1884,11 @@ void do_esp_go_to_sleep()
     }
   #endif
 
-  // #ifdef DEBUG_LIGHT
+  #ifdef DEBUG_LIGHT
     Serial.printf("[%s]: millis=%lums, Bye...\n========= E N D =========\n",__func__,millis());
-  // #endif
+  #else 
+    Serial.printf("[%s]: Bye...\n========= E N D =========\n",__func__);
+  #endif
   esp_deep_sleep_start();
 }
 
@@ -1975,7 +1977,7 @@ void save_config(const char* reason)
   }
   
   #ifndef DEBUG
-    Serial.printf("[%s]: millis=%lums, Program finished after %lums (adjusted).\n",__func__,millis(), work_time);
+    Serial.printf("[%s]: Program finished after %lums (adjusted).\n",__func__,work_time);
   #endif
   
   // testing with PPK2 - end save ontime
@@ -2191,8 +2193,11 @@ void setup()
 
   // #ifdef DEBUG_LIGHT
   Serial.printf("\n======= S T A R T =======\n");
-  Serial.printf("[%s]: millis=%lums, Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__,program_start_time, DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
-  // #endif
+  #ifdef DEBUG_LIGHT
+    Serial.printf("[%s]: millis=%lums, Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__,program_start_time, DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
+  #else 
+    Serial.printf("[%s]: Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__, DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
+  #endif
 
   // ciphered config
   cipher->setKey(cipher_key);     //for encryption/decryption of config file
@@ -2238,12 +2243,30 @@ void setup()
 
   // power for sensors from GPIO - MUST be before any I2C sensor is in use obviously!
   #ifdef ENABLE_3V_GPIO
-    pinMode(ENABLE_3V_GPIO,OUTPUT);
-    #ifdef DEBUG
-      Serial.printf("[%s]: Enabling 3V to power sensors on GPIO=%d\n",__func__,ENABLE_3V_GPIO);
+    #ifdef DEBUG_LIGHT
+      Serial.printf("[%s]: Enabling 3V to power sensors on GPIO=%d...\n",__func__,ENABLE_3V_GPIO);
     #endif
+    pinMode(ENABLE_3V_GPIO,OUTPUT);
     digitalWrite(ENABLE_3V_GPIO, HIGH);
-    while (!digitalRead(ENABLE_3V_GPIO)){delay(1);}
+    unsigned long en_3v_start_time = millis();
+    while (!digitalRead(ENABLE_3V_GPIO))
+    {
+      Serial.printf("[%s]: Waiting for 3V...\n",__func__);
+      while (millis()-en_3v_start_time < 10)
+      {
+        delay(1);
+      }
+      if (!digitalRead(ENABLE_3V_GPIO))
+      {
+        Serial.printf("[%s]: Enabling 3V to power sensors on GPIO=%d FAILED\n",__func__,ENABLE_3V_GPIO);
+        Serial.printf("[%s]: Gooing to forced sleep for %d seconds\n",__func__,g_sleeptime_s);
+        hibernate(false,g_sleeptime_s);
+      } 
+    }
+    #ifdef DEBUG_LIGHT
+      Serial.printf("[%s]: Enabling 3V to power sensors on GPIO=%d DONE\n",__func__,ENABLE_3V_GPIO);
+    #endif
+    // extra 10ms for sensors to wake up
     delay(10);
   #endif
   
@@ -2281,7 +2304,7 @@ void setup()
     // 1 = reset/power on
     case ESP_RST_POWERON:
     {
-      Serial.printf("[%s]: power on or reset\n",__func__);
+      Serial.printf("[%s]: Boot cause: power on or reset\n",__func__);
       set_act_blue_led_level(1);
       set_error_red_led_level(1);
       break;
@@ -2289,7 +2312,7 @@ void setup()
     // 3 = Software reset via esp_restart
     case ESP_RST_SW:
     {
-      Serial.printf("[%s]: Software reset via esp_restart\n",__func__);
+      Serial.printf("[%s]: Boot cause: software reset via esp_restart\n",__func__);
       set_act_blue_led_level(1);
       set_error_red_led_level(1);
       break;
@@ -2298,38 +2321,39 @@ void setup()
     case ESP_RST_DEEPSLEEP:
     {
       #ifdef DEBUG_LIGHT
-        Serial.printf("[%s]: wake up from deep sleep \n",__func__);
+        Serial.printf("[%s]: Boot cause: wake up from deep sleep \n",__func__);
       #endif
       break;
     }
     default:
     {
-      Serial.printf("[%s]: other boot cause=%d\n",__func__);
+      Serial.printf("[%s]: Boot cause: other boot cause=%d\n",__func__);
       break;
     }
   }
 
-  #ifdef DEBUG_LIGHT
-    Serial.printf("[%s]: Wakeup cause=%d\n",__func__,wakeup_reason);
-  #endif
+  // #ifdef DEBUG_LIGHT
+  //   Serial.printf("[%s]: Wakeup cause=%d\n",__func__,wakeup_reason);
+  // #endif
   switch(wakeup_reason)
   {
     // 0 = not deep sleep
     case ESP_SLEEP_WAKEUP_UNDEFINED:
     {
-      Serial.printf("[%s]: wake up was not caused by exit from deep sleep\n",__func__);
+      Serial.printf("[%s]: Wakeup cause: wake up was not caused by exit from deep sleep\n",__func__);
       break;
     }
     // 2 = not in use
     case ESP_SLEEP_WAKEUP_EXT0:
     {
-      Serial.printf("[%s]: external signal using RTC_IO (motion detected)\n",__func__);
+      Serial.printf("[%s]: Wakeup cause: external signal using RTC_IO (motion detected)\n",__func__);
       break;
     }
     // 3 = PUSH BUTTONS or fw update (FW_UPGRADE_GPIO) or motion detected (MOTION_SENSOR_GPIO) - not for ESP32-C3!
     #if (BOARD_TYPE != 4)
       case ESP_SLEEP_WAKEUP_EXT1:
       {
+        Serial.printf("[%s]: Wakeup cause: external signal using GPIO_EXT1\n",__func__);
         Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_ANY_GPIO);
         delay(DEBOUNCE_MS_ANY_GPIO);
         wakeup_gpio_mask = esp_sleep_get_ext1_wakeup_status();
@@ -2368,7 +2392,7 @@ void setup()
     case ESP_SLEEP_WAKEUP_TIMER:
     {
       #ifdef DEBUG_LIGHT
-        Serial.printf("timer (cooling or heartbeat)\n");
+        Serial.printf("[%s]: Wakeup cause: timer (cooling or heartbeat)\n",__func__);
       #endif
       set_act_blue_led_level(1);
       break;
@@ -2378,8 +2402,8 @@ void setup()
     {
       #if (TOUCHPAD_ONLY == 1)
         touch_pad_t touchPin;
-        #ifdef DEBUG
-          Serial.printf("[%s]: wakeup_reason=WAKEUP_TOUCHPAD\n",__func__);
+        #ifdef DEBUG_LIGHT
+          Serial.printf("[%s]: Wakeup cause: WAKEUP_TOUCHPAD\n",__func__);
         #endif
         touchPin = esp_sleep_get_touchpad_wakeup_status();
         switch(touchPin)
@@ -2459,13 +2483,16 @@ void setup()
     // 6 = not in use
     case ESP_SLEEP_WAKEUP_ULP:
     {
-      Serial.printf("WAKEUP_ULP\n");
+      #ifdef DEBUG_LIGHT
+          Serial.printf("[%s]: Wakeup cause: ESP_SLEEP_WAKEUP_ULP\n",__func__);
+      #endif
       break;
     }
     // 7 = for ESP32-C3 - ESP_SLEEP_WAKEUP_GPIO,for others it is from light sleep only (ESP32, S2 and S3) so not programmed
     #if (BOARD_TYPE == 4)
       case ESP_SLEEP_WAKEUP_GPIO:
       {
+        Serial.printf("[%s]: Wakeup cause: external signal ESP_SLEEP_WAKEUP_GPIO on C3\n",__func__);
         Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_ANY_GPIO);
         delay(DEBOUNCE_MS_ANY_GPIO);
         wakeup_gpio_mask = esp_sleep_get_gpio_wakeup_status();
@@ -2492,7 +2519,9 @@ void setup()
     #endif
     default:
     {
-      Serial.printf("OTHER Wakeup cause\n");
+      #ifdef DEBUG_LIGHT
+          Serial.printf("[%s]: Wakeup cause: OTHER cause\n",__func__);
+      #endif
       break;
     }
   }
@@ -2557,10 +2586,18 @@ void setup()
     } else
     {
       // very short press, not detected AFTER boot - no FW update just normal, forced run
-      fw_update = false;
-      #ifdef DEBUG
-        Serial.printf("[%s]: FW_UPGRADE_GPIO LOW after boot - no FW update scheduled - normal forced run\n",__func__);
-      #endif
+      if (fw_update)
+      {
+        #ifdef DEBUG
+          Serial.printf("[%s]: FW_UPGRADE_GPIO LOW after boot and debounce - no FW update scheduled - normal forced run\n",__func__);
+        #endif
+        fw_update = false;
+      } else
+      {
+        #ifdef DEBUG
+          Serial.printf("[%s]: FW_UPGRADE_GPIO LOW after boot - wakeup on timer\n",__func__);
+        #endif
+      }
     }
   #endif
 
@@ -2586,9 +2623,7 @@ void setup()
     #endif
     if (! lipo.begin())
     {
-      // #ifdef DEBUG
         Serial.printf("[%s]: MAX17048 NOT detected ... Check your wiring or I2C ADDR!\n",__func__);
-      // #endif
       max17ok = false;
     } else
     {
@@ -2618,9 +2653,7 @@ void setup()
     #endif
     if(!tsl.begin())
     {
-      #ifdef DEBUG
-        Serial.printf("[%s]: TSL2561  NOT detected ... Check your wiring or I2C ADDR!\n",__func__);
-      #endif
+      Serial.printf("[%s]: TSL2561  NOT detected ... Check your wiring or I2C ADDR!\n",__func__);
       tslok = false;
     } else 
     {
@@ -2641,9 +2674,7 @@ void setup()
       Serial.printf("[%s]: start USE_SHT31\n",__func__);
     #endif
     if (! sht31.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
-      // #ifdef DEBUG
-        Serial.printf("[%s]: SHT31    NOT detected ... Check your wiring or I2C ADDR!\n",__func__);
-      // #endif
+      Serial.printf("[%s]: SHT31    NOT detected ... Check your wiring or I2C ADDR!\n",__func__);
       sht31ok = false;
     } else
     {
@@ -2662,8 +2693,9 @@ void setup()
     #ifdef DEBUG
       Serial.printf("[%s]: start USE_MAX31855\n",__func__);
     #endif
-    if (!thermocouple.begin()) {   // Set to 0x45 for alternate i2c addr
-        Serial.printf("[%s]: MAX31855 NOT detected ... Check your wiring!\n",__func__);
+    if (!thermocouple.begin()) 
+    {   // Set to 0x45 for alternate i2c addr
+      Serial.printf("[%s]: MAX31855 NOT detected ... Check your wiring!\n",__func__);
       max31855ok = false;
     } else
     {
@@ -2739,11 +2771,11 @@ void setup()
   if (send_data())
   {
     #ifdef DEBUG
-      Serial.printf("[%s]: Sendig data SUCCESSFUL\n",__func__);
+      Serial.printf("[%s]: Sendig data to gateway SUCCESSFUL\n",__func__);
     #endif
   } else 
   {
-    Serial.printf("[%s]: Sendig data FAILED\n",__func__);
+    Serial.printf("[%s]: Sendig data to gateway FAILED\n",__func__);
   }
 
   while(!command_received && micros() <= start_waiting + (WAIT_FOR_COMMAND_MS * 1000))
@@ -2980,9 +3012,7 @@ void setup()
   } 
   else 
   {
-    #ifdef DEBUG
-      Serial.printf("[%s]: NOTHING RECEIVED from gateway within %dms\n",__func__,WAIT_FOR_COMMAND_MS);
-    #endif // DEBUG
+    Serial.printf("[%s]: NOTHING RECEIVED from gateway within %dms\n",__func__,WAIT_FOR_COMMAND_MS);
   }
 
   disable_espnow();

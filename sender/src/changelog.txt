@@ -4,6 +4,9 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
+2023-07-08
+  2.20.6 - another improvements in setup()
+
 2023-07-07
   2.20.5 - when command received, checking if target state is already there - if so, no changes
 
