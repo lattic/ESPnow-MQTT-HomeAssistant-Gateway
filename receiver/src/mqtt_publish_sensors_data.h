@@ -1299,6 +1299,7 @@ bool mqtt_publish_sensors_values()
   char pretty_ontime[17]; // "999d 24h 60m 60s" = 16 characters
   ConvertSectoDay(myLocalData.ontime,pretty_ontime);
 
+  // debug_mode = 1;
   if (debug_mode) Serial.printf("[%s]: queue size=%d/%d, %d bytes received from: %s: rssi=%ddBm, bat=%fV\n",__func__,queue_count,MAX_QUEUE_COUNT,sizeof(myLocalData), myLocalData.host, myLocalData_aux.rssi, myLocalData.bat);
 
   if (debug_mode)
@@ -1306,7 +1307,8 @@ bool mqtt_publish_sensors_values()
     Serial.println("\nESPnow Message received from:");
     Serial.print("\tname=");Serial.println(myLocalData.name);
     Serial.print("\thostname=");Serial.println(myLocalData.host);
-    Serial.print("\tMAC=");Serial.println(myLocalData_aux.macStr);
+    Serial.print("\tMAC from myLocalData_aux=");Serial.println(myLocalData_aux.macStr);
+    Serial.print("\tMAC from myLocalData    =");Serial.println(myLocalData.macStr);
     Serial.print("\tSize of message=");Serial.print(sizeof(myLocalData));Serial.println(" bytes");
     Serial.print("\ttemp=");Serial.println(myLocalData.temp);
     Serial.print("\thum=");Serial.println(myLocalData.hum);
@@ -1327,6 +1329,7 @@ bool mqtt_publish_sensors_values()
     Serial.print("\tbutton_pressed=");Serial.println(myLocalData.button_pressed);
     Serial.println();
   }
+  // debug_mode = 0;
 
   // publish influxdb
   #if(USE_INFLUXDB == 1)

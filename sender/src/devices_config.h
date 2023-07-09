@@ -496,6 +496,8 @@
 
 
 #elif DEVICE_ID == 100
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+  
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32100"
   #define DEVICE_NAME                 "Office"  // 15 characters maximum
@@ -979,7 +981,6 @@
 
 #elif DEVICE_ID == 94
   #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
-  #define LORA_ENABLED                1 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32094"
   #define DEVICE_NAME                 "test94"  // 15 characters maximum
@@ -999,8 +1000,17 @@
   #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
 
+  // for LoRa
+  #define LORA_ENABLED                1 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
+  #define LORA_GPIO_ENABLE_3V         19   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  #define LORA_GPIO_MISO              20  // - BLUE
+  #define LORA_GPIO_MOSI              17  // - GREEN
+  #define LORA_GPIO_CLOCK             18  // - BROWN
+  #define LORA_GPIO_SS                14  // - YELLOW, SS/NSS/CS:
+  #define LORA_GPIO_RST               15  // - ORANGE
+  #define LORA_GPIO_DIO0              16  // - VIOLET
 
-  #pragma message "compilation for: esp32092-test"
+  #pragma message "compilation for: esp32094-test"
 // ---------------------------------------------------------------------------------------------------
 
 

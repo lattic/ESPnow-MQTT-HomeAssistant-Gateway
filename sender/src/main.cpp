@@ -106,6 +106,11 @@ sender.ino
   #endif  
 #endif
 
+// LoRa
+#if (LORA_ENABLED == 1)
+  #include <SPI.h>
+  #include <LoRa.h>
+#endif
 // ========================================================================== libraries END
 
 // some consistency checks 
@@ -210,6 +215,7 @@ typedef struct struct_message           // 92 bytes
   uint16_t working_time_ms;             // last working time in ms
   uint16_t sleep_time_s;                // 
   uint8_t valid = 1;                    // make it invalid in case some info is missing, incorrect or flagged, don't publish to HA if invalid
+  char macStr[18];                      // MAC address of sender in "%02x:%02x:%02x:%02x:%02x:%02x" format
 } struct_message;
 
 struct_message myData;
@@ -283,7 +289,7 @@ struct_message_recv data_recv;
 // receiving command from gateway END
 
 
-
+bool data_sent = false; // to confirm if sent by ESPnow or LoRa
 // ========================================================================== variables END
 
 // ========================================================================== FUNCTIONS declaration
@@ -296,7 +302,7 @@ void change_mac();
 
 void hibernate(bool force, int final_sleeping_time_s);
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
-bool send_data();
+bool send_data_espnow();
 void OnDataReceived(const uint8_t * mac, const uint8_t *incomingData, int len); 
 
 
@@ -1014,6 +1020,12 @@ void gather_data()
     Serial.printf("[%s]: myData.motion_enabled=%d\n",__func__,myData.motion_enabled);
   #endif
 
+  // MAC:
+  snprintf(myData.macStr, sizeof(myData.macStr), "%s",mac_new_char);
+  #ifdef DEBUG
+    Serial.printf("[%s]: myData.macStr=%s\n",__func__,myData.macStr);
+  #endif
+
   // hostname
   strcpy(myData.host, HOSTNAME);
   #ifdef DEBUG
@@ -1249,7 +1261,7 @@ void gather_data()
 
 
 // send data to gateway over ESPnow
-bool send_data()     
+bool send_data_espnow()     
 {
   char receiver_mac[18];
   int channel, last_gw;
@@ -1501,6 +1513,61 @@ bool send_data()
 // ======================================================== LOOP THROUGH ALL RECEIVERS END =======================================================
 }
 
+bool send_data_lora()
+{
+  #if (LORA_ENABLED == 1)
+    /*
+    #define LORA_ENABLED                1 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
+    #define LORA_GPIO_ENABLE_3V         19   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+    #define LORA_GPIO_MISO              20  // - BLUE
+    #define LORA_GPIO_MOSI              17  // - GREEN
+    #define LORA_GPIO_CLOCK             18  // - BROWN
+    #define LORA_GPIO_SS                14  // - YELLOW, SS/NSS/CS:
+    #define LORA_GPIO_RST               15  // - ORANGE
+    #define LORA_GPIO_DIO0              16  // - VIOLET  
+    */
+    unsigned long s2=millis();  // micros
+    set_error_red_led_level(1);
+
+    SPI.begin(LORA_GPIO_CLOCK, LORA_GPIO_MISO, LORA_GPIO_MOSI);
+    LoRa.setPins(LORA_GPIO_SS, LORA_GPIO_RST, LORA_GPIO_DIO0);
+
+    if (!LoRa.begin(866E6)) 
+    {
+      Serial.printf("[%s]: Starting LoRa FAILED!\n",__func__);
+      set_error_red_led_level(0);
+      Serial.printf("[%s]: took=%dms\n",__func__,millis()-s2);
+      return 0;
+    }
+    while (LoRa.beginPacket() == 0)     // this stays here - change to timeout
+    {
+      Serial.printf("[%s]: waiting for LoRa radio to wake up...\n",__func__);
+    }
+    LoRa.setTxPower(20);
+    LoRa.enableCrc();
+
+
+    u_int8_t which_gw = 0;      // currently only 1 LoRa receiver - gw1
+    memcpy(broadcastAddress, lora_receivers[which_gw], sizeof(lora_receivers[which_gw]));
+
+    size_t broadcastAddress_size = sizeof(broadcastAddress);
+    size_t myData_size = sizeof(myData);
+    size_t total_size = broadcastAddress_size + myData_size;
+
+    Serial.printf("[%s]: Sending data to gw=%d, boot=%d, broadcastAddress_size=%d, packet size=%d, total bytes sent=%d\n",__func__,which_gw,myData.boot,broadcastAddress_size,myData_size,total_size);
+
+    unsigned long s3=millis();  // micros
+    LoRa.beginPacket();
+    LoRa.write((uint8_t*)&broadcastAddress, broadcastAddress_size);     // send gw address for gw to recognize if message is for it
+    LoRa.write((uint8_t*)&myData, myData_size);                         // send myData
+    LoRa.endPacket(false); // true = async / non-blocking mode
+    unsigned long end1=millis();  // micros
+
+    set_error_red_led_level(0);
+    Serial.printf("[%s]: took=%dms, sending over LoRa took=%dms\n",__func__,end1-s2,end1-s3);
+    return 1;
+  #endif
+}
 
 void setup_CP_Server()
 {
@@ -2259,7 +2326,7 @@ void setup()
       if (!digitalRead(ENABLE_3V_GPIO))
       {
         Serial.printf("[%s]: Enabling 3V to power sensors on GPIO=%d FAILED\n",__func__,ENABLE_3V_GPIO);
-        Serial.printf("[%s]: Gooing to forced sleep for %d seconds\n",__func__,g_sleeptime_s);
+        Serial.printf("[%s]: Going to forced sleep for %d seconds\n",__func__,g_sleeptime_s);
         hibernate(false,g_sleeptime_s);
       } 
     }
@@ -2270,6 +2337,37 @@ void setup()
     delay(10);
   #endif
   
+  
+  // power for LoRa module from GPIO 
+  #ifdef LORA_GPIO_ENABLE_3V
+    #ifdef DEBUG_LIGHT
+      Serial.printf("[%s]: Enabling 3V to power LoRa on GPIO=%d...\n",__func__,LORA_GPIO_ENABLE_3V);
+    #endif
+    pinMode(LORA_GPIO_ENABLE_3V,OUTPUT);
+    digitalWrite(LORA_GPIO_ENABLE_3V, HIGH);
+    unsigned long en_3v_lora_start_time = millis();
+    pinMode(LORA_GPIO_ENABLE_3V,INPUT);
+    while (!digitalRead(LORA_GPIO_ENABLE_3V))
+    {
+      Serial.printf("[%s]: Waiting for 3V for LoRa...\n",__func__);
+      while (millis()-en_3v_lora_start_time < 10)
+      {
+        delay(1);
+      }
+      if (!digitalRead(LORA_GPIO_ENABLE_3V))
+      {
+        Serial.printf("[%s]: Enabling 3V to power LoRa on GPIO=%d FAILED\n",__func__,LORA_GPIO_ENABLE_3V);
+        Serial.printf("[%s]: Gooing to forced sleep for %d seconds\n",__func__,g_sleeptime_s);
+        hibernate(false,g_sleeptime_s);
+      } 
+    }
+    #ifdef DEBUG_LIGHT
+      Serial.printf("[%s]: Enabling 3V to power LoRa on GPIO=%d DONE\n",__func__,LORA_GPIO_ENABLE_3V);
+    #endif
+    // extra 10ms for LoRa to wake up
+    delay(10);
+    pinMode(LORA_GPIO_ENABLE_3V,OUTPUT);
+  #endif  
 
   // start Wire after enabling 3.3V
   #if defined(CUSTOM_SDA_GPIO) and defined(CUSTOM_SCL_GPIO)
@@ -2756,7 +2854,7 @@ void setup()
   // off 3V
   #ifdef ENABLE_3V_GPIO
     #ifdef DEBUG
-      Serial.printf("[%s]: Disabling 3V on GPIO=%d\n",__func__,ENABLE_3V_GPIO);
+      Serial.printf("[%s]: Disabling 3V for sensors on GPIO=%d\n",__func__,ENABLE_3V_GPIO);
     #endif
     digitalWrite(ENABLE_3V_GPIO, LOW);
   #endif
@@ -2771,8 +2869,8 @@ void setup()
 
   // only ESPNOW code
   #if ESPNOW_ENABLED
-    Serial.printf("[%s]: ESPnow sending funciton here\n",__func__);
-    if (send_data())
+    Serial.printf("[%s]: ESPnow sending function here\n",__func__);
+    if (send_data_espnow())
     {
       #ifdef DEBUG
         Serial.printf("[%s]: Sendig data to gateway SUCCESSFUL\n",__func__);
@@ -3020,8 +3118,32 @@ void setup()
     }
 
     disable_espnow();
-  #elif LORA_ENABLED
-    Serial.printf("[%s]: LoRa sending funciton here\n",__func__);
+  #endif
+  
+  // only LoRa code
+  #if (LORA_ENABLED == 1)
+    // espnow_data_sent = 0;      // testing only
+    if (!espnow_data_sent)
+    {
+      Serial.printf("[%s]: LoRa sending function here as ESPnow FAILED\n",__func__);
+      if (send_data_lora())
+      {
+        Serial.printf("[%s]: Sending data over LoRa SUCCESSFUL\n",__func__);
+      } else 
+      {
+        Serial.printf("[%s]: Sending data over LoRa FAILED\n",__func__);
+      }
+    } else 
+    {
+      Serial.printf("[%s]: LoRa sending function NOT NEEDED as ESPnow was SUCCESSFUL \n",__func__);
+    }
+    // off 3V for LoRa
+    #ifdef LORA_GPIO_ENABLE_3V
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: Disabling 3V for LoRa on GPIO=%d\n",__func__,LORA_GPIO_ENABLE_3V);
+      #endif
+      digitalWrite(LORA_GPIO_ENABLE_3V, LOW);
+    #endif
   #endif 
 
 

@@ -29,7 +29,8 @@ typedef struct struct_message             // main data struct sent from sender t
   uint8_t button_pressed = 0;             // 0 = none, >0 = the button number as per button_gpio[NUMBER_OF_BUTTONS] - NOT GPIO NUMBER! index starts from 1
   uint16_t working_time_ms;               // last working time in ms
   uint16_t sleep_time_s;                  // programmed sleep time s
-  uint8_t valid = 1;                    // make it invalid in case some info is missing, incorrect or flagged, don't publish to HA if invalid  
+  uint8_t valid = 1;                      // make it invalid in case some info is missing, incorrect or flagged, don't publish to HA if invalid  
+  char macStr[18];                        // MAC address of sender in "%02x:%02x:%02x:%02x:%02x:%02x" format
 } struct_message;
 
 typedef struct struct_message_aux         // auxiliary data structure for sensors - with RSSI and MAC (of sender)

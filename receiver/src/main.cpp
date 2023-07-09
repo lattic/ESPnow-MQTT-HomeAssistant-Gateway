@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "2.27.1"
+#define VERSION "3.0.b1"
 
 #pragma message "Compiling VERSION = " VERSION
 
@@ -62,6 +62,12 @@
   #include <Adafruit_BMP280.h>
   Adafruit_BMP280 bmp; // I2C
   #include "measure-bmp280.h"
+#endif
+
+// LoRa
+#if (LORA_ENABLED == 1)
+  #include <SPI.h>
+  #include <LoRa.h>
 #endif
 
 // VARIABLES
@@ -166,11 +172,18 @@ void write_wifi_credentials(bool wifi_ok_local, String ssid_str_local, String pa
 void stop_cp_timer();
 void change_mac();
 
-void change_mac();
-
 bool send_command_to_sender(u_int8_t command);
+
 String mac_to_string(uint8_t *addr);
+
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
+
+// LoRa
+#if (LORA_ENABLED == 1)
+  void LoRaonReceive(int packetSize);
+  bool start_lora();
+#endif
+
 // fuctions declarations END
 
 
@@ -195,6 +208,11 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
   #include "measure-volts.h"
   #include "measure-lux.h"
 #endif 
+
+// LoRa
+#if (LORA_ENABLED == 1)
+  #include "lora-functions.h"
+#endif
 // separate files with functions END
 
 
@@ -469,6 +487,15 @@ void setup()
   // finally... ;-)
   espnow_start();
 
+  // and LoRa
+  if (start_lora())
+  {
+    Serial.printf("[%s]: LoRa started\n",__func__);
+  } else 
+  {
+    Serial.printf("[%s]: LoRa FAILED to start\n",__func__);
+  } 
+
   set_sensors_led_level(0);
   set_gateway_led_level(0);
   print2web = false;
@@ -595,6 +622,7 @@ void loop()
   int queue_count = uxQueueMessagesWaiting(queue);
   if ((queue_count > 0) and (publish_sensors_to_ha))
   {
+    // Serial.printf("[%s]: queue size=%d\n",__func__,queue_count);
     mqtt_publish_sensors_values();
     // influxdb_publish_sensors_values();
   }

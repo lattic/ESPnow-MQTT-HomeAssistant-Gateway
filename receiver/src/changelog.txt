@@ -10,6 +10,9 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+2023-07-09
+  3.0.b1  - testing LoRa
+
 2023-07-05
   2.27.1  - exp_aft minimum for sensors = 60s, else 2x sleep time
 
