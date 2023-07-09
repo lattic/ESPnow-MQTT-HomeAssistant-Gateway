@@ -978,7 +978,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 94
-  #define IS_LORA                     1 // 1-enable LoRa, 0 or nothing - only ESPnow
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+  #define LORA_ENABLED                1 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32094"
   #define DEVICE_NAME                 "test94"  // 15 characters maximum
