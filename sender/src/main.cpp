@@ -2346,7 +2346,6 @@ void setup()
     pinMode(LORA_GPIO_ENABLE_3V,OUTPUT);
     digitalWrite(LORA_GPIO_ENABLE_3V, HIGH);
     unsigned long en_3v_lora_start_time = millis();
-    pinMode(LORA_GPIO_ENABLE_3V,INPUT);
     while (!digitalRead(LORA_GPIO_ENABLE_3V))
     {
       Serial.printf("[%s]: Waiting for 3V for LoRa...\n",__func__);
@@ -2366,7 +2365,6 @@ void setup()
     #endif
     // extra 10ms for LoRa to wake up
     delay(10);
-    pinMode(LORA_GPIO_ENABLE_3V,OUTPUT);
   #endif  
 
   // start Wire after enabling 3.3V
