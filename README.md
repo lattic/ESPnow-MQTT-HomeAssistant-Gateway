@@ -1,5 +1,5 @@
 <h1> ESPnow MQTT Home Assistant Gateway </h1>
-<h2> SKETCHES MOVED TO PLATFORMIO! </h2>
+<h2> LoRa is comming! Already in the separate branch - under heavy tests before final commit </h2>
 
 <h2> Idea:</h2>
 <ul>
