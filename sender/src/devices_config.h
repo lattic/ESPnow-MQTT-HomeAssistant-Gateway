@@ -41,6 +41,8 @@
 // ***************************************  BOARDS  CONFIGURATION  ***************************************
 
 #if DEVICE_ID == 21
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32021"
   #define DEVICE_NAME                 "TRV5 Lidia"  // 15 characters maximum
@@ -59,6 +61,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 22
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32022"
   #define DEVICE_NAME                 "TRV6 Kids"  // 15 characters maximum
@@ -77,6 +81,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 23
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32023"
   #define DEVICE_NAME                 "TRV2 Toilet b."  // 15 characters maximum
@@ -96,6 +102,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 26
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32026"
   #define DEVICE_NAME                 "TRV4 Printers"  // 15 characters maximum
@@ -114,6 +122,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 28
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32028"
   #define DEVICE_NAME                 "Garage"  // 15 characters maximum
@@ -134,6 +144,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 31
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32031"
   #define DEVICE_NAME                 "Printers room"  // 15 characters maximum
@@ -154,6 +166,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 32
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 1 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32032"
   #define DEVICE_NAME                 "Bedroom mot."  // 15 characters maximum
@@ -172,6 +186,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 33
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32033"
   #define DEVICE_NAME                 "Living room"  // 15 characters maximum
@@ -192,6 +208,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 35
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32035"
   #define DEVICE_NAME                 "Tailor room"  // 15 characters maximum
@@ -213,6 +231,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 36
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32036"
   #define DEVICE_NAME                 "Lidia room"  // 15 characters maximum
@@ -234,6 +254,8 @@
 
 
 #elif DEVICE_ID == 37
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32037"
   #define DEVICE_NAME                 "TRV1 Bedroom"  // 15 characters maximum
@@ -253,6 +275,8 @@
 
 
 #elif DEVICE_ID == 38
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32038"
   #define DEVICE_NAME                 "Toilet bedroom"  // 15 characters maximum
@@ -273,6 +297,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 39
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 1 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32039"
   #define DEVICE_NAME                 "Garage front m."  // 15 characters maximum
@@ -292,7 +318,9 @@
   #pragma message "compilation for: esp32039-Garage front m."
 // ---------------------------------------------------------------------------------------------------
 
-#elif DEVICE_ID == 41                 // 
+#elif DEVICE_ID == 41                 
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32041"
   #define DEVICE_NAME                 "thermocouple01"  // 15 characters maximum
@@ -323,7 +351,9 @@
 // ---------------------------------------------------------------------------------------------------
 
 
-#elif DEVICE_ID == 42                 // 
+#elif DEVICE_ID == 42                 
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 4 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = battery, 4 = "push_b"
   #define HOSTNAME                    "esp32042"
   #define DEVICE_NAME                 "pushb_6x_desk"  // 15 characters maximum
@@ -366,7 +396,9 @@
 // ---------------------------------------------------------------------------------------------------
 
 
-#elif DEVICE_ID == 43                 // 
+#elif DEVICE_ID == 43                 
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32043"
   #define DEVICE_NAME                 "swimming pool"  // 15 characters maximum
@@ -417,6 +449,8 @@
 
 
 #elif DEVICE_ID == 44
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 1 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32044"
   #define DEVICE_NAME                 "Garage mid m."  // 15 characters maximum
@@ -437,6 +471,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 49
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32049"
   #define DEVICE_NAME                 "Kitchen"  // 15 characters maximum
@@ -458,6 +494,8 @@
 
 
 #elif DEVICE_ID == 55
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32055"
   #define DEVICE_NAME                 "TRV3 Toilet up"  // 15 characters maximum
@@ -477,6 +515,8 @@
 
 
 #elif DEVICE_ID == 56
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32056"
   #define DEVICE_NAME                 "TRV7 Tailor"  // 15 characters maximum
@@ -519,6 +559,8 @@
 
 #elif DEVICE_ID == 101
   // measured current: 38.45uA without PIR (switch OFF)
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32101"
   #define DEVICE_NAME                 "Dining room"  // 15 characters maximum
@@ -539,6 +581,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 102
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32102"
   #define DEVICE_NAME                 "Toilet up"  // 15 characters maximum
@@ -560,6 +604,8 @@
 
 
 #elif DEVICE_ID == 104
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32104"
   #define DEVICE_NAME                 "Kids room"  // 15 characters maximum
@@ -580,6 +626,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 105
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32105"
   #define DEVICE_NAME                 "Garden"  // 15 characters maximum
@@ -980,7 +1028,7 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 94
-  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+  #define ESPNOW_ENABLED              0 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32094"
   #define DEVICE_NAME                 "test94"  // 15 characters maximum
@@ -995,7 +1043,7 @@
   #define USE_MAX17048                1   // use "0" to disable
   #define USE_SHT31                   0   // use "0" to disable
   #define USE_TSL2561                 0   // use "0" to disable
-  #define SLEEP_TIME_S                10 // seconds - 180
+  #define SLEEP_TIME_S                0.1 // seconds - 180
 
   #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high

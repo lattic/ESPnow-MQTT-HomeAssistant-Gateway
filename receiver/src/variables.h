@@ -37,6 +37,7 @@ typedef struct struct_message_aux         // auxiliary data structure for sensor
 {
   int rssi;
   char macStr[18];
+  char comm_type[10];                     // "LoRa" 'ESPnow" "WiFi"
 } struct_message_aux;
 
 typedef struct struct_message_recv        // command to sender - only 1 type but struct ready for expansion, the same type on sensor device!
@@ -59,6 +60,10 @@ QueueHandle_t queue_commands;             // queue for commands to be sent to se
 SemaphoreHandle_t queue_protect = NULL;
 SemaphoreHandle_t myLocalData_protect = NULL;
 SemaphoreHandle_t queue_commands_protect = NULL;
+
+uint8_t message_received = 0;
+unsigned long aux_queue_check_interval = 0;
+int old_queue = 0;
 
 //change_mac variables used also in make_fw_version() so must be global
 char mac_org_char[18];

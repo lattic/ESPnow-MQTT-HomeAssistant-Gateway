@@ -18,8 +18,13 @@ void do_update()
   {
     // Serial.printf("[%s]: unregistering espnow callback during FW update\n",__func__);
     // esp_now_unregister_recv_cb();
-    Serial.printf("[%s]: unregistering espnow for FW update\n",__func__);
+    Serial.printf("[%s]: unregistering ESPnow for FW update\n",__func__);
     esp_now_deinit();
+    #if (LORA_ENABLED == 1) 
+      Serial.printf("[%s]: unregistering LoRa for FW update\n",__func__);
+      end_lora();
+    #endif
+
     perform_update_firmware=false;
     if (!skip_mqtt) publish_status_update_firmware=mqtt_publish_gw_status_values("Updating FW"); else publish_status_update_firmware = true;
     #if (USE_WEB_SERIAL == 1)

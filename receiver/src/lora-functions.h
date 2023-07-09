@@ -17,7 +17,6 @@ void LoRaonReceive(int packetSize)
     int queue_count;
     int mess_size;
     uint8_t received_address[6]  = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    // Serial.printf("[%s]: LoRa message received\n",__func__);
     if( queue_protect != NULL )
     {
         if( xSemaphoreTake( queue_protect, ( TickType_t ) 10 ) == pdTRUE )
@@ -29,38 +28,52 @@ void LoRaonReceive(int packetSize)
                 if (!compareArrays(received_address,FixedMACAddress,6)) 
                 {
                     Serial.println("this message is NOT for me");
-                    Serial.print("received address: ");
-                for (int i=0; i<6;i++)
-                {
-                    Serial.print(received_address[i],HEX);Serial.print(" ");
-                }
-                Serial.println();
+                    #ifdef DEBUG
+                        Serial.print("received address: ");
+                        for (int i=0; i<6;i++)
+                        {
+                            Serial.print(received_address[i],HEX);Serial.print(" ");
+                        }
+                        Serial.println();
 
-                Serial.print("my address:       ");
-                for (int i=0; i<6;i++)
-                {
-                    Serial.print(FixedMACAddress[i],HEX);Serial.print(" ");
-                }
-                Serial.println("\n---------------------");Serial.println();
-                return;
-                } else 
-                {
-                }
+                        Serial.print("my address:       ");
+                        for (int i=0; i<6;i++)
+                        {
+                            Serial.print(FixedMACAddress[i],HEX);Serial.print(" ");
+                        }
+                        Serial.println("\n---------------------");Serial.println();
+                    #endif
+                    xSemaphoreGive( queue_protect );
+                    return;
+                } 
                 while (LoRa.available()) 
                 {
+                    // push incoming data to myData
                     mess_size = LoRa.readBytes((uint8_t *)&myData, sizeof(myData));
                 }
-                // push incoming data to myData
-                // memcpy(&myData, incomingData, sizeof(myData));
                 // send to queue
                 xQueueSend(queue, &myData, portMAX_DELAY);
                 // in case of LoRa myData_aux is not needed as: RSSI is part of the code and MAC (since nowhere) is now sent by myData.macStr
                 // but it stays for compatibility
                 myData_aux.rssi = LoRa.packetRssi();
                 snprintf(myData_aux.macStr, sizeof(myData_aux.macStr), "%s",myData.macStr);
+                // new variable
+                snprintf(myData_aux.comm_type, sizeof(myData_aux.comm_type), "LoRa");
                 xQueueSend(queue_aux, &myData_aux, portMAX_DELAY);
             }
+            /*
+            removed from here, it is in main loop()
+                        // update HA on queue status
+                        // if (!publish_sensors_to_ha)
+                        // {
+                        //   char queue_status[20];
+                        //   snprintf(queue_status, sizeof(queue_status), "queue: %d/%d",queue_count,MAX_QUEUE_COUNT);
+                        //   mqtt_publish_gw_last_updated_sensor_values(queue_status);
+                        // }
+                        // unlock both queues
+            */
             xSemaphoreGive( queue_protect );
+            message_received = 1;
         } else
         {
             Serial.printf("[%s]: ERROR: semaphore not taken\n",__func__);
@@ -85,4 +98,9 @@ bool start_lora()
     LoRa.receive();
 
     return 1;
+}
+
+void end_lora()
+{
+    LoRa.end();
 }

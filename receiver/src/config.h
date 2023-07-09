@@ -9,11 +9,11 @@ config
 
 
 // configuration template:
-// #if DEVICE_ID == 29
-#if DEVICE_ID == 129
+
+#if DEVICE_ID == 29
   #define BOARD_TYPE                2             // 1=ESP32 2=ESP32S2 3=ESP32S3 4=ESP32C3
   #define HOSTNAME                  "esp32029"    // max 9 characters, used as name in HA
-  #define IP_ADDRESS                "192.168.1.29"  // fixed IP, not in use anymore for WiFi, only for name in HA
+  // #define IP_ADDRESS                "192.168.1.29"  // fixed IP, not in use anymore for WiFi, only for name in HA
   #define ROLE_NAME                 "gw1-hall"      // part of the name in HA (gateway 1)
 
   #define LED_GPIO_SENSORS          2   // RED
@@ -46,7 +46,7 @@ config
 #elif DEVICE_ID == 30
   #define BOARD_TYPE                2
   #define HOSTNAME                  "esp32030"
-  #define IP_ADDRESS                "192.168.1.30"
+  // #define IP_ADDRESS                "192.168.1.30"
   #define ROLE_NAME                 "gw2-dining"
   #define LED_GPIO_SENSORS          3   // RED
   #define LED_GPIO_GATEWAY          5   // GREEN
@@ -331,7 +331,7 @@ config
 
 
 
-#elif DEVICE_ID == 29
+#elif DEVICE_ID == 129
   #define BOARD_TYPE                2
   #define HOSTNAME                  "esp32029"
   #define ROLE_NAME                 "gw1-hall"

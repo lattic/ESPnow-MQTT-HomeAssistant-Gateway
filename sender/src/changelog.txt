@@ -4,6 +4,10 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
+
+2023-07-09
+  3.0.b2  - testing LoRa
+  
 2023-07-09
   3.0.b1 - testing LoRa 
 

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "3.0.b1"
+#define VERSION "3.0.b2"
 
 #pragma message "Compiling VERSION = " VERSION
 
@@ -182,6 +182,7 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
 #if (LORA_ENABLED == 1)
   void LoRaonReceive(int packetSize);
   bool start_lora();
+  void end_lora();
 #endif
 
 // fuctions declarations END
@@ -488,13 +489,15 @@ void setup()
   espnow_start();
 
   // and LoRa
-  if (start_lora())
-  {
-    Serial.printf("[%s]: LoRa started\n",__func__);
-  } else 
-  {
-    Serial.printf("[%s]: LoRa FAILED to start\n",__func__);
-  } 
+  #if (LORA_ENABLED == 1)
+    if (start_lora())
+    {
+      Serial.printf("[%s]: LoRa started\n",__func__);
+    } else 
+    {
+      Serial.printf("[%s]: LoRa FAILED to start\n",__func__);
+    } 
+  #endif
 
   set_sensors_led_level(0);
   set_gateway_led_level(0);
@@ -622,9 +625,29 @@ void loop()
   int queue_count = uxQueueMessagesWaiting(queue);
   if ((queue_count > 0) and (publish_sensors_to_ha))
   {
-    // Serial.printf("[%s]: queue size=%d\n",__func__,queue_count);
     mqtt_publish_sensors_values();
+    message_received = 0;
     // influxdb_publish_sensors_values();
+  } 
+
+
+  // if HA publish is off and messages are piling, update HA on "last" sensor of gw
+  queue_count = uxQueueMessagesWaiting(queue);
+  if ( (queue_count > 0) and (millis() >= aux_queue_check_interval + (1 * 1000))  )
+  {
+    if (message_received)
+    {
+      if (queue_count > old_queue)
+      {
+        // update HA on queue piling 
+        char queue_status[20];
+        snprintf(queue_status, sizeof(queue_status), "queue: %d/%d",queue_count,MAX_QUEUE_COUNT);
+        Serial.printf("[%s]: QUEUE PILING: %d/%d\n",__func__,queue_count,MAX_QUEUE_COUNT);
+        mqtt_publish_gw_last_updated_sensor_values(queue_status);
+        old_queue = queue_count;
+        aux_queue_check_interval = millis();
+      }
+    }
   }
 
   // check queue again after publishing
