@@ -329,6 +329,42 @@ config
 
 //   #pragma message "compilation for: ESPnow_esp32093-gwtest"
 
+
+
+#elif DEVICE_ID == 45
+  #define BOARD_TYPE                2
+  #define HOSTNAME                  "esp32045"
+  #define IP_ADDRESS                "192.168.1.45"
+  #define ROLE_NAME                 "gw4-test"
+  #define LED_GPIO_SENSORS          5   // RED
+  #define LED_GPIO_GATEWAY          6   // GREEN
+  #define LED_GPIO_STANDBY          6   // BLUE
+
+
+  #define LED_GPIO_SENSORS_USE_PWM  1
+  #define LED_GPIO_SENSORS_PWM_DC   10
+
+  #define LED_GPIO_GATEWAY_USE_PWM  1
+  #define LED_GPIO_GATEWAY_PWM_DC   10
+
+  #define LED_GPIO_STANDBY_USE_PWM  1
+  #define LED_GPIO_STANDBY_PWM_DC   10
+
+  #define PUSH_BUTTON_GPIO          0  // to control ESP
+  #define PUSH_BUTTON_GPIO_ACT    LOW  // HIGH or LOW, HIGH = 1, LOW = 0, 0 if not defined (so default)
+
+  uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x45};
+  
+  #define OTA_ACTIVE                1
+
+  #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
+
+  #define USE_WEB_SERIAL            1
+  #define CP_TIMEOUT_S              180
+
+  #pragma message "compilation for: ESPnow_esp32045_gw4"
+
+
 #else
   #error "Wrong DEVICE_ID chosen"
 #endif
