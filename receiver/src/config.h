@@ -41,6 +41,16 @@ config
   #define USE_WEB_SERIAL            1
   #define CP_TIMEOUT_S              180
 
+  // for LoRa
+  #define LORA_ENABLED                1 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
+  // #define LORA_GPIO_ENABLE_3V         19   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  #define LORA_GPIO_MISO              20  // - BLUE
+  #define LORA_GPIO_MOSI              17  // - GREEN
+  #define LORA_GPIO_CLOCK             18  // - BROWN
+  #define LORA_GPIO_SS                14  // - YELLOW, SS/NSS/CS:
+  #define LORA_GPIO_RST               15  // - ORANGE
+  #define LORA_GPIO_DIO0              16  // - VIOLET
+
   #pragma message "compilation for: ESPnow_esp32029_gw1"
 
 #elif DEVICE_ID == 30
