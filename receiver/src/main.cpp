@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "3.0.b2"
+#define VERSION "3.0.b4"
 
 #pragma message "Compiling VERSION = " VERSION
 
@@ -124,6 +124,7 @@ bool fw_update_timer_start();
 bool fw_update_timer_stop();
 
 // various other here in various.h
+int compareArrays(uint8_t a[], uint8_t b[], uint8_t n);
 void write_badbootcount(u_int8_t count);
 void do_esp_restart();
 void check_dirty_restart();

@@ -492,7 +492,7 @@ void disable_espnow()
 void sos(int led)
 {
   // function_start = micros();
-  #define DIT_MS 50;
+  #define DIT_MS 10;
   int dit = DIT_MS;
   int dah = 3 * dit;
   int inter_dit = dit;
@@ -550,14 +550,14 @@ void do_update()
     {
       #ifdef ERROR_RED_LED_GPIO
         set_error_red_led_level(0);
-        delay(500);
+        delay(50);
         set_error_red_led_level(1);
-        delay(100);
+        delay(17);
       #elif defined(ACT_BLUE_LED_GPIO)
         set_act_blue_led_level(0);
-        delay(100);
+        delay(50);
         set_act_blue_led_level(1);
-        delay(30);
+        delay(17);
         set_act_blue_led_level(0);
       #endif
     }
@@ -1283,7 +1283,7 @@ bool send_data_espnow()
   last_gw = g_last_gw;
   if ((channel < 1) or (channel > 13)) channel = 1;                       
   if ((last_gw < 0) or (last_gw > (NUMBER_OF_GATEWAYS-1))) last_gw = 0;
-  #ifdef DEBUG
+  #ifdef DEBUG_LIGHT
     Serial.printf("[%s]: Configuration data from file: channel=%d, last gateway=%d\n",__func__,channel,last_gw);
   #endif
   // read config END
@@ -1292,7 +1292,7 @@ bool send_data_espnow()
 
  // ======================================================== LETS TRY SAVED CONFIG ========================================================
   // lets try saved data first to shorten the time: saved receiver, saved channel
-  #ifdef DEBUG
+  #ifdef DEBUG_LIGHT
     Serial.printf("\n[%s]: Lets try saved config first...\n\n",__func__);
   #endif
   memcpy(broadcastAddress, receivers[last_gw], sizeof(receivers[last_gw]));
@@ -1304,12 +1304,12 @@ bool send_data_espnow()
   {
     Serial.printf("[%s]: esp_now_init FAILED\n",__func__);
     set_error_red_led_level(1);
-    delay(100);
+    delay(50);
     // FATAL ERROR - EXIT
     return false;
   } else
   {
-    #ifdef DEBUG
+    #ifdef DEBUG_LIGHT
       Serial.printf("[%s]: esp_now_init SUCCESSFUL\n",__func__);
     #endif
   }
@@ -1324,7 +1324,7 @@ bool send_data_espnow()
     Serial.printf("[%s]: esp_now_register_send_cb FAILED\n",__func__);
   } else
   {
-    #ifdef DEBUG
+    #ifdef DEBUG_LIGHT
       Serial.printf("[%s]: esp_now_register_send_cb SUCCESSFUL\n",__func__);
     #endif
   }
@@ -1334,7 +1334,7 @@ bool send_data_espnow()
     Serial.printf("[%s]: esp_now_register_recv_cb FAILED\n",__func__);
   } else
   {
-    #ifdef DEBUG
+    #ifdef DEBUG_LIGHT
       Serial.printf("[%s]: esp_now_register_recv_cb SUCCESSFUL\n",__func__);
     #endif
   }  
@@ -1346,45 +1346,41 @@ bool send_data_espnow()
     Serial.printf("[%s]: esp_now_add_peer FAILED\n",__func__);
   } else
   {
-    #ifdef DEBUG
+    #ifdef DEBUG_LIGHT
       Serial.printf("[%s]: esp_now_add_peer SUCCESSFUL\n",__func__);
     #endif
   }
-  #ifdef DEBUG
+  #ifdef DEBUG_LIGHT
     Serial.printf("[%s]: [SAVED CHANNEL, SAVED RECEIVER] trying channel=%d, receiver=%d \n",__func__,channel,last_gw);
   #endif
   esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
   esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
-  #ifdef DEBUG
+  #ifdef DEBUG_LIGHT
     Serial.printf("[%s]: [SAVED CHANNEL, SAVED RECEIVER] sending took=%dms\n",__func__,millis()-s1);
   #endif
   loop_timer=millis(); while(millis() < loop_timer + 10) {}  // unblocking loop for 10ms
   if(espnow_data_sent)
   {
-    // #ifdef DEBUG
-    #ifdef DEBUG_LIGHT
+    // #ifdef DEBUG_LIGHT
       Serial.printf("[%s]:\n [SAVED CHANNEL, SAVED RECEIVER] esp_now_send SUCCESSFUL on channel=%d, receiver=%d, MAC=%s; it took=%dms\n",__func__,channel,last_gw,receiver_mac,millis()-s1);
-    #endif
     // #endif
     return true;
   }
-  #ifdef DEBUG
     Serial.printf("[%s]: [SAVED CHANNEL, SAVED RECEIVER] esp_now_send FAILED on channel=%d, receiver=%d, MAC=%s; it took=%dms\n",__func__,channel,last_gw,receiver_mac,millis()-s1);
-  #endif
   // lets try saved data first to shorten the time: saved receiver, saved channel END
 // ======================================================== LETS TRY SAVED CONFIG END ========================================================
 
 
 // ======================================================== LOOP THROUGH ALL RECEIVERS =======================================================
   // if we are here, it means it failed - so now lets try everything else
-  #ifdef DEBUG
+  #ifdef DEBUG_LIGHT
     Serial.printf("\n[%s]: Loop through all receivers...\n",__func__);
   #endif
   for (int receiver = 0; receiver<NUMBER_OF_GATEWAYS; receiver++)   // lets go through all gateways
   {
     memcpy(broadcastAddress, receivers[receiver], sizeof(receivers[receiver]));
     snprintf(receiver_mac, sizeof(receiver_mac), "%02x:%02x:%02x:%02x:%02x:%02x",broadcastAddress[0], broadcastAddress[1], broadcastAddress[2], broadcastAddress[3], broadcastAddress[4], broadcastAddress[5]);
-    #ifdef DEBUG
+    #ifdef DEBUG_LIGHT
       Serial.printf("\n[%s]: gateway=%d, MAC=%s...\n\n",__func__,receiver,receiver_mac);
     #endif
 
@@ -1394,12 +1390,12 @@ bool send_data_espnow()
     {
       Serial.printf("[%s]: esp_now_init FAILED\n",__func__);
       set_error_red_led_level(1);
-      delay(100);
+      delay(50);
       // FATAL ERROR - EXIT
       return false;
     } else 
     {
-      #ifdef DEBUG
+      #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: esp_now_init SUCCESSFUL\n",__func__);
       #endif
     }
@@ -1414,7 +1410,7 @@ bool send_data_espnow()
       Serial.printf("[%s]: esp_now_register_send_cb FAILED\n",__func__);
     } else
     {
-      #ifdef DEBUG
+      #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: esp_now_register_send_cb SUCCESSFUL\n",__func__);
       #endif
     }
@@ -1424,7 +1420,7 @@ bool send_data_espnow()
       Serial.printf("[%s]: esp_now_register_recv_cb FAILED\n",__func__);
     } else
     {
-      #ifdef DEBUG
+      #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: esp_now_register_recv_cb SUCCESSFUL\n",__func__);
       #endif
     }  
@@ -1435,72 +1431,72 @@ bool send_data_espnow()
       Serial.printf("[%s]: esp_now_add_peer FAILED\n",__func__);
     } else
     {
-      #ifdef DEBUG
+      #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: esp_now_add_peer SUCCESSFUL\n",__func__);
       #endif
     }
 
 // ======================================================== FIRST TRY STORED CHANNEL =======================================================
-    #ifdef DEBUG
+    #ifdef DEBUG_LIGHT
       Serial.printf("[%s]: [SAVED CHANNEL] trying channel = %d \n",__func__,channel);
     #endif
+    unsigned long s2 = millis();
     esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
     esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
-    #ifdef DEBUG
+    #ifdef DEBUG_LIGHT
       Serial.printf("[%s]: [SAVED CHANNEL] sending took=%dms\n",__func__,millis()-s1);
     #endif
     unsigned long loop_timer=millis(); while(millis() < loop_timer + 10) {}  // unblocking loop for 10ms
     if(espnow_data_sent) 
     {
-      // #ifdef DEBUG
+      // #ifdef DEBUG_LIGHT
         Serial.printf("[%s]:\n [SAVED CHANNEL] esp_now_send SUCCESSFUL on receiver=%d, channel=%d, MAC=%s; it took=%dms\n",__func__,receiver,channel,receiver_mac,millis()-s1);
       // #endif
 
       // save successful data
       g_wifi_channel = channel;
       g_last_gw = receiver;
-      #ifdef DEBUG
+      #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: [ALL CHANNELS] Configuration data stored: receiver=%d, channel=%d\n",__func__,receiver,channel);
       #endif
       loop_timer=millis(); while(millis() < loop_timer + 1) {}  // unblocking loop for 1ms
       // save successful data END
       return true;
     }
-    Serial.printf("[%s]: [SAVED CHANNEL] esp_now_send FAILED on channel %d, it took=%dms\n",__func__,channel,millis()-s1);
+    Serial.printf("[%s]: [SAVED CHANNEL] esp_now_send FAILED on receiver=%d, channel=%d, it took=%dms\n",__func__,receiver,channel,millis()-s2);
     // fist attempt: on saved channel END
 // ======================================================== FIRST TRY STORED CHANNEL END =======================================================
 
 // ======================================================== LOOP THROUGH ALL CHANNELS ==========================================================
     // second attempt: all channels
-    #ifdef DEBUG
+    #ifdef DEBUG_LIGHT
       Serial.printf("[%s]: [ALL CHANNELS] trying all channels now \n",__func__);
     #endif
     for (int i = 1; i <= 13; i++)
     {
+      unsigned long s2 = millis();
       esp_wifi_set_channel(i, WIFI_SECOND_CHAN_NONE);
       esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
-      #ifdef DEBUG
+      #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: [ALL CHANNELS] sending took=%dms\n",__func__,millis()-s1);
       #endif
       unsigned long loop_timer=millis(); while(millis() < loop_timer + 30) {}  // unblocking loop 
       if(espnow_data_sent) 
       {
-        // #ifdef DEBUG
+        // #ifdef DEBUG_LIGHT
           Serial.printf("[%s]:\n [ALL CHANNELS] esp_now_send SUCCESSFUL on receiver=%d, channel=%d, MAC=%s; it took=%dms\n",__func__,receiver,i,receiver_mac,millis()-s1);
         // #endif
         // save successful data
         g_wifi_channel = i;
         g_last_gw = receiver;
-        #ifdef DEBUG
+        #ifdef DEBUG_LIGHT
           Serial.printf("[%s]: [ALL CHANNELS] Configuration data stored: receiver=%d, channel=%d\n",__func__,receiver,i);
         #endif
         loop_timer=millis(); while(millis() < loop_timer + 1) {}  // unblocking loop for 1ms
         // save successful data END
         return true;
       }
-      #ifdef DEBUG
-        Serial.printf("[%s]: [ALL CHANNELS] FAILED on channel=%d, it took=%dms\n",__func__,i,millis()-s1);
-      #endif
+        Serial.printf("[%s]: [ALL CHANNELS] FAILED on receiver=%D, channel=%d, it took=%dms\n",__func__,receiver,i,millis()-s2);
     }
   }
 // ======================================================== LOOP THROUGH ALL CHANNELS END ======================================================
@@ -1508,7 +1504,7 @@ bool send_data_espnow()
 // NOTHING WORKED...
   Serial.printf("[%s]: esp_now_send TOTALLY FAILED, it took=%dms\n",__func__,millis()-s1);
   set_error_red_led_level(1);
-  delay(100);
+  delay(50);
   return false;
 // ======================================================== LOOP THROUGH ALL RECEIVERS END =======================================================
 }
@@ -1538,11 +1534,19 @@ bool send_data_lora()
       set_error_red_led_level(0);
       Serial.printf("[%s]: took=%dms\n",__func__,millis()-s2);
       return 0;
+    } else 
+    {
+      Serial.printf("[%s]: LoRa STARTED\n",__func__);
     }
+
+    // check if working SF=6 - not working, requires implicit header and packet size known, default is 7
+    // LoRa.setSpreadingFactor(12); // 5 seconds!
+
     while (LoRa.beginPacket() == 0)     // this stays here - change to timeout
     {
       Serial.printf("[%s]: waiting for LoRa radio to wake up...\n",__func__);
     }
+
     LoRa.setTxPower(20);
     LoRa.enableCrc();
 
@@ -1566,6 +1570,8 @@ bool send_data_lora()
     set_error_red_led_level(0);
     Serial.printf("[%s]: took=%dms, sending over LoRa took=%dms\n",__func__,end1-s2,end1-s3);
     return 1;
+  #else 
+    return 0;
   #endif
 }
 
@@ -3117,10 +3123,11 @@ void setup()
 
     disable_espnow();
   #endif
-  
+
   // only LoRa code
   #if (LORA_ENABLED == 1)
     // espnow_data_sent = 0;      // testing only
+
     if (!espnow_data_sent)
     {
       Serial.printf("[%s]: LoRa sending function here as ESPnow FAILED\n",__func__);
@@ -3143,7 +3150,6 @@ void setup()
       digitalWrite(LORA_GPIO_ENABLE_3V, LOW);
     #endif
   #endif 
-
 
   if (fw_update)
   {

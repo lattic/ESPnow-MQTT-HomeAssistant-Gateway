@@ -1,19 +1,12 @@
 #pragma once
 
-int compareArrays(uint8_t a[], uint8_t b[], uint8_t n)
-{
-  for (uint8_t i=0; i<n; ++i)
-  {
-      if (a[i] != b[i])
-      {
-          return 0;
-      }
-  }
-  return 1;
-}
 
 void LoRaonReceive(int packetSize) 
 {   
+    // rather DON'T print anything here in this function as it can panic on wdt, especially with Serial.printf()
+    #ifdef DEBUG
+        Serial.println("[LoRaonReceive]: Message received");
+    #endif
     int queue_count;
     int mess_size;
     uint8_t received_address[6]  = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -27,8 +20,9 @@ void LoRaonReceive(int packetSize)
                 size_t addr_size = LoRa.readBytes((uint8_t *)&received_address, sizeof(received_address));
                 if (!compareArrays(received_address,FixedMACAddress,6)) 
                 {
-                    Serial.println("this message is NOT for me");
+                    Serial.println("[LoRaonReceive]: this message is NOT for me");
                     #ifdef DEBUG
+                        Serial.println("this message is NOT for me");
                         Serial.print("received address: ");
                         for (int i=0; i<6;i++)
                         {
@@ -61,17 +55,6 @@ void LoRaonReceive(int packetSize)
                 snprintf(myData_aux.comm_type, sizeof(myData_aux.comm_type), "LoRa");
                 xQueueSend(queue_aux, &myData_aux, portMAX_DELAY);
             }
-            /*
-            removed from here, it is in main loop()
-                        // update HA on queue status
-                        // if (!publish_sensors_to_ha)
-                        // {
-                        //   char queue_status[20];
-                        //   snprintf(queue_status, sizeof(queue_status), "queue: %d/%d",queue_count,MAX_QUEUE_COUNT);
-                        //   mqtt_publish_gw_last_updated_sensor_values(queue_status);
-                        // }
-                        // unlock both queues
-            */
             xSemaphoreGive( queue_protect );
             message_received = 1;
         } else
@@ -88,6 +71,9 @@ bool start_lora()
         Serial.printf("[%s]: LoRa FAILED to initialise\n",__func__);
         return 0;
     }
+    
+    // check if working SF=6 - not working, requires implicit header and packet size known, default is 7
+    // LoRa.setSpreadingFactor(12); // 5 seconds!
     LoRa.setTxPower(20);
     LoRa.enableCrc();
 
