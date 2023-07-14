@@ -13,7 +13,7 @@
   #endif
 #endif 
 
-#define ZH_PROG_VERSION "3.0.b4"                     // version < 10 chars, description in changelog.txt
+#define ZH_PROG_VERSION "3.0.b5"                     // version < 10 chars, description in changelog.txt
 
 
 #pragma message "Compiling ZH_PROG_VERSION = " ZH_PROG_VERSION

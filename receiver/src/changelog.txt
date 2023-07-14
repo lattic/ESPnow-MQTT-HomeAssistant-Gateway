@@ -10,6 +10,9 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+2023-07-14
+  3.0.b5  - some cleaning 
+  
 2023-07-11
   3.0.b4  - some cleaning 
 

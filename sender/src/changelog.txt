@@ -8,6 +8,9 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
+2023-07-14
+  3.0.b5  - some cleaning 
+
 2023-07-11
   3.0.b4  - some cleaning 
 

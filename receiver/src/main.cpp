@@ -1,14 +1,14 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "3.0.b4"
+#define VERSION "3.0.b5"
 
 #pragma message "Compiling VERSION = " VERSION
 
 // gateways config file
 #include "config.h"
 
-// libraries
+// ========================================================================== libraries 
 #include <WiFi.h>
 #include "esp_wifi.h"
 #include <ESPmDNS.h>
@@ -31,8 +31,6 @@
 #if (USE_WEB_SERIAL == 1)
   #include <WebSerialLite.h>
 #endif
-// webserial server END
-
 
 // Firmware update
 #include <HTTPClient.h>
@@ -44,7 +42,6 @@
   #include <ESPAsyncWebServer.h>
   #include <AsyncElegantOTA.h>
   AsyncWebServer server(8080);
-  // #warning "OTA_ACTIVE defined"
 #else
   #warning "OTA_ACTIVE NOT defined"
 #endif
@@ -69,13 +66,15 @@
   #include <SPI.h>
   #include <LoRa.h>
 #endif
+// ========================================================================== libraries END
 
 // VARIABLES
 #include "variables.h"
 // VARIABLES END
 
 
-// fuctions declarations
+// ========================================================================== FUNCTIONS declarations
+
 
 // espnow.h
 void espnow_start();
@@ -179,19 +178,15 @@ String mac_to_string(uint8_t *addr);
 
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
 
-// LoRa
 #if (LORA_ENABLED == 1)
   void LoRaonReceive(int packetSize);
   bool start_lora();
   void end_lora();
 #endif
-
-// fuctions declarations END
-
+// ========================================================================== FUNCTIONS declarations END
 
 
-// separate files with functions
-// #include "zhwifi.h"
+// ================================= separate files with functions
 #include "espnow.h"
 #include "mqtt.h"
 #include "mqtt_publish_gw_data.h"
@@ -211,11 +206,10 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
   #include "measure-lux.h"
 #endif 
 
-// LoRa
 #if (LORA_ENABLED == 1)
   #include "lora-functions.h"
 #endif
-// separate files with functions END
+// ================================= separate files with functions END
 
 
 
