@@ -1,4 +1,5 @@
 TODO:
+0 - implement send command to sender in LoRa (now there is no feedback from receiver to sender if LoRa in use only)
 1 - implement #ifdef DEBUG instead of if (debug_mode)
 2 - improve CP html, add old values, checking if new are correct etc (check in sender sketch)
 
