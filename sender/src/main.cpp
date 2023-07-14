@@ -352,6 +352,11 @@ void set_new_sleep_time_s(int time_s);
   float get_ds18b20();
 #endif  
 
+// LoRa
+#if (LORA_ENABLED == 1)
+  bool send_data_lora();
+#endif 
+
 // ========================================================================== FUNCTIONS declaration END
 
 // ========================================================================== FUNCTIONS implementation

@@ -1043,7 +1043,7 @@
   #define USE_MAX17048                1   // use "0" to disable
   #define USE_SHT31                   0   // use "0" to disable
   #define USE_TSL2561                 0   // use "0" to disable
-  #define SLEEP_TIME_S                10 // seconds - 180
+  #define SLEEP_TIME_S                5 // seconds - 180
 
   #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
