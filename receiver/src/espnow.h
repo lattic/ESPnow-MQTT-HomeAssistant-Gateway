@@ -147,17 +147,6 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
       {
         Serial.printf("[%s]: queue already FULL\n",__func__);
       }
-      /*
-      removed from here, it is in main loop()
-                // update HA on queue status
-                // if (!publish_sensors_to_ha)
-                // {
-                //   char queue_status[20];
-                //   snprintf(queue_status, sizeof(queue_status), "queue: %d/%d",queue_count,MAX_QUEUE_COUNT);
-                //   mqtt_publish_gw_last_updated_sensor_values(queue_status);
-                // }
-                // unlock both queues
-      */
       xSemaphoreGive( queue_protect );
       message_received = 1;
     }

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // #define DEBUG
-#define VERSION "3.0.b5"
+#define VERSION "3.0.b6"
 
 #pragma message "Compiling VERSION = " VERSION
 

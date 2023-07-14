@@ -405,7 +405,7 @@ config
 #define JSON_PAYLOAD_SIZE           512
 
 // mqtt - how many attempts to connect to MQTT broker before restarting
-#define MAX_MQTT_ERROR              180  // 180, in seconds / times, used in mqtt.reconnect as well as in loop to check if MQTT is ok
+#define MAX_MQTT_ERROR              30  // in times, used in mqtt.reconnect as well as in loop to check if MQTT is ok
                                          // and if not it restarts the ESP
 
 // queue size for incomming data from sensors, whe queue is full no more data is gathered until there is free space in the queue

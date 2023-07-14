@@ -56,7 +56,6 @@ void LoRaonReceive(int packetSize)
                 xQueueSend(queue_aux, &myData_aux, portMAX_DELAY);
             }
             xSemaphoreGive( queue_protect );
-            message_received = 1;
         } else
         {
             Serial.printf("[%s]: ERROR: semaphore not taken\n",__func__);

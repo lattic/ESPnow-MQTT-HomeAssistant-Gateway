@@ -10,6 +10,10 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+
+2023-07-14
+  3.0.b6  - MAX_MQTT_ERROR   30 to reduce MQTT timeout (each try takes around 4s so 4x 30 = 120s)
+
 2023-07-14
   3.0.b5  - some cleaning 
   
