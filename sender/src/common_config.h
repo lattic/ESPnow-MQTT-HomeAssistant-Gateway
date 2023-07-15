@@ -56,7 +56,7 @@
   #define NUMBER_OF_LORA_GATEWAYS     1               // number of receivers/gateways
   uint8_t lora_receivers[NUMBER_OF_LORA_GATEWAYS][6] =  // put here the fake MAC addresses of LoRa receviers that are assigned in receiver sketch
   {
-    0x2A, 0xFF, 0x01, 0x01, 0x01, 0x29                // gw1
+    0x2A, 0xFF, 0x01, 0x01, 0x01, 0x45                // gw1
   };
   
 #endif 

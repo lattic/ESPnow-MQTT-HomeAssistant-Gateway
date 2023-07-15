@@ -13,8 +13,8 @@ OTA:
 
 2023-07-15
   3.1.b1  - separated devices for ESPnow and LoRa (too much of time consuming and panic)
-          - changed esp32029 to LoRa only - gw1 hall
-          - added esp32045 - ESPnow only (not yet installed)
+          - changed esp32045 to LoRa only - renamed from 029 gw1 hall
+          - added esp32029 - new board, ESPnow only (not yet installed)
           - changed eso32027 and 030 to ESPnow only
 
 2023-07-14
