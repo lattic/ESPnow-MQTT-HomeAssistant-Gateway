@@ -1,7 +1,7 @@
 #pragma once
 
 // #define DEBUG
-#define VERSION "3.1.b1"
+#define VERSION "3.1.b2"
 
 // ****************************************
 #pragma message "Compiling VERSION = " VERSION
@@ -12,13 +12,13 @@
 // configuration template:
 
 #if DEVICE_ID == 29
-  #define BOARD_TYPE                2             // 1=ESP32 2=ESP32S2 3=ESP32S3 4=ESP32C3
-  #define HOSTNAME                  "esp32029"    // max 9 characters, used as name in HA
-  #define ROLE_NAME                 "gw1-hall"      // part of the name in HA (gateway 1)
+  #define BOARD_TYPE                2
+  #define HOSTNAME                  "esp32029"
+  #define ROLE_NAME                 "gw1-hall"
+  #define LED_GPIO_SENSORS          5   // RED
+  #define LED_GPIO_GATEWAY          6   // GREEN
+  #define LED_GPIO_STANDBY          6   // BLUE
 
-  #define LED_GPIO_SENSORS          2   // RED
-  #define LED_GPIO_GATEWAY          5   // GREEN
-  #define LED_GPIO_STANDBY          3   // BLUE
 
   #define LED_GPIO_SENSORS_USE_PWM  1
   #define LED_GPIO_SENSORS_PWM_DC   10
@@ -42,9 +42,20 @@
   #define CP_TIMEOUT_S              180
 
   // for ESPnow
-  #define ESPNOW_ENABLED            1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
+  // for LoRa
+  #define LORA_ENABLED                0 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
+  // #define LORA_GPIO_ENABLE_3V         19   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  #define LORA_GPIO_MISO              20  // - BLUE
+  #define LORA_GPIO_MOSI              17  // - GREEN
+  #define LORA_GPIO_CLOCK             18  // - BROWN
+  #define LORA_GPIO_SS                14  // - YELLOW, SS/NSS/CS:
+  #define LORA_GPIO_RST               15  // - ORANGE
+  #define LORA_GPIO_DIO0              16  // - VIOLET
 
   #pragma message "compilation for: ESPnow_esp32029_gw1"
+
 
 #elif DEVICE_ID == 30
   #define BOARD_TYPE                2
@@ -134,7 +145,7 @@
 #elif DEVICE_ID == 45
   #define BOARD_TYPE                2
   #define HOSTNAME                  "esp32045"
-  #define ROLE_NAME                 "gw4-LoRa"
+  #define ROLE_NAME                 "gw1-LoRa"
   #define LED_GPIO_SENSORS          5   // RED
   #define LED_GPIO_GATEWAY          6   // GREEN
   #define LED_GPIO_STANDBY          6   // BLUE
@@ -152,7 +163,7 @@
   #define PUSH_BUTTON_GPIO          0  // to control ESP
   #define PUSH_BUTTON_GPIO_ACT    LOW  // HIGH or LOW, HIGH = 1, LOW = 0, 0 if not defined (so default)
 
-  uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x45};
+  uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x29};
   
   #define OTA_ACTIVE                1
 

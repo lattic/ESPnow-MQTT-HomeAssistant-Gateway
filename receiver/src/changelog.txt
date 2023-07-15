@@ -11,6 +11,12 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+
+2023-07-15
+  3.1.b2  - renamed:
+          - esp32029 - gw1 in hall, configures as ESPnow but with LoRa capability if needed when relocated
+          - esp32045 - gw4, new board, noy yet deployed 
+
 2023-07-15
   3.1.b1  - separated devices for ESPnow and LoRa (too much of time consuming and panic)
           - changed esp32045 to LoRa only - renamed from 029 gw1 hall
