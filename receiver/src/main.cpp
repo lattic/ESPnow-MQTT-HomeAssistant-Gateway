@@ -1,23 +1,24 @@
 #include <Arduino.h>
 
-// #define DEBUG
-#define VERSION "3.0.b6"
-
-#pragma message "Compiling VERSION = " VERSION
-
 // gateways config file
 #include "config.h"
 
 // ========================================================================== libraries 
 #include <WiFi.h>
-#include "esp_wifi.h"
+
 #include <ESPmDNS.h>
-#include <esp_now.h>
+#include "esp_wifi.h"
+
 #include <PubSubClient.h>   
 #include <ArduinoJson.h>
 
 #include <Preferences.h>
 #include <nvs_flash.h>
+
+// ESPnow
+#if (ESPNOW_ENABLED == 1)
+  #include <esp_now.h>
+#endif
 
 // CO2 MHZ19
 #if (USE_MHZ19_CO2 == 1)
@@ -75,11 +76,14 @@
 
 // ========================================================================== FUNCTIONS declarations
 
-
-// espnow.h
-void espnow_start();
-void promiscuous_rx_cb(void *buf, wifi_promiscuous_pkt_type_t type);
-void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len);
+// ESPnow
+#if (ESPNOW_ENABLED == 1)
+  // espnow.h
+  void espnow_start();
+  void promiscuous_rx_cb(void *buf, wifi_promiscuous_pkt_type_t type);
+  void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len);
+  void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
+#endif
 
 // mqtt.h
 void mqtt_reconnect();
@@ -175,8 +179,6 @@ void change_mac();
 bool send_command_to_sender(u_int8_t command);
 
 String mac_to_string(uint8_t *addr);
-
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
 
 #if (LORA_ENABLED == 1)
   void LoRaonReceive(int packetSize);
@@ -480,8 +482,11 @@ void setup()
   // clear the message on HA:
   mqtt_publish_gw_last_updated_sensor_values("N/A");
 
-  // finally... ;-)
-  espnow_start();
+// ESPnow
+  #if (ESPNOW_ENABLED == 1)
+    // finally... ;-)
+    espnow_start();
+  #endif
 
   // and LoRa
   #if (LORA_ENABLED == 1)
@@ -535,8 +540,6 @@ void loop()
     }
     aux_mqtt_last_checked_interval = millis();
   }
-
-
 
     // button
   #ifdef PUSH_BUTTON_GPIO
@@ -622,7 +625,6 @@ void loop()
   {
     mqtt_publish_sensors_values();
     message_received = 0;
-    // influxdb_publish_sensors_values();
   } 
 
 

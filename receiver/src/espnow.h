@@ -3,9 +3,8 @@
 espnow functions
 */
 
-// #include "config.h"
-// #include "variables.h"
-
+// ESPnow
+#if (ESPNOW_ENABLED == 1)
 
 void espnow_start()
 {
@@ -215,3 +214,4 @@ bool send_command_to_sender(u_int8_t command)
   // }
 }
 
+#endif

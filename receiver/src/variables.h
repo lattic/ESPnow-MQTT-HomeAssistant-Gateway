@@ -138,10 +138,13 @@ bool mqtt_published_to_ha = false;
   #define PUSHBUTTON_UPDATE_INTERVAL_MS     100    // in ms
 #endif
 
-
+// ESPnow
+#if (ESPNOW_ENABLED == 1)
+  esp_now_peer_info_t peerInfo;
+#endif
 
 uint8_t temp_address[6];
-esp_now_peer_info_t peerInfo;
+
 unsigned long last_cmd_received;               // to clean commands from the queue if timeout expired
 
 // LED PWM

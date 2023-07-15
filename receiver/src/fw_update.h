@@ -16,10 +16,13 @@ void do_update()
   int update_firmware_status = -1;
   if (perform_update_firmware)
   {
-    // Serial.printf("[%s]: unregistering espnow callback during FW update\n",__func__);
-    // esp_now_unregister_recv_cb();
-    Serial.printf("[%s]: unregistering ESPnow for FW update\n",__func__);
-    esp_now_deinit();
+
+    // ESPnow
+    #if (ESPNOW_ENABLED == 1)
+      Serial.printf("[%s]: unregistering ESPnow for FW update\n",__func__);
+      esp_now_deinit();
+    #endif
+    
     #if (LORA_ENABLED == 1) 
       Serial.printf("[%s]: unregistering LoRa for FW update\n",__func__);
       end_lora();
