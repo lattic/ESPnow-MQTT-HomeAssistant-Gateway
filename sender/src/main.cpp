@@ -1219,7 +1219,7 @@ void hibernate(bool force, int final_sleeping_time_s)
   #endif  
 
   // now add TOUCHPAD_ONLY  GPIOs (it does not have MOTION_ENABLED) and go to sleep - it ENDs here
-  #if (TOUCHPAD_ONLY == 1)                
+  #if (TOUCHPAD_ONLY == 1)          // todo probably not added FW_UPGRADE_GPIO here - test it later      
     uint16_t touch_value;
     uint16_t thr;
     uint32_t pad_intr;
@@ -1304,12 +1304,6 @@ void hibernate(bool force, int final_sleeping_time_s)
     {
       bitmask_dec += pow(2, button_gpio[i]);
     }
-    #ifdef DEBUG
-      Serial.printf("[%s]: without FW_UPGRADE_GPIO: bitmask_dec=%ju\n",__func__,bitmask_dec);
-    #endif
-    #ifdef FW_UPGRADE_GPIO
-      bitmask_dec +=  pow(2, FW_UPGRADE_GPIO);
-    #endif
     #ifdef DEBUG
       Serial.printf("[%s]: with FW_UPGRADE_GPIO: bitmask_dec=%ju\n",__func__,bitmask_dec);
     #endif
@@ -3220,7 +3214,11 @@ void setup()
 // LCD
 #if (USE_ST7735_160_80_ALI == 1) 
   // display temperature on: reset, power on, gpio short push AND if not OTA webserver needed!
-  if (((boot_reason == 1) or (boot_reason == 3) or (wakeup_gpio == FW_UPGRADE_GPIO)) and (!ota_web_server_needed))
+  #ifdef FW_UPGRADE_GPIO
+    if (((boot_reason == 1) or (boot_reason == 3) or (wakeup_gpio == FW_UPGRADE_GPIO)) and (!ota_web_server_needed))
+  #else 
+    if (((boot_reason == 1) or (boot_reason == 3)) and (!ota_web_server_needed))
+  #endif
   {
     // power savign features: 
     // before savings: 

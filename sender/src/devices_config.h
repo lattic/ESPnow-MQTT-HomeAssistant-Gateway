@@ -418,7 +418,7 @@
   #define HOSTNAME                    "esp32042"
   #define DEVICE_NAME                 "pushb_6x_desk"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-  #define FW_UPGRADE_GPIO             8   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  // #define FW_UPGRADE_GPIO             8   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
   #define SLEEP_TIME_S                3600  // seconds - 
   #define ACT_BLUE_LED_GPIO           38   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          37   // comment out if not in use - don't use "0" here unless you mean GPIO=0
@@ -426,10 +426,11 @@
 
   #define PUSH_BUTTONS                1   // PULL GPIO DOWN, ACTIVE HIGH as it is programmed like this in the hibernate()
 
-  #define NUMBER_OF_BUTTONS           5  
+  #define NUMBER_OF_BUTTONS           6
+  // FW_UPGRADE_GPIO can be added to PUSH_BUTTONS if not needed separatelly - here added to PUSH_BUTTONS
   uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of push buttons
   {
-    3,4,5,6,7
+    3,4,5,6,7,8
   }; 
   uint8_t button_pressed = 0;               // 0 means: not pressed
                                             // 1 means: button_gpio[0] pressed, 2 means: button_gpio[1]
@@ -1280,9 +1281,12 @@
   #endif
 #endif
 
-// don't allow compiling if not provided FW_UPGRADE_GPIO
-#ifndef FW_UPGRADE_GPIO
-  #error "FW_UPGRADE_GPIO not defined"
+
+// don't allow compiling if not provided FW_UPGRADE_GPIO (for devices that are not PUSH_BUTTONS)
+#if (SENSOR_TYPE != 4)
+  #ifndef FW_UPGRADE_GPIO
+    #error "FW_UPGRADE_GPIO not defined yet OBLIGATORY"
+  #endif
 #endif
 
 
