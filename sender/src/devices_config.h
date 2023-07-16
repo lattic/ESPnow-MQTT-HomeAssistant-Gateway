@@ -130,7 +130,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -139,6 +138,15 @@
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
 
   #pragma message "compilation for: esp32028-Garage"
 // ---------------------------------------------------------------------------------------------------
@@ -152,7 +160,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -162,6 +169,14 @@
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
   #pragma message "compilation for: esp32031-Printers room"
 // ---------------------------------------------------------------------------------------------------
 
@@ -172,7 +187,6 @@
   #define HOSTNAME                    "esp32032"
   #define DEVICE_NAME                 "Bedroom mot."  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-  #define MOTION_SENSOR_GPIO          2   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -182,6 +196,14 @@
   #define USE_TSL2561                 0   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      2
+    };
+  #endif
   #pragma message "compilation for: esp32032-bedroom motion"
 // ---------------------------------------------------------------------------------------------------
 
@@ -194,7 +216,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -203,6 +224,15 @@
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
 
   #pragma message "compilation for: esp32033-Living room"
 // ---------------------------------------------------------------------------------------------------
@@ -216,7 +246,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -224,8 +253,16 @@
   #define USE_MAX17048                1   // use "0" to disable
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
-
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
 
   #pragma message "compilation for: esp32035-Tailor"
 // ---------------------------------------------------------------------------------------------------
@@ -239,7 +276,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -248,6 +284,15 @@
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                120 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
 
   #pragma message "compilation for: esp32036-Lidia"
 // ---------------------------------------------------------------------------------------------------
@@ -283,7 +328,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -292,6 +336,15 @@
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
 
   #pragma message "compilation for: esp32038-Toilet bedroom"
 // ---------------------------------------------------------------------------------------------------
@@ -305,7 +358,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -315,6 +367,14 @@
   #define USE_TSL2561                 0   // use "0" to disable
   #define SLEEP_TIME_S                300 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
   #pragma message "compilation for: esp32039-Garage front m."
 // ---------------------------------------------------------------------------------------------------
 
@@ -457,7 +517,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   // #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   // #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -467,6 +526,14 @@
   #define USE_TSL2561                 0   // use "0" to disable
   #define SLEEP_TIME_S                3600 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
   #pragma message "compilation for: esp32044-Garage middle m."
 // ---------------------------------------------------------------------------------------------------
 
@@ -479,7 +546,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -488,6 +554,15 @@
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
 
   #pragma message "compilation for: esp32049-Kitchen"
 // ---------------------------------------------------------------------------------------------------
@@ -544,7 +619,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -553,6 +627,15 @@
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  2 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1,2
+    };
+  #endif
 
   #pragma message "compilation for: esp32100-Office"
 // ---------------------------------------------------------------------------------------------------
@@ -567,7 +650,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -576,6 +658,15 @@
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
 
   #pragma message "compilation for: esp32101-Dining"
 // ---------------------------------------------------------------------------------------------------
@@ -589,7 +680,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -598,6 +688,15 @@
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
 
   #pragma message "compilation for: esp32102-ToiletUp"
 // ---------------------------------------------------------------------------------------------------
@@ -612,7 +711,6 @@
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -621,6 +719,15 @@
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
 
   #pragma message "compilation for: esp32104-Milena"
 // ---------------------------------------------------------------------------------------------------
@@ -1148,16 +1255,16 @@
 
 // SENSOR_TYPE defines what is to be sent to GW and what should wake up sensor device
 #if (SENSOR_TYPE == 0)
-  #ifdef MOTION_SENSOR_GPIO
-    #warning "SENSOR_TYPE=0 (env) should not have MOTION_SENSOR_GPIO defined - removing it"
-    #undef MOTION_SENSOR_GPIO
+  #if (MOTION_ENABLED == 1)
+    #warning "SENSOR_TYPE=0 (env) should not have MOTION_ENABLED defined - removing it"
+    #undef MOTION_ENABLED
   #endif
 #endif
 
 // don't allow compiling if not provided MOTION_SENSOR_GPIO
 #if (SENSOR_TYPE == 1) or (SENSOR_TYPE == 2)
-  #ifndef MOTION_SENSOR_GPIO
-    #error "MOTION_SENSOR_GPIO not defined"
+  #if (MOTION_ENABLED != 1)
+    #error "MOTION_ENABLED not defined but sensor type includes motion"
   #endif
 #endif
 
@@ -1165,10 +1272,11 @@
   #error "TOUCHPAD_ONLY works (now) only with ESP32"
 #endif
 
+// no motion for push buttons sensor
 #if (SENSOR_TYPE == 4)
-  #ifdef MOTION_SENSOR_GPIO
-    #warning "SENSOR_TYPE=4 (buttons) should not have MOTION_SENSOR_GPIO defined - removing it"
-    #undef MOTION_SENSOR_GPIO
+  #if (MOTION_ENABLED == 1)
+    #warning "SENSOR_TYPE=4 (buttons) should not have MOTION_ENABLED defined - removing it"
+    #undef MOTION_ENABLED
   #endif
 #endif
 
@@ -1176,6 +1284,7 @@
 #ifndef FW_UPGRADE_GPIO
   #error "FW_UPGRADE_GPIO not defined"
 #endif
+
 
 #endif  /* devices_config_h */
 

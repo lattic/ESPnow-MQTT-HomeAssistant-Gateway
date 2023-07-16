@@ -706,9 +706,9 @@ void tp_callback()
     loop_timer=millis(); while(millis() < loop_timer + 10) {}  // unblocking loop for 10ms
     if(espnow_data_sent)
     {
-      // #ifdef DEBUG_LIGHT
+      #ifdef DEBUG_LIGHT
         Serial.printf("[%s]:\n [SAVED CHANNEL, SAVED RECEIVER] esp_now_send SUCCESSFUL on channel=%d, receiver=%d, MAC=%s; it took=%dms\n",__func__,channel,last_gw,receiver_mac,millis()-s1);
-      // #endif
+      #endif
       return true;
     }
       Serial.printf("[%s]: [SAVED CHANNEL, SAVED RECEIVER] esp_now_send FAILED on channel=%d, receiver=%d, MAC=%s; it took=%dms\n",__func__,channel,last_gw,receiver_mac,millis()-s1);
@@ -1195,50 +1195,31 @@ void hibernate(bool force, int final_sleeping_time_s)
     do_esp_go_to_sleep();
   }
 
-  #ifdef DEBUG
-    #ifdef MOTION_SENSOR_GPIO
-      Serial.printf("[%s]: MOTION_SENSOR_GPIO=%d\n",__func__,MOTION_SENSOR_GPIO);
+  uint64_t bitmask_dec = 0;
+
+  // first add FW_UPGRADE_GPIO
+  #ifdef FW_UPGRADE_GPIO //if FW_UPGRADE_GPIO  defined, wake up on it 
+      bitmask_dec = pow(2,FW_UPGRADE_GPIO);
+  #endif
+
+  #ifdef DEBUG_LIGHT
+    #if (MOTION_ENABLED == 1)
+      Serial.printf("[%s]: MOTION_ENABLED=%d on %d GPIO(s): ",__func__,MOTION_ENABLED,NUMBER_OF_MOTION_SENSORS);
+      for (u_int8_t i = 0; i < NUMBER_OF_MOTION_SENSORS; i++)
+      {
+        {
+          Serial.printf(" %d",motion_sensors_gpio[i]);
+        }
+      }
+      Serial.println();
     #endif
     #ifdef FW_UPGRADE_GPIO
       Serial.printf("[%s]: FW_UPGRADE_GPIO=%d\n",__func__,FW_UPGRADE_GPIO);
     #endif
-  #endif
-  uint64_t bitmask_dec = 0;
+  #endif  
 
-  #if (PUSH_BUTTONS == 1)
-    for (uint8_t i = 0; i < NUMBER_OF_BUTTONS; i++)
-    {
-      bitmask_dec = bitmask_dec + pow(2, button_gpio[i]);
-    }
-    #ifdef DEBUG
-      Serial.printf("[%s]: without FW_UPGRADE_GPIO: bitmask_dec=%ju\n",__func__,bitmask_dec);
-    #endif
-    #ifdef FW_UPGRADE_GPIO
-      bitmask_dec = bitmask_dec + pow(2, FW_UPGRADE_GPIO);
-    #endif
-    #ifdef DEBUG
-      Serial.printf("[%s]: with FW_UPGRADE_GPIO: bitmask_dec=%ju\n",__func__,bitmask_dec);
-    #endif
-
-    // ESP32-C3
-    #if (BOARD_TYPE == 4)
-      {
-        esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
-      }
-    #else
-      {
-        esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
-      }
-    #endif
-
-    esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
-    
-
-    Serial.printf("[%s]: Going to sleep for %d seconds\n",__func__,final_sleeping_time_s);
-    do_esp_go_to_sleep();
-  #endif
-
-  #if (TOUCHPAD_ONLY == 1)
+  // now add TOUCHPAD_ONLY  GPIOs (it does not have MOTION_ENABLED) and go to sleep - it ENDs here
+  #if (TOUCHPAD_ONLY == 1)                
     uint16_t touch_value;
     uint16_t thr;
     uint32_t pad_intr;
@@ -1313,113 +1294,108 @@ void hibernate(bool force, int final_sleeping_time_s)
     if (NUMBER_OF_BUTTONS > 0)  esp_sleep_enable_touchpad_wakeup();
     esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
 
-    Serial.printf("[%s]: Going to sleep for %d seconds\n",__func__,final_sleeping_time_s);
+    Serial.printf("[%s]: Going to sleep for %d seconds on TOUCHPAD_ONLY\n",__func__,final_sleeping_time_s);
+    do_esp_go_to_sleep();
+  #endif
+
+  // or add PUSH_BUTTONS  GPIOs (it does not have MOTION_ENABLED) and go to sleep - it ENDs here
+  #if (PUSH_BUTTONS == 1)
+    for (uint8_t i = 0; i < NUMBER_OF_BUTTONS; i++)
+    {
+      bitmask_dec += pow(2, button_gpio[i]);
+    }
+    #ifdef DEBUG
+      Serial.printf("[%s]: without FW_UPGRADE_GPIO: bitmask_dec=%ju\n",__func__,bitmask_dec);
+    #endif
+    #ifdef FW_UPGRADE_GPIO
+      bitmask_dec +=  pow(2, FW_UPGRADE_GPIO);
+    #endif
+    #ifdef DEBUG
+      Serial.printf("[%s]: with FW_UPGRADE_GPIO: bitmask_dec=%ju\n",__func__,bitmask_dec);
+    #endif
+
+    // add PUSH_BUTTONS GPIOs to wakup 
+    // ESP32-C3
+    #if (BOARD_TYPE == 4)
+      {
+        esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
+      }
+    #else
+      {
+        esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
+      }
+    #endif
+
+    esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
+    
+    Serial.printf("[%s]: Going to sleep for %d seconds on PUSH_BUTTONS\n",__func__,final_sleeping_time_s);
     do_esp_go_to_sleep();
   #endif
 
   // https://randomnerdtutorials.com/esp32-deep-sleep-arduino-ide-wake-up-sources/ for ext0 and ext1 examples
-  #ifdef MOTION_SENSOR_GPIO
-    if (motion)
-    // when motion detected we don't allow second wakup on motion - first cooling time only or FW update
+
+  // if motion is enabled... (here we don't have TOUCHPAD_ONLY or PUSH_BUTTONS - they sleep already)
+  #if (MOTION_ENABLED == 1)   // if motion detected we don't allow second wakup on motion - first cooling time only 
+    if (motion)               
     {
-      //send ESP to deep unconditional sleep for predefined time -  wake up on timer (cooling period)
       final_sleeping_time_s = COOLING_SLEEP_DURATION_S;
       esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
-      //... or on GPIO ext1 (FW update)
-      #ifdef FW_UPGRADE_GPIO //if FW_UPGRADE_GPIO  defined, wake up on it
-        bitmask_dec = pow(2,FW_UPGRADE_GPIO);
-        // bitmask_dec =  (1ULL << FW_UPGRADE_GPIO);// | (1ULL << MOTION_SENSOR_GPIO);
+      //... and add GPIO ext1 (FW update) if defined
+      #ifdef FW_UPGRADE_GPIO  //if FW_UPGRADE_GPIO  defined, wake up on it
         #ifdef DEBUG
-          Serial.printf("[%s]: bitmask_dec (FW_UPGRADE_GPIO) in dec=%ju\n",__func__,bitmask_dec);
-        #endif
-        // ESP32-C3
-        #if (BOARD_TYPE == 4)
-          {
-            esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
-          }
-        #else
-          {
-            esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
-          }
+          Serial.printf("[%s]: bitmask_dec (FW_UPGRADE_GPIO only) in dec=%ju\n",__func__,bitmask_dec);
         #endif
 
       #endif
       #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: Sleeping due to cooling after motion\n",__func__);
       #endif
-    } else
+    } else                    // if motion NOT detected add PIR GPIOs to already defined FW_UPGRADE_GPIO
     {
-      //send ESP to deep unconditional sleep for predefined time -  wake up on timer...(heartbeat)
-      
-      // esp_sleep_enable_timer_wakeup(SLEEP_TIME_S * uS_TO_S_FACTOR);
       esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
-
-      //... or on GPIO ext1 (PIR motion detected) or FW_UPGRADE_GPIO
-      #ifdef FW_UPGRADE_GPIO //if FW_UPGRADE_GPIO  defined, wake up on it or on PIR - actually FW_UPGRADE_GPIO is obligatory
-
-
-        if (g_motion == 1)
-          bitmask_dec = pow(2,FW_UPGRADE_GPIO) + pow(2,MOTION_SENSOR_GPIO);
-        else 
-          // don't wake up on MOTION_SENSOR_GPIO
-          bitmask_dec = pow(2,FW_UPGRADE_GPIO);
-
-        // bitmask_dec =  (1ULL << FW_UPGRADE_GPIO) | (1ULL << MOTION_SENSOR_GPIO);
-        #ifdef DEBUG
-          Serial.printf("[%s]: bitmask_dec (FW_UPGRADE_GPIO + MOTION_SENSOR_GPIO) in dec=%ju\n",__func__,bitmask_dec);
-        #endif
-      #else //if FW_UPGRADE_GPIO not defined, wake up only on PIR - btw this is not allowed anyway as FW_UPGRADE_GPIO is mandatory
-        bitmask_dec = pow(2,MOTION_SENSOR_GPIO);
-        // bitmask_dec =   (1ULL << MOTION_SENSOR_GPIO);
-        #ifdef DEBUG
-          Serial.printf("[%s]: bitmask_dec=2^GPIO in dec=%d\n",__func__,bitmask_dec);
-        #endif
-      #endif
-      // ESP32-C3
-      #if (BOARD_TYPE == 4)
+      if (g_motion == 1)
+      {
+        for (u_int8_t i = 0; i < NUMBER_OF_MOTION_SENSORS; i++)
         {
-          esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
+          {
+            bitmask_dec +=  pow(2,motion_sensors_gpio[i]);
+          }
         }
-      #else
-        {
-          esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
-        }
+      }
+      #ifdef DEBUG
+        Serial.printf("[%s]: bitmask_dec (FW_UPGRADE_GPIO + motion_sensors_gpio[i]) in dec=%ju\n",__func__,bitmask_dec);
       #endif
+
       #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: Sleeping due to heartbeat\n",__func__);
       #endif
     }
-  #else
-    //send ESP to deep unconditional sleep for predefined time -  wake up on timer...(heartbeat)
+  // if motion is NOT enabled...
+  #else                       // wake up on heartbeat
     esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
-    //... or on GPIO ext1 FW_UPGRADE_GPIO
-    #ifdef FW_UPGRADE_GPIO //if FW_UPGRADE_GPIO  defined, wake up on it or on PIR - actually FW_UPGRADE_GPIO is obligatory
-      bitmask_dec = pow(2,FW_UPGRADE_GPIO);
-      // bitmask_dec =  (1ULL << FW_UPGRADE_GPIO);// | (1ULL << MOTION_SENSOR_GPIO);
-      #ifdef DEBUG
-        Serial.printf("[%s]: bitmask_dec (FW_UPGRADE_GPIO) in dec=%ju\n",__func__,bitmask_dec);
-      #endif
-      // ESP32-C3
-      #if (BOARD_TYPE == 4)
-        {
-          esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
-        }
-      #else
-        {
-          esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
-        }
-      #endif
-    #endif
     #ifdef DEBUG_LIGHT
       Serial.printf("[%s]: Sleeping due to heartbeat\n",__func__);
     #endif
   #endif
+  
+  // finally, go to sleep - wake up on bitmask_dec (FW_UPGRADE_GPIO and MOTION)
+  // ESP32-C3
+  #if (BOARD_TYPE == 4)
+    {
+      esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
+    }
+  #else
+    {
+      esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
+    }
+  #endif  
+  
   // testing with PPK2 - go to sleep
   #ifdef PPK2_GPIO
     digitalWrite(PPK2_GPIO,HIGH);
   #endif
 
-  // the next 2 lines are NOT working - CP cannot start! ????
+  // the next line is NOT working - CP cannot start! ????
   // esp_sleep_config_gpio_isolate();
 
   Serial.printf("[%s]: Going to sleep for %d seconds\n",__func__,final_sleeping_time_s);
@@ -1504,7 +1480,7 @@ void gather_data()
   #endif
 
   // motion enabled/disable
-  #ifdef MOTION_SENSOR_GPIO
+  #if (MOTION_ENABLED == 1)
     myData.motion_enabled = g_motion;
   #else
     myData.motion_enabled = 0;
@@ -2183,13 +2159,13 @@ void set_act_blue_led_level(u_int8_t level)
       {
         ledcWrite(ACT_BLUE_LED_PWM_CHANNEL, g_led_pwm);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: %d\n",__func__,g_led_pwm);
+          Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: %d\n",__func__,g_led_pwm);
         #endif
       } else 
       {
         ledcWrite(ACT_BLUE_LED_PWM_CHANNEL, 0);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: 0\n",__func__);
+          Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: 0\n",__func__);
         #endif
       }
     #else 
@@ -2197,13 +2173,13 @@ void set_act_blue_led_level(u_int8_t level)
       {
         digitalWrite(ACT_BLUE_LED_GPIO,HIGH);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: HIGH\n",__func__);
+          Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: HIGH\n",__func__);
         #endif
       } else 
       {
         digitalWrite(ACT_BLUE_LED_GPIO,LOW);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: LOW\n",__func__);
+          Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: LOW\n",__func__);
         #endif
       }
     #endif
@@ -2224,13 +2200,13 @@ void set_error_red_led_level(u_int8_t level)
           red_level = g_led_pwm;
         ledcWrite(ERROR_RED_LED_PWM_CHANNEL, red_level);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: %d\n",__func__,red_level);
+          Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: %d\n",__func__,red_level);
         #endif
       } else 
       {
         ledcWrite(ERROR_RED_LED_PWM_CHANNEL, 0);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: 0\n",__func__);
+          Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: 0\n",__func__);
         #endif
       }
     #else 
@@ -2238,13 +2214,13 @@ void set_error_red_led_level(u_int8_t level)
       {
           digitalWrite(ERROR_RED_LED_GPIO,HIGH);
           #ifdef DEBUG
-            // Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: HIGH\n",__func__);
+            Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: HIGH\n",__func__);
           #endif
       } else 
       {
         digitalWrite(ERROR_RED_LED_GPIO,LOW);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: LOW\n",__func__);
+          Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: LOW\n",__func__);
         #endif
       }
     #endif
@@ -2278,11 +2254,11 @@ void setup()
   Serial.begin(115200);
   delay(1);
 
+  // #ifdef DEBUG_LIGHT
+  Serial.printf("\n======= S T A R T =======\n");
   // start LEDs  
   initiate_all_leds();
 
-  // #ifdef DEBUG_LIGHT
-  Serial.printf("\n======= S T A R T =======\n");
   #ifdef DEBUG_LIGHT
     Serial.printf("[%s]: millis=%lums, Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__,program_start_time, DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
   #else 
@@ -2341,7 +2317,9 @@ void setup()
     unsigned long en_3v_start_time = millis();
     while (!digitalRead(ENABLE_3V_GPIO))
     {
-      Serial.printf("[%s]: Waiting for 3V...\n",__func__);
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: Waiting for 3V...\n",__func__);
+      #endif
       while (millis()-en_3v_start_time < 10)
       {
         delay(1);
@@ -2371,7 +2349,9 @@ void setup()
     unsigned long en_3v_lora_start_time = millis();
     while (!digitalRead(LORA_GPIO_ENABLE_3V))
     {
-      Serial.printf("[%s]: Waiting for 3V for LoRa...\n",__func__);
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: Waiting for 3V for LoRa...\n",__func__);
+      #endif
       while (millis()-en_3v_lora_start_time < 10)
       {
         delay(1);
@@ -2424,7 +2404,6 @@ void setup()
     case ESP_RST_POWERON:
     {
       Serial.printf("[%s]: Boot cause: power on or reset\n",__func__);
-      set_act_blue_led_level(1);
       set_error_red_led_level(1);
       break;
     }
@@ -2432,7 +2411,6 @@ void setup()
     case ESP_RST_SW:
     {
       Serial.printf("[%s]: Boot cause: software reset via esp_restart\n",__func__);
-      set_act_blue_led_level(1);
       set_error_red_led_level(1);
       break;
     }
@@ -2447,13 +2425,14 @@ void setup()
     default:
     {
       Serial.printf("[%s]: Boot cause: other boot cause=%d\n",__func__);
+      set_error_red_led_level(1);
       break;
     }
   }
 
-  // #ifdef DEBUG_LIGHT
-  //   Serial.printf("[%s]: Wakeup cause=%d\n",__func__,wakeup_reason);
-  // #endif
+  #ifdef DEBUG_LIGHT
+    Serial.printf("[%s]: Wakeup cause=%d\n",__func__,wakeup_reason);
+  #endif
   switch(wakeup_reason)
   {
     // 0 = not deep sleep
@@ -2468,16 +2447,16 @@ void setup()
       Serial.printf("[%s]: Wakeup cause: external signal using RTC_IO (motion detected)\n",__func__);
       break;
     }
-    // 3 = PUSH BUTTONS or fw update (FW_UPGRADE_GPIO) or motion detected (MOTION_SENSOR_GPIO) - not for ESP32-C3!
-    #if (BOARD_TYPE != 4)
-      case ESP_SLEEP_WAKEUP_EXT1:
-      {
-        Serial.printf("[%s]: Wakeup cause: external signal using GPIO_EXT1\n",__func__);
-        Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_ANY_GPIO);
+    // 3 = PUSH BUTTONS or fw update (FW_UPGRADE_GPIO) or motion detected (MOTION_ENABLED) - not for ESP32-C3!
+    case ESP_SLEEP_WAKEUP_EXT1:
+    {
+      #if (BOARD_TYPE != 4)
+        // Serial.printf("[%s]: Wakeup cause: external signal using GPIO_EXT1\n",__func__);
+        // Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_ANY_GPIO);
         delay(DEBOUNCE_MS_ANY_GPIO);
         wakeup_gpio_mask = esp_sleep_get_ext1_wakeup_status();
         wakeup_gpio = log(wakeup_gpio_mask)/log(2);
-        Serial.printf("[%s]: external signal using GPIO=%d, GPIO_MASK=%ju\n",__func__,wakeup_gpio,wakeup_gpio_mask);
+        Serial.printf("[%s]: Wakeup cause: external signal using GPIO=%d, GPIO_MASK=%ju\n",__func__,wakeup_gpio,wakeup_gpio_mask);
         set_error_red_led_level(1);
         #ifdef FW_UPGRADE_GPIO
           if (wakeup_gpio == FW_UPGRADE_GPIO)
@@ -2487,14 +2466,18 @@ void setup()
             break;
           }
         #endif
-        #ifdef MOTION_SENSOR_GPIO
-          if (wakeup_gpio == MOTION_SENSOR_GPIO)
+        #if (MOTION_ENABLED == 1)
+          for (u_int8_t i = 0; i < NUMBER_OF_MOTION_SENSORS; i++)
           {
-            motion = true;
-            break;
+            if (wakeup_gpio == motion_sensors_gpio[i])
+            {
+              motion = true;
+              break;
+            }
           }
         #endif
         #if (PUSH_BUTTONS == 1)
+          set_error_red_led_level(1);
           for (uint8_t i = 0; i < NUMBER_OF_BUTTONS; i++)
           {
             if (wakeup_gpio == button_gpio[i])
@@ -2505,20 +2488,21 @@ void setup()
             }
           }
         #endif
-      }
-    #endif
+      #endif
+      break;
+    }
     // 4 = wake up on timer (SLEEP_TIME_S or COOLING_SLEEP_DURATION_S)
     case ESP_SLEEP_WAKEUP_TIMER:
     {
       #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: Wakeup cause: timer (cooling or heartbeat)\n",__func__);
       #endif
-      set_act_blue_led_level(1);
       break;
     }
     // 5 = not in use
     case ESP_SLEEP_WAKEUP_TOUCHPAD:
     {
+      set_error_red_led_level(1);
       #if (TOUCHPAD_ONLY == 1)
         touch_pad_t touchPin;
         #ifdef DEBUG_LIGHT
@@ -2586,7 +2570,6 @@ void setup()
         }    
         if (wakeup_gpio < 255)
         {
-          set_error_red_led_level(1);
           for (uint8_t i = 0; i < NUMBER_OF_BUTTONS; i++)
           {
             if (i == touchPin)
@@ -2602,15 +2585,16 @@ void setup()
     // 6 = not in use
     case ESP_SLEEP_WAKEUP_ULP:
     {
+      set_error_red_led_level(1);
       #ifdef DEBUG_LIGHT
           Serial.printf("[%s]: Wakeup cause: ESP_SLEEP_WAKEUP_ULP\n",__func__);
       #endif
       break;
     }
     // 7 = for ESP32-C3 - ESP_SLEEP_WAKEUP_GPIO,for others it is from light sleep only (ESP32, S2 and S3) so not programmed
-    #if (BOARD_TYPE == 4)
-      case ESP_SLEEP_WAKEUP_GPIO:
-      {
+    case ESP_SLEEP_WAKEUP_GPIO:
+    {
+      #if (BOARD_TYPE == 4)
         Serial.printf("[%s]: Wakeup cause: external signal ESP_SLEEP_WAKEUP_GPIO on C3\n",__func__);
         Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_ANY_GPIO);
         delay(DEBOUNCE_MS_ANY_GPIO);
@@ -2623,19 +2607,24 @@ void setup()
           {
             fw_update = true;
             Serial.printf("[%s]: woke up on FW button pressed\n",__func__);
-            
+            break;
           }
         #endif
-        #ifdef MOTION_SENSOR_GPIO
-          if (wakeup_gpio == MOTION_SENSOR_GPIO)
+        
+        #if (MOTION_ENABLED == 1)
+          for (u_int8_t i = 0; i < NUMBER_OF_MOTION_SENSORS; i++)
           {
-            motion = true;
+            if (wakeup_gpio == motion_sensors_gpio[i])
+            {
+              motion = true;
+              break;
+            }
           }
-          break;
         #endif
         break;
-      }
-    #endif
+      #endif
+      break;
+  }
     default:
     {
       #ifdef DEBUG_LIGHT
@@ -2651,11 +2640,9 @@ void setup()
     // RED LED ON, BLUE OFF if FW_UPGRADE_GPIO was pressed
     if (fw_update)
     {
-      set_act_blue_led_level(0);
-      set_error_red_led_level(1);
       Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_FW_GPIO);
       delay(DEBOUNCE_MS_FW_GPIO);
-    }
+    } 
     // check if FW_UPGRADE_GPIO is still high after boot
     pinMode(FW_UPGRADE_GPIO,INPUT);
     if ((digitalRead(FW_UPGRADE_GPIO)) and (fw_update))
@@ -2720,11 +2707,13 @@ void setup()
     }
   #endif
 
-  #ifdef MOTION_SENSOR_GPIO
+  #if (MOTION_ENABLED == 1)
+    #ifdef DEBUG
+      Serial.printf("[%s]: motion enabled\n",__func__);
+    #endif
     if (motion)
     {
-      set_error_red_led_level(1);
-      Serial.printf("[%s]: motion DETECTED\n",__func__);
+        Serial.printf("[%s]: motion DETECTED on GPIO=%d\n",__func__,wakeup_gpio);
     } else
     {
       #ifdef DEBUG
@@ -2732,6 +2721,16 @@ void setup()
       #endif
     }
   #endif
+
+  #ifdef FW_UPGRADE_GPIO
+    if ((!motion) and (!fw_update) and (boot_reason != ESP_RST_SW) and (boot_reason != ESP_RST_POWERON) and (wakeup_gpio != FW_UPGRADE_GPIO) )
+  #else 
+    if ((!motion) and (!fw_update) and (boot_reason != ESP_RST_SW) and (boot_reason != ESP_RST_POWERON) )
+  #endif 
+  {
+    set_error_red_led_level(0);
+    set_act_blue_led_level(1);
+  }
 
 // ===============  SENSORS INITIALISATION
 // MAX17048 - fuel gauge
@@ -2890,7 +2889,9 @@ void setup()
 
   // only ESPNOW code
   #if (ESPNOW_ENABLED ==1)
-    Serial.printf("[%s]: ESPnow sending function here\n",__func__);
+    #ifdef DEBUG
+      Serial.printf("[%s]: ESPnow sending function here\n",__func__);
+    #endif
     if (ESPnow_send_data())
     {
       #ifdef DEBUG
@@ -3147,7 +3148,9 @@ void setup()
 
     if (!espnow_data_sent)
     {
-      Serial.printf("[%s]: LoRa sending function here as ESPnow FAILED or DISABLED\n",__func__);
+      #ifdef DEBUG
+        Serial.printf("[%s]: LoRa sending function here as ESPnow FAILED or DISABLED\n",__func__);
+      #endif
       if (LoRa_send_data())
       {
         Serial.printf("[%s]: Sending data over LoRa SUCCESSFUL\n",__func__);
