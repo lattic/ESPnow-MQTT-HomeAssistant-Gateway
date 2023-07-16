@@ -1,6 +1,6 @@
 <h1> ESPnow/LoRa to MQTT Gateway for Home Assistant  </h1>
 <h2> 2023-07-09: </h2>
-<h3> LoRa is comming! Already in the separate branch - under heavy tests before final commit </h3>
+<h3> LoRa is here! </h3>
 
 <h2> Idea:</h2>
 <ul>
