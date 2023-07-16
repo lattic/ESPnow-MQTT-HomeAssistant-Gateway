@@ -20,6 +20,7 @@
   // #define DEVICE_ID  39           // "esp32039" - S2, production - garage front mot.
   // #define DEVICE_ID  41           // "esp32041" - S,  production - thermocouple  
   // #define DEVICE_ID  42           // "esp32042" - S2, production - pushbuttons 6x desk  
+  // #define DEVICE_ID  43           // "esp32043" - S2, production - swimming pool   
   // #define DEVICE_ID  49           // "esp32049" - S2, production - kitchen
   // #define DEVICE_ID  55           // "esp32055" - C3, production - TRV3 Toilet Bedroom
   // #define DEVICE_ID  56           // "esp32056" - C3, production - TRV7 Tailor
@@ -141,10 +142,10 @@
 
   #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
   #if (MOTION_ENABLED == 1)
-    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    #define NUMBER_OF_MOTION_SENSORS  2 // number of PIR sensors
     uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
     {
-      1
+      1,2
     };
   #endif
 
