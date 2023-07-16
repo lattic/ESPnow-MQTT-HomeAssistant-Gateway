@@ -1,7 +1,8 @@
 <h1> ESPnow/LoRa to MQTT Gateway for Home Assistant  </h1>
 <h2> 2023-07-09: </h2>
 <h3> LoRa is here! </h3>
-
+<br> Sender can use LoRa instead of ESPnow for long range </br>
+<br> Receiver: separate devices as gateway for LoRa (from ESPnow) due to long time needed for communication with LoRa transciever </br>
 <h2> Idea:</h2>
 <ul>
   <li>Build universal sensor device (ESP32 based) equipped with temperature, humidity and light sensors, that can live long on 1 battery charge. </br>
