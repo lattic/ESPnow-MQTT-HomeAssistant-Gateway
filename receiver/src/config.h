@@ -1,24 +1,24 @@
 #pragma once
-/*
-config
-*/
-// wifi common settings
 
+// #define DEBUG
+#define VERSION "3.1.b2"
+
+// ****************************************
+#pragma message "Compiling VERSION = " VERSION
 #define WAIT_FOR_WIFI               5     // in seconds
 #define MQTT_DEVICE_IDENTIFIER      String(WiFi.macAddress())
 
 
 // configuration template:
-// #if DEVICE_ID == 29
-#if DEVICE_ID == 29
-  #define BOARD_TYPE                2             // 1=ESP32 2=ESP32S2 3=ESP32S3 4=ESP32C3
-  #define HOSTNAME                  "esp32029"    // max 9 characters, used as name in HA
-  #define IP_ADDRESS                "192.168.1.29"  // fixed IP, not in use anymore for WiFi, only for name in HA
-  #define ROLE_NAME                 "gw1-hall"      // part of the name in HA (gateway 1)
 
-  #define LED_GPIO_SENSORS          2   // RED
-  #define LED_GPIO_GATEWAY          5   // GREEN
-  #define LED_GPIO_STANDBY          3   // BLUE
+#if DEVICE_ID == 29
+  #define BOARD_TYPE                2
+  #define HOSTNAME                  "esp32029"
+  #define ROLE_NAME                 "gw1-hall"
+  #define LED_GPIO_SENSORS          5   // RED
+  #define LED_GPIO_GATEWAY          6   // GREEN
+  #define LED_GPIO_STANDBY          6   // BLUE
+
 
   #define LED_GPIO_SENSORS_USE_PWM  1
   #define LED_GPIO_SENSORS_PWM_DC   10
@@ -41,12 +41,25 @@ config
   #define USE_WEB_SERIAL            1
   #define CP_TIMEOUT_S              180
 
+  // for ESPnow
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
+  // for LoRa
+  #define LORA_ENABLED                0 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
+  // #define LORA_GPIO_ENABLE_3V         19   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  #define LORA_GPIO_MISO              20  // - BLUE
+  #define LORA_GPIO_MOSI              17  // - GREEN
+  #define LORA_GPIO_CLOCK             18  // - BROWN
+  #define LORA_GPIO_SS                14  // - YELLOW, SS/NSS/CS:
+  #define LORA_GPIO_RST               15  // - ORANGE
+  #define LORA_GPIO_DIO0              16  // - VIOLET
+
   #pragma message "compilation for: ESPnow_esp32029_gw1"
+
 
 #elif DEVICE_ID == 30
   #define BOARD_TYPE                2
   #define HOSTNAME                  "esp32030"
-  #define IP_ADDRESS                "192.168.1.30"
   #define ROLE_NAME                 "gw2-dining"
   #define LED_GPIO_SENSORS          3   // RED
   #define LED_GPIO_GATEWAY          5   // GREEN
@@ -72,6 +85,9 @@ config
 
   #define USE_WEB_SERIAL            1
   #define CP_TIMEOUT_S              180
+
+  // for ESPnow
+  #define ESPNOW_ENABLED            1  // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
 
   #pragma message "compilation for: ESPnow_esp32030_gw2"
 
@@ -114,6 +130,9 @@ config
   #define USE_WEB_SERIAL            1
   #define CP_TIMEOUT_S              180
 
+  // for ESPnow
+  #define ESPNOW_ENABLED            1  // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define MEASURE_LUX               1
   #define MEASURE_LUX_GPIO          11
   #define LUX_MAX_RAW_READING       7800  // resistors specific max value - variable as each sensor is done with different voltage divider
@@ -122,6 +141,51 @@ config
 
 
   #pragma message "compilation for: ESPnow_esp32027_gw3"  
+
+#elif DEVICE_ID == 45
+  #define BOARD_TYPE                2
+  #define HOSTNAME                  "esp32045"
+  #define ROLE_NAME                 "gw1-LoRa"
+  #define LED_GPIO_SENSORS          5   // RED
+  #define LED_GPIO_GATEWAY          6   // GREEN
+  #define LED_GPIO_STANDBY          6   // BLUE
+
+
+  #define LED_GPIO_SENSORS_USE_PWM  1
+  #define LED_GPIO_SENSORS_PWM_DC   10
+
+  #define LED_GPIO_GATEWAY_USE_PWM  1
+  #define LED_GPIO_GATEWAY_PWM_DC   10
+
+  #define LED_GPIO_STANDBY_USE_PWM  1
+  #define LED_GPIO_STANDBY_PWM_DC   10
+
+  #define PUSH_BUTTON_GPIO          0  // to control ESP
+  #define PUSH_BUTTON_GPIO_ACT    LOW  // HIGH or LOW, HIGH = 1, LOW = 0, 0 if not defined (so default)
+
+  uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x29};
+  
+  #define OTA_ACTIVE                1
+
+  #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
+
+  #define USE_WEB_SERIAL            1
+  #define CP_TIMEOUT_S              180
+
+  // for ESPnow
+  #define ESPNOW_ENABLED              0 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
+  // for LoRa
+  #define LORA_ENABLED                1 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
+  // #define LORA_GPIO_ENABLE_3V         19   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  #define LORA_GPIO_MISO              20  // - BLUE
+  #define LORA_GPIO_MOSI              17  // - GREEN
+  #define LORA_GPIO_CLOCK             18  // - BROWN
+  #define LORA_GPIO_SS                14  // - YELLOW, SS/NSS/CS:
+  #define LORA_GPIO_RST               15  // - ORANGE
+  #define LORA_GPIO_DIO0              16  // - VIOLET
+
+  #pragma message "compilation for: ESPnow_esp32045_gw4"
 
 
 // ************************************* C L I E N T S ***********************************************
@@ -329,11 +393,23 @@ config
 
 //   #pragma message "compilation for: ESPnow_esp32093-gwtest"
 
+
+
+
 #else
   #error "Wrong DEVICE_ID chosen"
 #endif
 // DEVICE CUSTOM SETTINGS END
 
+// check if LoRa and ESPnow
+#if ((LORA_ENABLED == 1) and (ESPNOW_ENABLED == 1))
+  #error "both LoRa and ESPnow cannot work together, choose only one"
+#endif
+
+// check if neither LoRa nor ESPnow
+#if ((LORA_ENABLED == 0) and (ESPNOW_ENABLED == 0))
+  #error "both LoRa and ESPnow are DISABLED, enable one"
+#endif
 
 // 
 #ifndef LED_GPIO_GATEWAY
@@ -350,7 +426,7 @@ config
 #define JSON_PAYLOAD_SIZE           512
 
 // mqtt - how many attempts to connect to MQTT broker before restarting
-#define MAX_MQTT_ERROR              180  // 180, in seconds / times, used in mqtt.reconnect as well as in loop to check if MQTT is ok
+#define MAX_MQTT_ERROR              30  // in times, used in mqtt.reconnect as well as in loop to check if MQTT is ok
                                          // and if not it restarts the ESP
 
 // queue size for incomming data from sensors, whe queue is full no more data is gathered until there is free space in the queue

@@ -20,6 +20,7 @@
   // #define DEVICE_ID  39           // "esp32039" - S2, production - garage front mot.
   // #define DEVICE_ID  41           // "esp32041" - S,  production - thermocouple  
   // #define DEVICE_ID  42           // "esp32042" - S2, production - pushbuttons 6x desk  
+  // #define DEVICE_ID  43           // "esp32043" - S2, production - swimming pool   
   // #define DEVICE_ID  49           // "esp32049" - S2, production - kitchen
   // #define DEVICE_ID  55           // "esp32055" - C3, production - TRV3 Toilet Bedroom
   // #define DEVICE_ID  56           // "esp32056" - C3, production - TRV7 Tailor
@@ -41,6 +42,8 @@
 // ***************************************  BOARDS  CONFIGURATION  ***************************************
 
 #if DEVICE_ID == 21
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32021"
   #define DEVICE_NAME                 "TRV5 Lidia"  // 15 characters maximum
@@ -59,6 +62,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 22
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32022"
   #define DEVICE_NAME                 "TRV6 Kids"  // 15 characters maximum
@@ -77,6 +82,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 23
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32023"
   #define DEVICE_NAME                 "TRV2 Toilet b."  // 15 characters maximum
@@ -96,6 +103,8 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 26
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32026"
   #define DEVICE_NAME                 "TRV4 Printers"  // 15 characters maximum
@@ -114,13 +123,14 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 28
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32028"
   #define DEVICE_NAME                 "Garage"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -130,17 +140,27 @@
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  2 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1,2
+    };
+  #endif
+
   #pragma message "compilation for: esp32028-Garage"
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 31
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32031"
   #define DEVICE_NAME                 "Printers room"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -150,15 +170,24 @@
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
   #pragma message "compilation for: esp32031-Printers room"
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 32
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 1 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32032"
   #define DEVICE_NAME                 "Bedroom mot."  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-  #define MOTION_SENSOR_GPIO          2   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -168,17 +197,26 @@
   #define USE_TSL2561                 0   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      2
+    };
+  #endif
   #pragma message "compilation for: esp32032-bedroom motion"
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 33
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32033"
   #define DEVICE_NAME                 "Living room"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -188,17 +226,27 @@
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
+
   #pragma message "compilation for: esp32033-Living room"
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 35
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32035"
   #define DEVICE_NAME                 "Tailor room"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -206,20 +254,29 @@
   #define USE_MAX17048                1   // use "0" to disable
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
-
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
 
   #pragma message "compilation for: esp32035-Tailor"
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 36
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32036"
   #define DEVICE_NAME                 "Lidia room"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -229,11 +286,22 @@
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                120 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
+
   #pragma message "compilation for: esp32036-Lidia"
 // ---------------------------------------------------------------------------------------------------
 
 
 #elif DEVICE_ID == 37
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32037"
   #define DEVICE_NAME                 "TRV1 Bedroom"  // 15 characters maximum
@@ -253,13 +321,14 @@
 
 
 #elif DEVICE_ID == 38
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32038"
   #define DEVICE_NAME                 "Toilet bedroom"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -269,17 +338,27 @@
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
+
   #pragma message "compilation for: esp32038-Toilet bedroom"
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 39
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 1 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32039"
   #define DEVICE_NAME                 "Garage front m."  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -289,10 +368,20 @@
   #define USE_TSL2561                 0   // use "0" to disable
   #define SLEEP_TIME_S                300 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
   #pragma message "compilation for: esp32039-Garage front m."
 // ---------------------------------------------------------------------------------------------------
 
-#elif DEVICE_ID == 41                 // 
+#elif DEVICE_ID == 41                 
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32041"
   #define DEVICE_NAME                 "thermocouple01"  // 15 characters maximum
@@ -323,7 +412,9 @@
 // ---------------------------------------------------------------------------------------------------
 
 
-#elif DEVICE_ID == 42                 // 
+#elif DEVICE_ID == 42                 
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 4 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = battery, 4 = "push_b"
   #define HOSTNAME                    "esp32042"
   #define DEVICE_NAME                 "pushb_6x_desk"  // 15 characters maximum
@@ -336,7 +427,7 @@
 
   #define PUSH_BUTTONS                1   // PULL GPIO DOWN, ACTIVE HIGH as it is programmed like this in the hibernate()
 
-  #define NUMBER_OF_BUTTONS           5  
+  #define NUMBER_OF_BUTTONS           5
   uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of push buttons
   {
     3,4,5,6,7
@@ -366,7 +457,9 @@
 // ---------------------------------------------------------------------------------------------------
 
 
-#elif DEVICE_ID == 43                 // 
+#elif DEVICE_ID == 43                 
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32043"
   #define DEVICE_NAME                 "swimming pool"  // 15 characters maximum
@@ -417,13 +510,14 @@
 
 
 #elif DEVICE_ID == 44
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 1 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32044"
   #define DEVICE_NAME                 "Garage mid m."  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   // #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   // #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -433,17 +527,26 @@
   #define USE_TSL2561                 0   // use "0" to disable
   #define SLEEP_TIME_S                3600 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
   #pragma message "compilation for: esp32044-Garage middle m."
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 49
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32049"
   #define DEVICE_NAME                 "Kitchen"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -453,11 +556,22 @@
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
+
   #pragma message "compilation for: esp32049-Kitchen"
 // ---------------------------------------------------------------------------------------------------
 
 
 #elif DEVICE_ID == 55
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32055"
   #define DEVICE_NAME                 "TRV3 Toilet up"  // 15 characters maximum
@@ -477,6 +591,8 @@
 
 
 #elif DEVICE_ID == 56
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = "battery"
   #define HOSTNAME                    "esp32056"
   #define DEVICE_NAME                 "TRV7 Tailor"  // 15 characters maximum
@@ -496,13 +612,14 @@
 
 
 #elif DEVICE_ID == 100
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+  
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32100"
   #define DEVICE_NAME                 "Office"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -511,19 +628,29 @@
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  2 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1,2
+    };
+  #endif
 
   #pragma message "compilation for: esp32100-Office"
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 101
   // measured current: 38.45uA without PIR (switch OFF)
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32101"
   #define DEVICE_NAME                 "Dining room"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             4   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -533,17 +660,27 @@
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
+
   #pragma message "compilation for: esp32101-Dining"
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 102
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32102"
   #define DEVICE_NAME                 "Toilet up"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -552,19 +689,29 @@
   #define USE_SHT31                   1   // use "0" to disable
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
+
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
 
   #pragma message "compilation for: esp32102-ToiletUp"
 // ---------------------------------------------------------------------------------------------------
 
 
 #elif DEVICE_ID == 104
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 2 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32104"
   #define DEVICE_NAME                 "Kids room"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
   #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  #define MOTION_SENSOR_GPIO          1   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -574,10 +721,21 @@
   #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                180 // seconds - 180
 
+  #define MOTION_ENABLED              1   // 1 to enable, 0 to disable
+  #if (MOTION_ENABLED == 1)
+    #define NUMBER_OF_MOTION_SENSORS  1 // number of PIR sensors
+    uint8_t motion_sensors_gpio[NUMBER_OF_MOTION_SENSORS] =    // put here GPIO for each PIR, active HIGH (no pull down resistor needed for SR602)
+    {
+      1
+    };
+  #endif
+
   #pragma message "compilation for: esp32104-Milena"
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 105
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32105"
   #define DEVICE_NAME                 "Garden"  // 15 characters maximum
@@ -978,6 +1136,7 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 94
+  #define ESPNOW_ENABLED              0 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32094"
   #define DEVICE_NAME                 "test94"  // 15 characters maximum
@@ -992,13 +1151,22 @@
   #define USE_MAX17048                1   // use "0" to disable
   #define USE_SHT31                   0   // use "0" to disable
   #define USE_TSL2561                 0   // use "0" to disable
-  #define SLEEP_TIME_S                10 // seconds - 180
+  #define SLEEP_TIME_S                5 // seconds - 180
 
   #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
 
+  // for LoRa
+  #define LORA_ENABLED                1 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
+  #define LORA_GPIO_ENABLE_3V         19   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+  #define LORA_GPIO_MISO              20  // - BLUE
+  #define LORA_GPIO_MOSI              17  // - GREEN
+  #define LORA_GPIO_CLOCK             18  // - BROWN
+  #define LORA_GPIO_SS                14  // - YELLOW, SS/NSS/CS:
+  #define LORA_GPIO_RST               15  // - ORANGE
+  #define LORA_GPIO_DIO0              16  // - VIOLET
 
-  #pragma message "compilation for: esp32092-test"
+  #pragma message "compilation for: esp32094-test"
 // ---------------------------------------------------------------------------------------------------
 
 
@@ -1088,16 +1256,16 @@
 
 // SENSOR_TYPE defines what is to be sent to GW and what should wake up sensor device
 #if (SENSOR_TYPE == 0)
-  #ifdef MOTION_SENSOR_GPIO
-    #warning "SENSOR_TYPE=0 (env) should not have MOTION_SENSOR_GPIO defined - removing it"
-    #undef MOTION_SENSOR_GPIO
+  #if (MOTION_ENABLED == 1)
+    #warning "SENSOR_TYPE=0 (env) should not have MOTION_ENABLED defined - removing it"
+    #undef MOTION_ENABLED
   #endif
 #endif
 
 // don't allow compiling if not provided MOTION_SENSOR_GPIO
 #if (SENSOR_TYPE == 1) or (SENSOR_TYPE == 2)
-  #ifndef MOTION_SENSOR_GPIO
-    #error "MOTION_SENSOR_GPIO not defined"
+  #if (MOTION_ENABLED != 1)
+    #error "MOTION_ENABLED not defined but sensor type includes motion"
   #endif
 #endif
 
@@ -1105,17 +1273,21 @@
   #error "TOUCHPAD_ONLY works (now) only with ESP32"
 #endif
 
+// no motion for push buttons sensor
 #if (SENSOR_TYPE == 4)
-  #ifdef MOTION_SENSOR_GPIO
-    #warning "SENSOR_TYPE=4 (buttons) should not have MOTION_SENSOR_GPIO defined - removing it"
-    #undef MOTION_SENSOR_GPIO
+  #if (MOTION_ENABLED == 1)
+    #warning "SENSOR_TYPE=4 (buttons) should not have MOTION_ENABLED defined - removing it"
+    #undef MOTION_ENABLED
   #endif
 #endif
 
-// don't allow compiling if not provided FW_UPGRADE_GPIO
+
+// don't allow compiling if not provided FW_UPGRADE_GPIO 
 #ifndef FW_UPGRADE_GPIO
-  #error "FW_UPGRADE_GPIO not defined"
+  #error "FW_UPGRADE_GPIO not defined yet OBLIGATORY"
 #endif
+
+
 
 #endif  /* devices_config_h */
 

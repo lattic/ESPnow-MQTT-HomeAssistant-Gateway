@@ -3,9 +3,8 @@
 espnow functions
 */
 
-// #include "config.h"
-// #include "variables.h"
-
+// ESPnow
+#if (ESPNOW_ENABLED == 1)
 
 void espnow_start()
 {
@@ -120,10 +119,22 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
       {
         // push incoming data to myData
         memcpy(&myData, incomingData, sizeof(myData));
-        // send to queue
-        xQueueSend(queue, &myData, portMAX_DELAY);
+        
+        // new variable
+        snprintf(myData_aux.comm_type, sizeof(myData_aux.comm_type), "ESPnow");
+
         // push MAC to myData_aux (rssi, MAC)
         snprintf(myData_aux.macStr, sizeof(myData_aux.macStr), "%02x:%02x:%02x:%02x:%02x:%02x",mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+        if (strcmp(myData.macStr, myData_aux.macStr) != 0)
+        {
+          Serial.printf("[%s]: MACs are DIFFERENT, NOT PUBLISHING!\n",__func__);
+          xSemaphoreGive( queue_protect );
+          return;
+        } 
+
+        // send to queue
+        xQueueSend(queue, &myData, portMAX_DELAY);
+
         // send to queue_aux
         xQueueSend(queue_aux, &myData_aux, portMAX_DELAY);
         queue_count = uxQueueMessagesWaiting(queue);
@@ -135,15 +146,8 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
       {
         Serial.printf("[%s]: queue already FULL\n",__func__);
       }
-      // update HA on queue status
-      if (!publish_sensors_to_ha)
-      {
-        char queue_status[20];
-        snprintf(queue_status, sizeof(queue_status), "queue: %d/%d",queue_count,MAX_QUEUE_COUNT);
-        mqtt_publish_gw_last_updated_sensor_values(queue_status);
-      }
-      // unlock both queues
       xSemaphoreGive( queue_protect );
+      message_received = 1;
     }
     else
     {
@@ -210,3 +214,4 @@ bool send_command_to_sender(u_int8_t command)
   // }
 }
 
+#endif

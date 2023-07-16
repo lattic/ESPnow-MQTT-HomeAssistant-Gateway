@@ -29,13 +29,15 @@ typedef struct struct_message             // main data struct sent from sender t
   uint8_t button_pressed = 0;             // 0 = none, >0 = the button number as per button_gpio[NUMBER_OF_BUTTONS] - NOT GPIO NUMBER! index starts from 1
   uint16_t working_time_ms;               // last working time in ms
   uint16_t sleep_time_s;                  // programmed sleep time s
-  uint8_t valid = 1;                    // make it invalid in case some info is missing, incorrect or flagged, don't publish to HA if invalid  
+  uint8_t valid = 1;                      // make it invalid in case some info is missing, incorrect or flagged, don't publish to HA if invalid  
+  char macStr[18];                        // MAC address of sender in "%02x:%02x:%02x:%02x:%02x:%02x" format
 } struct_message;
 
 typedef struct struct_message_aux         // auxiliary data structure for sensors - with RSSI and MAC (of sender)
 {
   int rssi;
   char macStr[18];
+  char comm_type[10];                     // "LoRa" 'ESPnow" "WiFi"
 } struct_message_aux;
 
 typedef struct struct_message_recv        // command to sender - only 1 type but struct ready for expansion, the same type on sensor device!
@@ -58,6 +60,10 @@ QueueHandle_t queue_commands;             // queue for commands to be sent to se
 SemaphoreHandle_t queue_protect = NULL;
 SemaphoreHandle_t myLocalData_protect = NULL;
 SemaphoreHandle_t queue_commands_protect = NULL;
+
+uint8_t message_received = 0;
+unsigned long aux_queue_check_interval = 0;
+int old_queue = 0;
 
 //change_mac variables used also in make_fw_version() so must be global
 char mac_org_char[18];
@@ -132,10 +138,13 @@ bool mqtt_published_to_ha = false;
   #define PUSHBUTTON_UPDATE_INTERVAL_MS     100    // in ms
 #endif
 
-
+// ESPnow
+#if (ESPNOW_ENABLED == 1)
+  esp_now_peer_info_t peerInfo;
+#endif
 
 uint8_t temp_address[6];
-esp_now_peer_info_t peerInfo;
+
 unsigned long last_cmd_received;               // to clean commands from the queue if timeout expired
 
 // LED PWM

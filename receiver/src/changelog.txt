@@ -1,4 +1,5 @@
 TODO:
+0 - implement send command to sender in LoRa (now there is no feedback from receiver to sender if LoRa in use only)
 1 - implement #ifdef DEBUG instead of if (debug_mode)
 2 - improve CP html, add old values, checking if new are correct etc (check in sender sketch)
 
@@ -9,6 +10,33 @@ Webserial:
 
 OTA:
 - http://HOSTNAME.local:8080/update
+
+
+2023-07-15
+  3.1.b2  - renamed:
+          - esp32029 - gw1 in hall, configures as ESPnow but with LoRa capability if needed when relocated
+          - esp32045 - gw4, new board, noy yet deployed 
+
+2023-07-15
+  3.1.b1  - separated devices for ESPnow and LoRa (too much of time consuming and panic)
+          - changed esp32045 to LoRa only - renamed from 029 gw1 hall
+          - added esp32029 - new board, ESPnow only (not yet installed)
+          - changed eso32027 and 030 to ESPnow only
+
+2023-07-14
+  3.0.b6  - MAX_MQTT_ERROR   30 to reduce MQTT timeout (each try takes around 4s so 4x 30 = 120s)
+
+2023-07-14
+  3.0.b5  - some cleaning 
+  
+2023-07-11
+  3.0.b4  - some cleaning 
+
+2023-07-09
+  3.0.b2  - testing LoRa
+
+2023-07-09
+  3.0.b1  - testing LoRa
 
 2023-07-05
   2.27.1  - exp_aft minimum for sensors = 60s, else 2x sleep time

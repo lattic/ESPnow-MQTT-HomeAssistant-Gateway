@@ -1,23 +1,24 @@
 #include <Arduino.h>
 
-// #define DEBUG
-#define VERSION "2.27.1"
-
-#pragma message "Compiling VERSION = " VERSION
-
 // gateways config file
 #include "config.h"
 
-// libraries
+// ========================================================================== libraries 
 #include <WiFi.h>
-#include "esp_wifi.h"
+
 #include <ESPmDNS.h>
-#include <esp_now.h>
+#include "esp_wifi.h"
+
 #include <PubSubClient.h>   
 #include <ArduinoJson.h>
 
 #include <Preferences.h>
 #include <nvs_flash.h>
+
+// ESPnow
+#if (ESPNOW_ENABLED == 1)
+  #include <esp_now.h>
+#endif
 
 // CO2 MHZ19
 #if (USE_MHZ19_CO2 == 1)
@@ -31,8 +32,6 @@
 #if (USE_WEB_SERIAL == 1)
   #include <WebSerialLite.h>
 #endif
-// webserial server END
-
 
 // Firmware update
 #include <HTTPClient.h>
@@ -44,7 +43,6 @@
   #include <ESPAsyncWebServer.h>
   #include <AsyncElegantOTA.h>
   AsyncWebServer server(8080);
-  // #warning "OTA_ACTIVE defined"
 #else
   #warning "OTA_ACTIVE NOT defined"
 #endif
@@ -64,17 +62,28 @@
   #include "measure-bmp280.h"
 #endif
 
+// LoRa
+#if (LORA_ENABLED == 1)
+  #include <SPI.h>
+  #include <LoRa.h>
+#endif
+// ========================================================================== libraries END
+
 // VARIABLES
 #include "variables.h"
 // VARIABLES END
 
 
-// fuctions declarations
+// ========================================================================== FUNCTIONS declarations
 
-// espnow.h
-void espnow_start();
-void promiscuous_rx_cb(void *buf, wifi_promiscuous_pkt_type_t type);
-void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len);
+// ESPnow
+#if (ESPNOW_ENABLED == 1)
+  // espnow.h
+  void espnow_start();
+  void promiscuous_rx_cb(void *buf, wifi_promiscuous_pkt_type_t type);
+  void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len);
+  void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
+#endif
 
 // mqtt.h
 void mqtt_reconnect();
@@ -118,6 +127,7 @@ bool fw_update_timer_start();
 bool fw_update_timer_stop();
 
 // various other here in various.h
+int compareArrays(uint8_t a[], uint8_t b[], uint8_t n);
 void write_badbootcount(u_int8_t count);
 void do_esp_restart();
 void check_dirty_restart();
@@ -166,17 +176,19 @@ void write_wifi_credentials(bool wifi_ok_local, String ssid_str_local, String pa
 void stop_cp_timer();
 void change_mac();
 
-void change_mac();
-
 bool send_command_to_sender(u_int8_t command);
+
 String mac_to_string(uint8_t *addr);
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
-// fuctions declarations END
+
+#if (LORA_ENABLED == 1)
+  void LoRaonReceive(int packetSize);
+  bool start_lora();
+  void end_lora();
+#endif
+// ========================================================================== FUNCTIONS declarations END
 
 
-
-// separate files with functions
-// #include "zhwifi.h"
+// ================================= separate files with functions
 #include "espnow.h"
 #include "mqtt.h"
 #include "mqtt_publish_gw_data.h"
@@ -195,7 +207,11 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
   #include "measure-volts.h"
   #include "measure-lux.h"
 #endif 
-// separate files with functions END
+
+#if (LORA_ENABLED == 1)
+  #include "lora-functions.h"
+#endif
+// ================================= separate files with functions END
 
 
 
@@ -466,8 +482,22 @@ void setup()
   // clear the message on HA:
   mqtt_publish_gw_last_updated_sensor_values("N/A");
 
-  // finally... ;-)
-  espnow_start();
+// ESPnow
+  #if (ESPNOW_ENABLED == 1)
+    // finally... ;-)
+    espnow_start();
+  #endif
+
+  // and LoRa
+  #if (LORA_ENABLED == 1)
+    if (start_lora())
+    {
+      Serial.printf("[%s]: LoRa started\n",__func__);
+    } else 
+    {
+      Serial.printf("[%s]: LoRa FAILED to start\n",__func__);
+    } 
+  #endif
 
   set_sensors_led_level(0);
   set_gateway_led_level(0);
@@ -510,8 +540,6 @@ void loop()
     }
     aux_mqtt_last_checked_interval = millis();
   }
-
-
 
     // button
   #ifdef PUSH_BUTTON_GPIO
@@ -596,7 +624,27 @@ void loop()
   if ((queue_count > 0) and (publish_sensors_to_ha))
   {
     mqtt_publish_sensors_values();
-    // influxdb_publish_sensors_values();
+    message_received = 0;
+  } 
+
+
+  // if HA publish is off and messages are piling, update HA on "last" sensor of gw
+  queue_count = uxQueueMessagesWaiting(queue);
+  if ( (queue_count > 0) and (millis() >= aux_queue_check_interval + (1 * 1000))  )
+  {
+    if (message_received)
+    {
+      if (queue_count > old_queue)
+      {
+        // update HA on queue piling 
+        char queue_status[20];
+        snprintf(queue_status, sizeof(queue_status), "queue: %d/%d",queue_count,MAX_QUEUE_COUNT);
+        Serial.printf("[%s]: QUEUE PILING: %d/%d\n",__func__,queue_count,MAX_QUEUE_COUNT);
+        mqtt_publish_gw_last_updated_sensor_values(queue_status);
+        old_queue = queue_count;
+        aux_queue_check_interval = millis();
+      }
+    }
   }
 
   // check queue again after publishing

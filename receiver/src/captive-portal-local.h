@@ -201,7 +201,12 @@ void StartWiFiSTA(String rec_ssid, String rec_password)
   esp_wifi_set_ps(WIFI_PS_NONE);
   esp_wifi_set_mode(WIFI_MODE_STA);
   esp_wifi_set_promiscuous(0);
-  esp_wifi_set_promiscuous_rx_cb(&promiscuous_rx_cb);
+
+  // ESPnow
+  #if (ESPNOW_ENABLED == 1)
+    esp_wifi_set_promiscuous_rx_cb(&promiscuous_rx_cb);
+  #endif
+  
   esp_wifi_set_promiscuous(1);
 
   cp_wifi_timeout = false;

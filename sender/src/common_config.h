@@ -13,7 +13,7 @@
   #endif
 #endif 
 
-#define ZH_PROG_VERSION "2.20.6"                     // version < 10 chars, description in changelog.txt
+#define ZH_PROG_VERSION "3.1.b3"                     // version < 10 chars, description in changelog.txt
 
 
 #pragma message "Compiling ZH_PROG_VERSION = " ZH_PROG_VERSION
@@ -53,7 +53,15 @@
     0x2A, 0xFF, 0x01, 0x01, 0x01, 0x30,               // gw2
     0x2A, 0xFF, 0x01, 0x01, 0x01, 0x27                // gw3
   };
+  #define NUMBER_OF_LORA_GATEWAYS     1               // number of receivers/gateways
+  uint8_t lora_receivers[NUMBER_OF_LORA_GATEWAYS][6] =  // put here the fake MAC addresses of LoRa receviers that are assigned in receiver sketch
+  {
+    0x2A, 0xFF, 0x01, 0x01, 0x01, 0x45                // gw1
+  };
+  
 #endif 
+
+
 // template for new fake MAC - last 2 bytes replaced later in change_mac() by DEVICE_ID as if it was in hex
 uint8_t FixedMACAddress[] =         {0x2a, 0x01, 0x01, 0x01, 0x00, 0x01};
 

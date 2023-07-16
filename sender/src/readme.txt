@@ -23,3 +23,13 @@ total:              = 19ms
 load: 19ms
 save: 14ms
 total: 33ms
+
+// LoRa power consumption:
+S2, no sensors, no confirmation:
+1- working time: 380ms, max: 215mA, avg: 140mA, charge: 53uC
+2- standby: 37uA
+
+// ESPnow power consumption:
+S2, no sensors, WITH confirmation:
+1- working time: 130ms, max: 360mA, avg: 57mA, charge: 7.2uC
+2- standby: 37uA

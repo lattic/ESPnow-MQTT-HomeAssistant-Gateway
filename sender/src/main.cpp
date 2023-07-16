@@ -16,7 +16,10 @@ sender.ino
 #include <Update.h>
 
 // other libraries and variables
-#include <esp_now.h>
+#if (ESPNOW_ENABLED == 1)
+  #include <esp_now.h>
+#endif
+
 #include <WiFi.h>
 #include <esp_wifi.h>
 #include <Wire.h>
@@ -32,9 +35,6 @@ sender.ino
 
 // timers
 #include "freertos/timers.h"
-
-// preferences
-// #include <Preferences.h>
 
 // filesystem
 #include "FS.h"
@@ -106,6 +106,11 @@ sender.ino
   #endif  
 #endif
 
+// LoRa
+#if (LORA_ENABLED == 1)
+  #include <SPI.h>
+  #include <LoRa.h>
+#endif
 // ========================================================================== libraries END
 
 // some consistency checks 
@@ -126,9 +131,11 @@ char mac_new_char[18];
 uint8_t mac_new[6];
 
 
-esp_now_peer_info_t peerInfo;
+#if (ESPNOW_ENABLED == 1)
+  esp_now_peer_info_t peerInfo;
+#endif 
 
-bool espnow_data_sent=false;      // for OnDataSent()
+bool espnow_data_sent=false;      // for ESPnow_OnDataSent()
 
 // Firmware update
 HTTPClient firmware_update_client;
@@ -210,6 +217,7 @@ typedef struct struct_message           // 92 bytes
   uint16_t working_time_ms;             // last working time in ms
   uint16_t sleep_time_s;                // 
   uint8_t valid = 1;                    // make it invalid in case some info is missing, incorrect or flagged, don't publish to HA if invalid
+  char macStr[18];                      // MAC address of sender in "%02x:%02x:%02x:%02x:%02x:%02x" format
 } struct_message;
 
 struct_message myData;
@@ -283,10 +291,10 @@ struct_message_recv data_recv;
 // receiving command from gateway END
 
 
-
+bool data_sent = false; // to confirm if sent by ESPnow or LoRa
 // ========================================================================== variables END
 
-// ========================================================================== FUNCTIONS declaration
+// ========================================================================== FUNCTIONS declarations
 
 bool load_config();
 void save_config(const char* reason);
@@ -295,14 +303,25 @@ u_int8_t charging_state();
 void change_mac();
 
 void hibernate(bool force, int final_sleeping_time_s);
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
-bool send_data();
-void OnDataReceived(const uint8_t * mac, const uint8_t *incomingData, int len); 
+
+/// ESPnow related functions
+#if (ESPNOW_ENABLED == 1)
+  void ESPnow_OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
+  bool ESPnow_send_data();
+  void ESPnow_OnDataReceived(const uint8_t * mac, const uint8_t *incomingData, int len); 
+  void disable_espnow();
+#endif
+
+// LoRa related functions
+#if (LORA_ENABLED == 1)
+  bool LoRa_send_data();
+  void LoRa_end();
+#endif 
 
 
 void do_esp_restart();
 void do_esp_go_to_sleep();
-void disable_espnow();
+
 void sos(int led);
 void erase_all_data();
 void do_update();
@@ -346,10 +365,11 @@ void set_new_sleep_time_s(int time_s);
   float get_ds18b20();
 #endif  
 
-// ========================================================================== FUNCTIONS declaration END
+// ========================================================================== FUNCTIONS declarations END
 
-// ========================================================================== FUNCTIONS implementation
+// ========================================================================== FUNCTIONS definitions
 
+// Captive Portal related
 void stop_cp_timer()
 {
     if( xTimerStop( cp_timer_handle, 0 ) != pdPASS )
@@ -397,9 +417,137 @@ void start_cp_timer(int16_t timeout)
   }
 }
 
+void setup_CP_Server()
+{
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest * request)
+  {
+    const char *index_html = cp_html_page.c_str();
+    request->send_P(200, "text/html", index_html);
+    Serial.printf("[%s]: Client Connected\n",__func__);
+  });
+  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request)
+  {
+    String inputMessage;
+    String inputParam;
+
+    if (request->hasParam("ssid"))
+    {
+      inputMessage = request->getParam("ssid")->value();
+      inputParam = "ssid";
+      ssid = inputMessage;
+      Serial.printf("[%s]: SSID received: %s\n",__func__,ssid);
+      if (strlen(ssid.c_str()) == 0)
+      {
+        ssid = old_ssid;
+        Serial.printf("[%s]: SSID is blank, reusing the old value: %s\n",__func__,ssid);
+      } else
+      {
+        ssid = inputMessage;
+      }
+      valid_ssid_received = true;
+    }
+
+    if (request->hasParam("password"))
+    {
+      inputMessage = request->getParam("password")->value();
+      inputParam = "password";
+      password = inputMessage;
+      Serial.printf("[%s]: password received: %s\n",__func__,password.c_str());
+      if (strlen(password.c_str()) == 0)
+      {
+        password = old_password;
+        Serial.printf("[%s]: password is blank, reusing the old value: %s\n",__func__,password.c_str()); 
+      } else
+      {
+        password = inputMessage;
+      }
+      valid_password_received = true;
+    }
 
 
-// ota web server
+    if (request->hasParam("sleeptime_s_str"))
+    {
+      inputMessage = request->getParam("sleeptime_s_str")->value();
+      inputParam = "sleeptime_s_str";
+      sleeptime_s_str = inputMessage;
+      Serial.printf("[%s]: sleeptime_s_str received: %s\n",__func__,sleeptime_s_str);
+      uint16_t old_sleeptime_s = sleeptime_s_str.toInt();
+      if ((strlen(sleeptime_s_str.c_str()) == 0) or (old_sleeptime_s <= 0))
+      {
+        sleeptime_s_str = String(SLEEP_TIME_S);
+        Serial.printf("[%s]: sleeptime_s_str is INCORRECT (%ss), reusing the default value: %ss\n",__func__,inputMessage,sleeptime_s_str);
+      } else
+      {
+        sleeptime_s_str = inputMessage;
+      }
+      valid_sleeptime_s_str_received = true;
+    }
+
+    request->send(200, "text/html", "The values entered by you have been successfully sent to the device. It will now attempt WiFi connection");
+  });
+}
+
+void WiFiSoftAPSetup()
+{
+  char cp_ssid[32];
+  snprintf(cp_ssid,sizeof(cp_ssid),"%s",HOSTNAME);
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(cp_ssid);
+  Serial.printf("[%s]: AP IP address: %s\n",__func__,WiFi.softAPIP().toString().c_str());
+
+  Serial.printf("[%s]: SSID: %s\n",__func__,cp_ssid);
+  Serial.printf("[%s]: NO PASSWORD\n",__func__);
+}
+
+void StartCaptivePortal() 
+{
+  // blink LEDs in task, if not yet blinking
+  #if defined(ERROR_RED_LED_GPIO) 
+    if (led_blink_handle == NULL)
+    {
+      xReturned_led_blink = xTaskCreate(led_blink, "led_blink", 2000, NULL, 1, &led_blink_handle);
+      if( xReturned_led_blink != pdPASS )
+      {
+        Serial.printf("[%s]: CANNOT create led_blink task\n",__func__);
+      } else
+      {
+        #ifdef DEBUG
+          Serial.printf("[%s]: Task led_blink created\n",__func__);
+        #endif
+      }
+    } else
+    // blink LEDs already blinking
+    {
+      Serial.printf("[%s]: Task led_blink ALREADY created\n",__func__);
+    }
+  #endif
+  
+  // create CP timer if not yet created
+  start_cp_timer(CP_TIMEOUT_S);
+
+  Serial.printf("[%s]: Setting up AP Mode\n",__func__);
+
+  WiFiSoftAPSetup();
+
+  Serial.printf("[%s]: Setting up Async WebServer\n",__func__);
+  setup_CP_Server();
+  Serial.printf("[%s]: Starting DNS Server\n",__func__);
+  dnsServer.start(53, "*", WiFi.softAPIP());
+  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);             //only when requested from AP
+  server.begin();
+  dnsServer.processNextRequest();
+  Serial.printf("[%s]: Captive Portal and AP created, timeout set to %ds\n",__func__,CP_TIMEOUT_S);
+}
+
+void cp_timer( TimerHandle_t cp_timer_handle )
+{
+  Serial.printf("[%s]: Timer expired, RESTARTING...\n",__func__);
+  // do_esp_restart();      // panicking in save_config()
+  ESP.restart();
+}
+// Captive Portal related END
+
+// OTA web server
 void start_web_server()
 {
   #define OTA_USER "admin"
@@ -422,18 +570,371 @@ void tp_callback()
   // it is executed only when touch is detected AND esp32 is awake - not when it slept
 }
 
-void OnDataReceived(const uint8_t * mac, const uint8_t *incomingData, int len) 
-{
-  memcpy(&data_recv, incomingData, sizeof(data_recv));
-  command_received = true;
-}
+// ESPnow related functions
+#if (ESPNOW_ENABLED == 1)
+// callback on receive
+  void ESPnow_OnDataReceived(const uint8_t * mac, const uint8_t *incomingData, int len) 
+  {
+    memcpy(&data_recv, incomingData, sizeof(data_recv));
+    command_received = true;
+  }
+
+// callback on sent
+  void ESPnow_OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
+    {
+      if (status == ESP_NOW_SEND_SUCCESS)
+      {
+        espnow_data_sent = true;
+        #ifdef DEBUG
+          Serial.printf("[%s]: espnow_data_sent=%d OK\n",__func__,ESP_NOW_SEND_SUCCESS);
+        #endif
+      } else 
+      {
+        espnow_data_sent = false;
+        #ifdef DEBUG
+          Serial.printf("[%s]: espnow_data_sent=%d FAILED\n",__func__,ESP_NOW_SEND_SUCCESS);
+        #endif
+      }
+    }
+// turn off espnow
+  void disable_espnow()
+  {
+    // function_start = micros();
+    esp_now_unregister_send_cb();
+    esp_now_deinit();
+    // Serial.printf("[%s]: took %uus\n",__func__,(micros()-function_start));
+  }
+
+// send data to gateway over ESPnow
+  bool ESPnow_send_data()     
+  {
+    char receiver_mac[18];
+    int channel, last_gw;
+    unsigned long loop_timer;
+
+    unsigned long s1=millis();  // micros
+
+    #if (USE_FAKE_RECEIVER == 1)
+      #pragma message ("\n\n[MESSAGE] NOT sending data to any receiver - FAKE MAC ADDRESS USED")
+      return false;
+    #endif
+
+    //   #if (MAC_BROADCAST == 1)
+    //     #pragma message ("\n\n[MESSAGE] sending data to all ESP - BROADCAST")
+    //     memcpy(broadcastAddress, broadcastAddress_all, sizeof(broadcastAddress));
+    //   #endif
+
+    channel = g_wifi_channel;
+    last_gw = g_last_gw;
+    if ((channel < 1) or (channel > 13)) channel = 1;                       
+    if ((last_gw < 0) or (last_gw > (NUMBER_OF_GATEWAYS-1))) last_gw = 0;
+    #ifdef DEBUG_LIGHT
+      Serial.printf("[%s]: Configuration data from file: channel=%d, last gateway=%d\n",__func__,channel,last_gw);
+    #endif
+    // read config END
+
+    WiFi.mode(WIFI_MODE_STA);
+
+  // ======================================================== LETS TRY SAVED CONFIG ========================================================
+    // lets try saved data first to shorten the time: saved receiver, saved channel
+    #ifdef DEBUG_LIGHT
+      Serial.printf("\n[%s]: Lets try saved config first...\n\n",__func__);
+    #endif
+    memcpy(broadcastAddress, receivers[last_gw], sizeof(receivers[last_gw]));
+    snprintf(receiver_mac, sizeof(receiver_mac), "%02x:%02x:%02x:%02x:%02x:%02x",broadcastAddress[0], broadcastAddress[1], broadcastAddress[2], broadcastAddress[3], broadcastAddress[4], broadcastAddress[5]);
+
+    // init espnow
+    esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+    if (esp_now_init() != ESP_OK)
+    {
+      Serial.printf("[%s]: esp_now_init FAILED\n",__func__);
+      set_error_red_led_level(1);
+      delay(50);
+      // FATAL ERROR - EXIT
+      return false;
+    } else
+    {
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: esp_now_init SUCCESSFUL\n",__func__);
+      #endif
+    }
+
+    memcpy(peerInfo.peer_addr, broadcastAddress, sizeof(broadcastAddress));
+    peerInfo.ifidx   = WIFI_IF_STA;
+    peerInfo.encrypt = false;
+
+    // register cb
+    if (esp_now_register_send_cb(ESPnow_OnDataSent) != ESP_OK)
+    {
+      Serial.printf("[%s]: esp_now_register_send_cb FAILED\n",__func__);
+    } else
+    {
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: esp_now_register_send_cb SUCCESSFUL\n",__func__);
+      #endif
+    }
+
+    if (esp_now_register_recv_cb(ESPnow_OnDataReceived) != ESP_OK)
+    {
+      Serial.printf("[%s]: esp_now_register_recv_cb FAILED\n",__func__);
+    } else
+    {
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: esp_now_register_recv_cb SUCCESSFUL\n",__func__);
+      #endif
+    }  
+
+
+    // add peer
+    if (esp_now_add_peer(&peerInfo) != ESP_OK)
+    {
+      Serial.printf("[%s]: esp_now_add_peer FAILED\n",__func__);
+    } else
+    {
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: esp_now_add_peer SUCCESSFUL\n",__func__);
+      #endif
+    }
+    #ifdef DEBUG_LIGHT
+      Serial.printf("[%s]: [SAVED CHANNEL, SAVED RECEIVER] trying channel=%d, receiver=%d \n",__func__,channel,last_gw);
+    #endif
+    esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+    esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
+    #ifdef DEBUG_LIGHT
+      Serial.printf("[%s]: [SAVED CHANNEL, SAVED RECEIVER] sending took=%dms\n",__func__,millis()-s1);
+    #endif
+    loop_timer=millis(); while(millis() < loop_timer + 10) {}  // unblocking loop for 10ms
+    if(espnow_data_sent)
+    {
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]:\n [SAVED CHANNEL, SAVED RECEIVER] esp_now_send SUCCESSFUL on channel=%d, receiver=%d, MAC=%s; it took=%dms\n",__func__,channel,last_gw,receiver_mac,millis()-s1);
+      #endif
+      return true;
+    }
+      Serial.printf("[%s]: [SAVED CHANNEL, SAVED RECEIVER] esp_now_send FAILED on channel=%d, receiver=%d, MAC=%s; it took=%dms\n",__func__,channel,last_gw,receiver_mac,millis()-s1);
+    // lets try saved data first to shorten the time: saved receiver, saved channel END
+  // ======================================================== LETS TRY SAVED CONFIG END ========================================================
+
+
+  // ======================================================== LOOP THROUGH ALL RECEIVERS =======================================================
+    // if we are here, it means it failed - so now lets try everything else
+    #ifdef DEBUG_LIGHT
+      Serial.printf("\n[%s]: Loop through all receivers...\n",__func__);
+    #endif
+    for (int receiver = 0; receiver<NUMBER_OF_GATEWAYS; receiver++)   // lets go through all gateways
+    {
+      memcpy(broadcastAddress, receivers[receiver], sizeof(receivers[receiver]));
+      snprintf(receiver_mac, sizeof(receiver_mac), "%02x:%02x:%02x:%02x:%02x:%02x",broadcastAddress[0], broadcastAddress[1], broadcastAddress[2], broadcastAddress[3], broadcastAddress[4], broadcastAddress[5]);
+      #ifdef DEBUG_LIGHT
+        Serial.printf("\n[%s]: gateway=%d, MAC=%s...\n\n",__func__,receiver,receiver_mac);
+      #endif
+
+      // init espnow
+      esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+      if (esp_now_init() != ESP_OK) 
+      {
+        Serial.printf("[%s]: esp_now_init FAILED\n",__func__);
+        set_error_red_led_level(1);
+        delay(50);
+        // FATAL ERROR - EXIT
+        return false;
+      } else 
+      {
+        #ifdef DEBUG_LIGHT
+          Serial.printf("[%s]: esp_now_init SUCCESSFUL\n",__func__);
+        #endif
+      }
+
+      memcpy(peerInfo.peer_addr, broadcastAddress, sizeof(broadcastAddress));
+      peerInfo.ifidx   = WIFI_IF_STA;
+      peerInfo.encrypt = false;
+
+      // register cb
+      if (esp_now_register_send_cb(ESPnow_OnDataSent) != ESP_OK)
+      {
+        Serial.printf("[%s]: esp_now_register_send_cb FAILED\n",__func__);
+      } else
+      {
+        #ifdef DEBUG_LIGHT
+          Serial.printf("[%s]: esp_now_register_send_cb SUCCESSFUL\n",__func__);
+        #endif
+      }
+
+      if (esp_now_register_recv_cb(ESPnow_OnDataReceived) != ESP_OK)
+      {
+        Serial.printf("[%s]: esp_now_register_recv_cb FAILED\n",__func__);
+      } else
+      {
+        #ifdef DEBUG_LIGHT
+          Serial.printf("[%s]: esp_now_register_recv_cb SUCCESSFUL\n",__func__);
+        #endif
+      }  
+
+      // add peer
+      if (esp_now_add_peer(&peerInfo) != ESP_OK)
+      {
+        Serial.printf("[%s]: esp_now_add_peer FAILED\n",__func__);
+      } else
+      {
+        #ifdef DEBUG_LIGHT
+          Serial.printf("[%s]: esp_now_add_peer SUCCESSFUL\n",__func__);
+        #endif
+      }
+
+  // ======================================================== FIRST TRY STORED CHANNEL =======================================================
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: [SAVED CHANNEL] trying channel = %d \n",__func__,channel);
+      #endif
+      unsigned long s2 = millis();
+      esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+      esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: [SAVED CHANNEL] sending took=%dms\n",__func__,millis()-s1);
+      #endif
+      unsigned long loop_timer=millis(); while(millis() < loop_timer + 10) {}  // unblocking loop for 10ms
+      if(espnow_data_sent) 
+      {
+        // #ifdef DEBUG_LIGHT
+          Serial.printf("[%s]:\n [SAVED CHANNEL] esp_now_send SUCCESSFUL on receiver=%d, channel=%d, MAC=%s; it took=%dms\n",__func__,receiver,channel,receiver_mac,millis()-s1);
+        // #endif
+
+        // save successful data
+        g_wifi_channel = channel;
+        g_last_gw = receiver;
+        #ifdef DEBUG_LIGHT
+          Serial.printf("[%s]: [ALL CHANNELS] Configuration data stored: receiver=%d, channel=%d\n",__func__,receiver,channel);
+        #endif
+        loop_timer=millis(); while(millis() < loop_timer + 1) {}  // unblocking loop for 1ms
+        // save successful data END
+        return true;
+      }
+      Serial.printf("[%s]: [SAVED CHANNEL] esp_now_send FAILED on receiver=%d, channel=%d, it took=%dms\n",__func__,receiver,channel,millis()-s2);
+      // fist attempt: on saved channel END
+  // ======================================================== FIRST TRY STORED CHANNEL END =======================================================
+
+  // ======================================================== LOOP THROUGH ALL CHANNELS ==========================================================
+      // second attempt: all channels
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: [ALL CHANNELS] trying all channels now \n",__func__);
+      #endif
+      for (int i = 1; i <= 13; i++)
+      {
+        unsigned long s2 = millis();
+        esp_wifi_set_channel(i, WIFI_SECOND_CHAN_NONE);
+        esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
+        #ifdef DEBUG_LIGHT
+          Serial.printf("[%s]: [ALL CHANNELS] sending took=%dms\n",__func__,millis()-s1);
+        #endif
+        unsigned long loop_timer=millis(); while(millis() < loop_timer + 30) {}  // unblocking loop 
+        if(espnow_data_sent) 
+        {
+          // #ifdef DEBUG_LIGHT
+            Serial.printf("[%s]:\n [ALL CHANNELS] esp_now_send SUCCESSFUL on receiver=%d, channel=%d, MAC=%s; it took=%dms\n",__func__,receiver,i,receiver_mac,millis()-s1);
+          // #endif
+          // save successful data
+          g_wifi_channel = i;
+          g_last_gw = receiver;
+          #ifdef DEBUG_LIGHT
+            Serial.printf("[%s]: [ALL CHANNELS] Configuration data stored: receiver=%d, channel=%d\n",__func__,receiver,i);
+          #endif
+          loop_timer=millis(); while(millis() < loop_timer + 1) {}  // unblocking loop for 1ms
+          // save successful data END
+          return true;
+        }
+          Serial.printf("[%s]: [ALL CHANNELS] FAILED on receiver=%D, channel=%d, it took=%dms\n",__func__,receiver,i,millis()-s2);
+      }
+    }
+  // ======================================================== LOOP THROUGH ALL CHANNELS END ======================================================
+
+  // NOTHING WORKED...
+    Serial.printf("[%s]: esp_now_send TOTALLY FAILED, it took=%dms\n",__func__,millis()-s1);
+    set_error_red_led_level(1);
+    delay(50);
+    return false;
+  // ======================================================== LOOP THROUGH ALL RECEIVERS END =======================================================
+  }
+#endif
+// ESPnow related functions END
+
+// LoRa related functions
+#if (LORA_ENABLED == 1)
+  bool LoRa_send_data()
+    {
+    
+      /*
+      #define LORA_ENABLED                1 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
+      #define LORA_GPIO_ENABLE_3V         19   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
+      #define LORA_GPIO_MISO              20  // - BLUE
+      #define LORA_GPIO_MOSI              17  // - GREEN
+      #define LORA_GPIO_CLOCK             18  // - BROWN
+      #define LORA_GPIO_SS                14  // - YELLOW, SS/NSS/CS:
+      #define LORA_GPIO_RST               15  // - ORANGE
+      #define LORA_GPIO_DIO0              16  // - VIOLET  
+      */
+      unsigned long s2=millis();  // micros
+      set_error_red_led_level(1);
+
+      SPI.begin(LORA_GPIO_CLOCK, LORA_GPIO_MISO, LORA_GPIO_MOSI);
+      LoRa.setPins(LORA_GPIO_SS, LORA_GPIO_RST, LORA_GPIO_DIO0);
+
+      if (!LoRa.begin(866E6)) 
+      {
+        Serial.printf("[%s]: Starting LoRa FAILED!\n",__func__);
+        set_error_red_led_level(0);
+        Serial.printf("[%s]: took=%dms\n",__func__,millis()-s2);
+        return 0;
+      } else 
+      {
+        Serial.printf("[%s]: LoRa STARTED\n",__func__);
+      }
+
+      // check if working SF=6 - not working, requires implicit header and packet size known, default is 7
+      // LoRa.setSpreadingFactor(12); // 5 seconds!
+
+      while (LoRa.beginPacket() == 0)     // this stays here - change to timeout
+      {
+        Serial.printf("[%s]: waiting for LoRa radio to wake up...\n",__func__);
+      }
+
+      LoRa.setTxPower(20);
+      LoRa.enableCrc();
+
+
+      u_int8_t which_gw = 0;      // currently only 1 LoRa receiver - gw1
+      memcpy(broadcastAddress, lora_receivers[which_gw], sizeof(lora_receivers[which_gw]));
+
+      size_t broadcastAddress_size = sizeof(broadcastAddress);
+      size_t myData_size = sizeof(myData);
+      size_t total_size = broadcastAddress_size + myData_size;
+
+      Serial.printf("[%s]: Sending data to gw=%d, boot=%d, broadcastAddress_size=%d, packet size=%d, total bytes sent=%d\n",__func__,which_gw,myData.boot,broadcastAddress_size,myData_size,total_size);
+
+      unsigned long s3=millis();  // micros
+      LoRa.beginPacket();
+      LoRa.write((uint8_t*)&broadcastAddress, broadcastAddress_size);     // send gw address for gw to recognize if message is for it
+      LoRa.write((uint8_t*)&myData, myData_size);                         // send myData
+      LoRa.endPacket(false); // true = async / non-blocking mode
+      unsigned long end1=millis();  // micros
+
+      set_error_red_led_level(0);
+      Serial.printf("[%s]: took=%dms, sending over LoRa took=%dms\n",__func__,end1-s2,end1-s3);
+      return 1;
+  }
+
+  void LoRa_end()
+  {
+      LoRa.end();
+  }
+#endif
+// LoRa related functions END
 
 // check charging
+#if defined(CHARGING_GPIO) and defined(POWER_GPIO)
 u_int8_t charging_state()
 {
   uint8_t charging_int_local = 0;
   // function_start = micros();
-  #if defined(CHARGING_GPIO) and defined(POWER_GPIO)
+  // #if defined(CHARGING_GPIO) and defined(POWER_GPIO)
   /*
     - both GPIO must be PULLUP as LOW is active from TP4056
     - LEDs on TP4056 are NOT needed if PULL_UP both GPIO
@@ -466,27 +967,16 @@ u_int8_t charging_state()
     #endif
   
   // Serial.printf("[%s]: took %uus\n",__func__,(micros()-function_start));
-  #endif
+  // #endif
   return charging_int_local;
 }
-
-
-// update firmware
-// turn off espnow
-void disable_espnow()
-{
-  // function_start = micros();
-  esp_now_unregister_send_cb();
-  esp_now_deinit();
-  // Serial.printf("[%s]: took %uus\n",__func__,(micros()-function_start));
-}
-
+#endif
 
 // blink nicely - SOS on upgrade failure
 void sos(int led)
 {
   // function_start = micros();
-  #define DIT_MS 50;
+  #define DIT_MS 10;
   int dit = DIT_MS;
   int dah = 3 * dit;
   int inter_dit = dit;
@@ -526,14 +1016,25 @@ void sos(int led)
   // Serial.printf("[%s]: took %uus\n",__func__,(micros()-function_start));
 }
 
-
-// FW upgrade wrapper
+// FW upgrade related
+  // FW upgrade wrapper
 void do_update()
 {
   // function_start = micros();
   Serial.printf("[%s]: FW UPGRADE starting...\n",__func__);
   // turn OFF BLUE LED
   set_act_blue_led_level(0);
+  #if (LORA_ENABLED == 1) 
+    Serial.printf("[%s]: unregistering LoRa for FW update\n",__func__);
+    LoRa_end();
+  #endif
+
+  #if (ESPNOW_ENABLED == 1) 
+    Serial.printf("[%s]: unregistering ESPnow for FW update\n",__func__);
+    disable_espnow();
+  #endif
+  
+
   int update_firmware_status = -1;
   update_firmware_status=update_firmware_prepare();
   if (update_firmware_status == 0)
@@ -544,14 +1045,14 @@ void do_update()
     {
       #ifdef ERROR_RED_LED_GPIO
         set_error_red_led_level(0);
-        delay(500);
+        delay(50);
         set_error_red_led_level(1);
-        delay(100);
+        delay(17);
       #elif defined(ACT_BLUE_LED_GPIO)
         set_act_blue_led_level(0);
-        delay(100);
+        delay(50);
         set_act_blue_led_level(1);
-        delay(30);
+        delay(17);
         set_act_blue_led_level(0);
       #endif
     }
@@ -569,8 +1070,7 @@ void do_update()
   do_esp_restart();
 }
 
-
-// real upgrade
+  // real upgrade
 void updateFirmware(uint8_t *data, size_t len)
 {
   // blink ERROR_RED_LED_GPIO or...
@@ -610,8 +1110,7 @@ void updateFirmware(uint8_t *data, size_t len)
   Serial.printf("\n[%s]: Update Success, Total Size: %d bytes\n",__func__,fw_currentLength);
 }
 
-
-// download from webserver
+  // download from webserver
 int update_firmware_prepare()
 {
   char firmware_file[255];
@@ -670,10 +1169,9 @@ int update_firmware_prepare()
   Serial.printf("[%s]: firmware update prepare SUCESSFULL\n",__func__);
   return 0;
 }
-// update firmware END
+// FW upgrade related END
 
-
-// hibernate - force to indicate no GPIO wake up - used for low battery
+// hibernate wrapper - force to indicate no GPIO wake up - used for low battery
 void hibernate(bool force, int final_sleeping_time_s) 
 {
   esp_wifi_stop();                                                        // wifi - big impact on current: from 115mA to 42mA
@@ -697,50 +1195,31 @@ void hibernate(bool force, int final_sleeping_time_s)
     do_esp_go_to_sleep();
   }
 
-  #ifdef DEBUG
-    #ifdef MOTION_SENSOR_GPIO
-      Serial.printf("[%s]: MOTION_SENSOR_GPIO=%d\n",__func__,MOTION_SENSOR_GPIO);
+  uint64_t bitmask_dec = 0;
+
+  // first add FW_UPGRADE_GPIO
+  #ifdef FW_UPGRADE_GPIO //if FW_UPGRADE_GPIO  defined, wake up on it 
+      bitmask_dec = pow(2,FW_UPGRADE_GPIO);
+  #endif
+
+  #ifdef DEBUG_LIGHT
+    #if (MOTION_ENABLED == 1)
+      Serial.printf("[%s]: MOTION_ENABLED=%d on %d GPIO(s): ",__func__,MOTION_ENABLED,NUMBER_OF_MOTION_SENSORS);
+      for (u_int8_t i = 0; i < NUMBER_OF_MOTION_SENSORS; i++)
+      {
+        {
+          Serial.printf(" %d",motion_sensors_gpio[i]);
+        }
+      }
+      Serial.println();
     #endif
     #ifdef FW_UPGRADE_GPIO
       Serial.printf("[%s]: FW_UPGRADE_GPIO=%d\n",__func__,FW_UPGRADE_GPIO);
     #endif
-  #endif
-  uint64_t bitmask_dec = 0;
+  #endif  
 
-  #if (PUSH_BUTTONS == 1)
-    for (uint8_t i = 0; i < NUMBER_OF_BUTTONS; i++)
-    {
-      bitmask_dec = bitmask_dec + pow(2, button_gpio[i]);
-    }
-    #ifdef DEBUG
-      Serial.printf("[%s]: without FW_UPGRADE_GPIO: bitmask_dec=%ju\n",__func__,bitmask_dec);
-    #endif
-    #ifdef FW_UPGRADE_GPIO
-      bitmask_dec = bitmask_dec + pow(2, FW_UPGRADE_GPIO);
-    #endif
-    #ifdef DEBUG
-      Serial.printf("[%s]: with FW_UPGRADE_GPIO: bitmask_dec=%ju\n",__func__,bitmask_dec);
-    #endif
-
-    // ESP32-C3
-    #if (BOARD_TYPE == 4)
-      {
-        esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
-      }
-    #else
-      {
-        esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
-      }
-    #endif
-
-    esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
-    
-
-    Serial.printf("[%s]: Going to sleep for %d seconds\n",__func__,final_sleeping_time_s);
-    do_esp_go_to_sleep();
-  #endif
-
-  #if (TOUCHPAD_ONLY == 1)
+  // now add TOUCHPAD_ONLY  GPIOs (it does not have MOTION_ENABLED) and go to sleep - it ENDs here
+  #if (TOUCHPAD_ONLY == 1)          // todo probably not added FW_UPGRADE_GPIO here - test it later      
     uint16_t touch_value;
     uint16_t thr;
     uint32_t pad_intr;
@@ -815,119 +1294,128 @@ void hibernate(bool force, int final_sleeping_time_s)
     if (NUMBER_OF_BUTTONS > 0)  esp_sleep_enable_touchpad_wakeup();
     esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
 
-    Serial.printf("[%s]: Going to sleep for %d seconds\n",__func__,final_sleeping_time_s);
+    Serial.printf("[%s]: Going to sleep for %d seconds on TOUCHPAD_ONLY\n",__func__,final_sleeping_time_s);
+    do_esp_go_to_sleep();
+  #endif
+
+  // or add PUSH_BUTTONS  GPIOs (it does not have MOTION_ENABLED) and go to sleep - it ENDs here
+  #if (PUSH_BUTTONS == 1)
+    for (uint8_t i = 0; i < NUMBER_OF_BUTTONS; i++)
+    {
+      bitmask_dec += pow(2, button_gpio[i]);
+    }
+    #ifdef DEBUG
+      Serial.printf("[%s]: with FW_UPGRADE_GPIO: bitmask_dec=%ju\n",__func__,bitmask_dec);
+    #endif
+
+    // add PUSH_BUTTONS GPIOs to wakup 
+    // ESP32-C3
+    #if (BOARD_TYPE == 4)
+      {
+        esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
+      }
+    #else
+      {
+        esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
+      }
+    #endif
+
+    esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
+    
+    Serial.printf("[%s]: Going to sleep for %d seconds on PUSH_BUTTONS\n",__func__,final_sleeping_time_s);
     do_esp_go_to_sleep();
   #endif
 
   // https://randomnerdtutorials.com/esp32-deep-sleep-arduino-ide-wake-up-sources/ for ext0 and ext1 examples
-  #ifdef MOTION_SENSOR_GPIO
-    if (motion)
-    // when motion detected we don't allow second wakup on motion - first cooling time only or FW update
+
+  // if motion is enabled... (here we don't have TOUCHPAD_ONLY or PUSH_BUTTONS - they sleep already)
+  #if (MOTION_ENABLED == 1)   // if motion detected we don't allow second wakup on motion - first cooling time only 
+    if (motion)               
     {
-      //send ESP to deep unconditional sleep for predefined time -  wake up on timer (cooling period)
       final_sleeping_time_s = COOLING_SLEEP_DURATION_S;
       esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
-      //... or on GPIO ext1 (FW update)
-      #ifdef FW_UPGRADE_GPIO //if FW_UPGRADE_GPIO  defined, wake up on it
-        bitmask_dec = pow(2,FW_UPGRADE_GPIO);
-        // bitmask_dec =  (1ULL << FW_UPGRADE_GPIO);// | (1ULL << MOTION_SENSOR_GPIO);
+      //... and add GPIO ext1 (FW update) if defined
+      #ifdef FW_UPGRADE_GPIO  //if FW_UPGRADE_GPIO  defined, wake up on it
         #ifdef DEBUG
-          Serial.printf("[%s]: bitmask_dec (FW_UPGRADE_GPIO) in dec=%ju\n",__func__,bitmask_dec);
-        #endif
-        // ESP32-C3
-        #if (BOARD_TYPE == 4)
-          {
-            esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
-          }
-        #else
-          {
-            esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
-          }
+          Serial.printf("[%s]: bitmask_dec (FW_UPGRADE_GPIO only) in dec=%ju\n",__func__,bitmask_dec);
         #endif
 
       #endif
       #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: Sleeping due to cooling after motion\n",__func__);
       #endif
-    } else
+    } else                    // if motion NOT detected add PIR GPIOs to already defined FW_UPGRADE_GPIO
     {
-      //send ESP to deep unconditional sleep for predefined time -  wake up on timer...(heartbeat)
-      
-      // esp_sleep_enable_timer_wakeup(SLEEP_TIME_S * uS_TO_S_FACTOR);
       esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
-
-      //... or on GPIO ext1 (PIR motion detected) or FW_UPGRADE_GPIO
-      #ifdef FW_UPGRADE_GPIO //if FW_UPGRADE_GPIO  defined, wake up on it or on PIR - actually FW_UPGRADE_GPIO is obligatory
-
-
-        if (g_motion == 1)
-          bitmask_dec = pow(2,FW_UPGRADE_GPIO) + pow(2,MOTION_SENSOR_GPIO);
-        else 
-          // don't wake up on MOTION_SENSOR_GPIO
-          bitmask_dec = pow(2,FW_UPGRADE_GPIO);
-
-        // bitmask_dec =  (1ULL << FW_UPGRADE_GPIO) | (1ULL << MOTION_SENSOR_GPIO);
-        #ifdef DEBUG
-          Serial.printf("[%s]: bitmask_dec (FW_UPGRADE_GPIO + MOTION_SENSOR_GPIO) in dec=%ju\n",__func__,bitmask_dec);
-        #endif
-      #else //if FW_UPGRADE_GPIO not defined, wake up only on PIR - btw this is not allowed anyway as FW_UPGRADE_GPIO is mandatory
-        bitmask_dec = pow(2,MOTION_SENSOR_GPIO);
-        // bitmask_dec =   (1ULL << MOTION_SENSOR_GPIO);
-        #ifdef DEBUG
-          Serial.printf("[%s]: bitmask_dec=2^GPIO in dec=%d\n",__func__,bitmask_dec);
-        #endif
-      #endif
-      // ESP32-C3
-      #if (BOARD_TYPE == 4)
+      if (g_motion == 1)
+      {
+        for (u_int8_t i = 0; i < NUMBER_OF_MOTION_SENSORS; i++)
         {
-          esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
+          {
+            bitmask_dec +=  pow(2,motion_sensors_gpio[i]);
+          }
         }
-      #else
-        {
-          esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
-        }
+      }
+      #ifdef DEBUG
+        Serial.printf("[%s]: bitmask_dec (FW_UPGRADE_GPIO + motion_sensors_gpio[i]) in dec=%ju\n",__func__,bitmask_dec);
       #endif
+
       #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: Sleeping due to heartbeat\n",__func__);
       #endif
     }
-  #else
-    //send ESP to deep unconditional sleep for predefined time -  wake up on timer...(heartbeat)
+  // if motion is NOT enabled...
+  #else                       // wake up on heartbeat
     esp_sleep_enable_timer_wakeup(final_sleeping_time_s * uS_TO_S_FACTOR);
-    //... or on GPIO ext1 FW_UPGRADE_GPIO
-    #ifdef FW_UPGRADE_GPIO //if FW_UPGRADE_GPIO  defined, wake up on it or on PIR - actually FW_UPGRADE_GPIO is obligatory
-      bitmask_dec = pow(2,FW_UPGRADE_GPIO);
-      // bitmask_dec =  (1ULL << FW_UPGRADE_GPIO);// | (1ULL << MOTION_SENSOR_GPIO);
-      #ifdef DEBUG
-        Serial.printf("[%s]: bitmask_dec (FW_UPGRADE_GPIO) in dec=%ju\n",__func__,bitmask_dec);
-      #endif
-      // ESP32-C3
-      #if (BOARD_TYPE == 4)
-        {
-          esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
-        }
-      #else
-        {
-          esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
-        }
-      #endif
-    #endif
     #ifdef DEBUG_LIGHT
       Serial.printf("[%s]: Sleeping due to heartbeat\n",__func__);
     #endif
   #endif
+  
+  // finally, go to sleep - wake up on bitmask_dec (FW_UPGRADE_GPIO and MOTION)
+  // ESP32-C3
+  #if (BOARD_TYPE == 4)
+    {
+      esp_deep_sleep_enable_gpio_wakeup(bitmask_dec, ESP_GPIO_WAKEUP_GPIO_HIGH);
+    }
+  #else
+    {
+      esp_sleep_enable_ext1_wakeup(bitmask_dec, ESP_EXT1_WAKEUP_ANY_HIGH);
+    }
+  #endif  
+  
   // testing with PPK2 - go to sleep
   #ifdef PPK2_GPIO
     digitalWrite(PPK2_GPIO,HIGH);
   #endif
 
-  // the next 2 lines are NOT working - CP cannot start! ????
+  // the next line is NOT working - CP cannot start! ????
   // esp_sleep_config_gpio_isolate();
 
   Serial.printf("[%s]: Going to sleep for %d seconds\n",__func__,final_sleeping_time_s);
   do_esp_go_to_sleep();
 }
 
+// actual deep sleep
+void do_esp_go_to_sleep()
+{
+  save_config("Config saved before going to sleep");
+  
+  #if (PUSH_BUTTONS == 1)
+    if (button_pressed)
+    {
+      Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_PUSHBUTTON);
+      delay(DEBOUNCE_MS_PUSHBUTTON);
+    }
+  #endif
+
+  #ifdef DEBUG_LIGHT
+    Serial.printf("[%s]: millis=%lums, Bye...\n========= E N D =========\n",__func__,millis());
+  #else 
+    Serial.printf("[%s]: Bye...\n========= E N D =========\n",__func__);
+  #endif
+  esp_deep_sleep_start();
+}
 
 // restart ESP
 void do_esp_restart()
@@ -936,25 +1424,6 @@ void do_esp_restart()
   Serial.printf("[%s]: Bye...\n========= R E S T A R T I N G =========\n",__func__);
   ESP.restart();
 }
-
-// on sent callback
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
-{
-  if (status == ESP_NOW_SEND_SUCCESS)
-  {
-    espnow_data_sent = true;
-    #ifdef DEBUG
-      Serial.printf("[%s]: espnow_data_sent=%d OK\n",__func__,ESP_NOW_SEND_SUCCESS);
-    #endif
-  } else 
-  {
-    espnow_data_sent = false;
-    #ifdef DEBUG
-      Serial.printf("[%s]: espnow_data_sent=%d FAILED\n",__func__,ESP_NOW_SEND_SUCCESS);
-    #endif
-  }
-}
-
 
 // gather data from sensors, returns false if (bat_volts < MINIMUM_VOLTS) so ESPnow will not start - goes to sleep instead of sending
 void gather_data()
@@ -1005,13 +1474,19 @@ void gather_data()
   #endif
 
   // motion enabled/disable
-  #ifdef MOTION_SENSOR_GPIO
+  #if (MOTION_ENABLED == 1)
     myData.motion_enabled = g_motion;
   #else
     myData.motion_enabled = 0;
   #endif
   #ifdef DEBUG
     Serial.printf("[%s]: myData.motion_enabled=%d\n",__func__,myData.motion_enabled);
+  #endif
+
+  // MAC:
+  snprintf(myData.macStr, sizeof(myData.macStr), "%s",mac_new_char);
+  #ifdef DEBUG
+    Serial.printf("[%s]: myData.macStr=%s\n",__func__,myData.macStr);
   #endif
 
   // hostname
@@ -1247,345 +1722,7 @@ void gather_data()
   #endif
 }
 
-
-// send data to gateway over ESPnow
-bool send_data()     
-{
-  char receiver_mac[18];
-  int channel, last_gw;
-  unsigned long loop_timer;
-
-  unsigned long s1=millis();  // micros
-
-  #if (USE_FAKE_RECEIVER == 1)
-    #pragma message ("\n\n[MESSAGE] NOT sending data to any receiver - FAKE MAC ADDRESS USED")
-    return false;
-  #endif
-
-  //   #if (MAC_BROADCAST == 1)
-  //     #pragma message ("\n\n[MESSAGE] sending data to all ESP - BROADCAST")
-  //     memcpy(broadcastAddress, broadcastAddress_all, sizeof(broadcastAddress));
-  //   #endif
-
-  channel = g_wifi_channel;
-  last_gw = g_last_gw;
-  if ((channel < 1) or (channel > 13)) channel = 1;                       
-  if ((last_gw < 0) or (last_gw > (NUMBER_OF_GATEWAYS-1))) last_gw = 0;
-  #ifdef DEBUG
-    Serial.printf("[%s]: Configuration data from file: channel=%d, last gateway=%d\n",__func__,channel,last_gw);
-  #endif
-  // read config END
-
-  WiFi.mode(WIFI_MODE_STA);
-
- // ======================================================== LETS TRY SAVED CONFIG ========================================================
-  // lets try saved data first to shorten the time: saved receiver, saved channel
-  #ifdef DEBUG
-    Serial.printf("\n[%s]: Lets try saved config first...\n\n",__func__);
-  #endif
-  memcpy(broadcastAddress, receivers[last_gw], sizeof(receivers[last_gw]));
-  snprintf(receiver_mac, sizeof(receiver_mac), "%02x:%02x:%02x:%02x:%02x:%02x",broadcastAddress[0], broadcastAddress[1], broadcastAddress[2], broadcastAddress[3], broadcastAddress[4], broadcastAddress[5]);
-
-  // init espnow
-  esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
-  if (esp_now_init() != ESP_OK)
-  {
-    Serial.printf("[%s]: esp_now_init FAILED\n",__func__);
-    set_error_red_led_level(1);
-    delay(100);
-    // FATAL ERROR - EXIT
-    return false;
-  } else
-  {
-    #ifdef DEBUG
-      Serial.printf("[%s]: esp_now_init SUCCESSFUL\n",__func__);
-    #endif
-  }
-
-  memcpy(peerInfo.peer_addr, broadcastAddress, sizeof(broadcastAddress));
-  peerInfo.ifidx   = WIFI_IF_STA;
-  peerInfo.encrypt = false;
-
-  // register cb
-  if (esp_now_register_send_cb(OnDataSent) != ESP_OK)
-  {
-    Serial.printf("[%s]: esp_now_register_send_cb FAILED\n",__func__);
-  } else
-  {
-    #ifdef DEBUG
-      Serial.printf("[%s]: esp_now_register_send_cb SUCCESSFUL\n",__func__);
-    #endif
-  }
-
-  if (esp_now_register_recv_cb(OnDataReceived) != ESP_OK)
-  {
-    Serial.printf("[%s]: esp_now_register_recv_cb FAILED\n",__func__);
-  } else
-  {
-    #ifdef DEBUG
-      Serial.printf("[%s]: esp_now_register_recv_cb SUCCESSFUL\n",__func__);
-    #endif
-  }  
-
-
-  // add peer
-  if (esp_now_add_peer(&peerInfo) != ESP_OK)
-  {
-    Serial.printf("[%s]: esp_now_add_peer FAILED\n",__func__);
-  } else
-  {
-    #ifdef DEBUG
-      Serial.printf("[%s]: esp_now_add_peer SUCCESSFUL\n",__func__);
-    #endif
-  }
-  #ifdef DEBUG
-    Serial.printf("[%s]: [SAVED CHANNEL, SAVED RECEIVER] trying channel=%d, receiver=%d \n",__func__,channel,last_gw);
-  #endif
-  esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
-  esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
-  #ifdef DEBUG
-    Serial.printf("[%s]: [SAVED CHANNEL, SAVED RECEIVER] sending took=%dms\n",__func__,millis()-s1);
-  #endif
-  loop_timer=millis(); while(millis() < loop_timer + 10) {}  // unblocking loop for 10ms
-  if(espnow_data_sent)
-  {
-    // #ifdef DEBUG
-    #ifdef DEBUG_LIGHT
-      Serial.printf("[%s]:\n [SAVED CHANNEL, SAVED RECEIVER] esp_now_send SUCCESSFUL on channel=%d, receiver=%d, MAC=%s; it took=%dms\n",__func__,channel,last_gw,receiver_mac,millis()-s1);
-    #endif
-    // #endif
-    return true;
-  }
-  #ifdef DEBUG
-    Serial.printf("[%s]: [SAVED CHANNEL, SAVED RECEIVER] esp_now_send FAILED on channel=%d, receiver=%d, MAC=%s; it took=%dms\n",__func__,channel,last_gw,receiver_mac,millis()-s1);
-  #endif
-  // lets try saved data first to shorten the time: saved receiver, saved channel END
-// ======================================================== LETS TRY SAVED CONFIG END ========================================================
-
-
-// ======================================================== LOOP THROUGH ALL RECEIVERS =======================================================
-  // if we are here, it means it failed - so now lets try everything else
-  #ifdef DEBUG
-    Serial.printf("\n[%s]: Loop through all receivers...\n",__func__);
-  #endif
-  for (int receiver = 0; receiver<NUMBER_OF_GATEWAYS; receiver++)   // lets go through all gateways
-  {
-    memcpy(broadcastAddress, receivers[receiver], sizeof(receivers[receiver]));
-    snprintf(receiver_mac, sizeof(receiver_mac), "%02x:%02x:%02x:%02x:%02x:%02x",broadcastAddress[0], broadcastAddress[1], broadcastAddress[2], broadcastAddress[3], broadcastAddress[4], broadcastAddress[5]);
-    #ifdef DEBUG
-      Serial.printf("\n[%s]: gateway=%d, MAC=%s...\n\n",__func__,receiver,receiver_mac);
-    #endif
-
-    // init espnow
-    esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
-    if (esp_now_init() != ESP_OK) 
-    {
-      Serial.printf("[%s]: esp_now_init FAILED\n",__func__);
-      set_error_red_led_level(1);
-      delay(100);
-      // FATAL ERROR - EXIT
-      return false;
-    } else 
-    {
-      #ifdef DEBUG
-        Serial.printf("[%s]: esp_now_init SUCCESSFUL\n",__func__);
-      #endif
-    }
-
-    memcpy(peerInfo.peer_addr, broadcastAddress, sizeof(broadcastAddress));
-    peerInfo.ifidx   = WIFI_IF_STA;
-    peerInfo.encrypt = false;
-
-    // register cb
-    if (esp_now_register_send_cb(OnDataSent) != ESP_OK)
-    {
-      Serial.printf("[%s]: esp_now_register_send_cb FAILED\n",__func__);
-    } else
-    {
-      #ifdef DEBUG
-        Serial.printf("[%s]: esp_now_register_send_cb SUCCESSFUL\n",__func__);
-      #endif
-    }
-
-    if (esp_now_register_recv_cb(OnDataReceived) != ESP_OK)
-    {
-      Serial.printf("[%s]: esp_now_register_recv_cb FAILED\n",__func__);
-    } else
-    {
-      #ifdef DEBUG
-        Serial.printf("[%s]: esp_now_register_recv_cb SUCCESSFUL\n",__func__);
-      #endif
-    }  
-
-    // add peer
-    if (esp_now_add_peer(&peerInfo) != ESP_OK)
-    {
-      Serial.printf("[%s]: esp_now_add_peer FAILED\n",__func__);
-    } else
-    {
-      #ifdef DEBUG
-        Serial.printf("[%s]: esp_now_add_peer SUCCESSFUL\n",__func__);
-      #endif
-    }
-
-// ======================================================== FIRST TRY STORED CHANNEL =======================================================
-    #ifdef DEBUG
-      Serial.printf("[%s]: [SAVED CHANNEL] trying channel = %d \n",__func__,channel);
-    #endif
-    esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
-    esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
-    #ifdef DEBUG
-      Serial.printf("[%s]: [SAVED CHANNEL] sending took=%dms\n",__func__,millis()-s1);
-    #endif
-    unsigned long loop_timer=millis(); while(millis() < loop_timer + 10) {}  // unblocking loop for 10ms
-    if(espnow_data_sent) 
-    {
-      // #ifdef DEBUG
-        Serial.printf("[%s]:\n [SAVED CHANNEL] esp_now_send SUCCESSFUL on receiver=%d, channel=%d, MAC=%s; it took=%dms\n",__func__,receiver,channel,receiver_mac,millis()-s1);
-      // #endif
-
-      // save successful data
-      g_wifi_channel = channel;
-      g_last_gw = receiver;
-      #ifdef DEBUG
-        Serial.printf("[%s]: [ALL CHANNELS] Configuration data stored: receiver=%d, channel=%d\n",__func__,receiver,channel);
-      #endif
-      loop_timer=millis(); while(millis() < loop_timer + 1) {}  // unblocking loop for 1ms
-      // save successful data END
-      return true;
-    }
-    Serial.printf("[%s]: [SAVED CHANNEL] esp_now_send FAILED on channel %d, it took=%dms\n",__func__,channel,millis()-s1);
-    // fist attempt: on saved channel END
-// ======================================================== FIRST TRY STORED CHANNEL END =======================================================
-
-// ======================================================== LOOP THROUGH ALL CHANNELS ==========================================================
-    // second attempt: all channels
-    #ifdef DEBUG
-      Serial.printf("[%s]: [ALL CHANNELS] trying all channels now \n",__func__);
-    #endif
-    for (int i = 1; i <= 13; i++)
-    {
-      esp_wifi_set_channel(i, WIFI_SECOND_CHAN_NONE);
-      esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
-      #ifdef DEBUG
-        Serial.printf("[%s]: [ALL CHANNELS] sending took=%dms\n",__func__,millis()-s1);
-      #endif
-      unsigned long loop_timer=millis(); while(millis() < loop_timer + 30) {}  // unblocking loop 
-      if(espnow_data_sent) 
-      {
-        // #ifdef DEBUG
-          Serial.printf("[%s]:\n [ALL CHANNELS] esp_now_send SUCCESSFUL on receiver=%d, channel=%d, MAC=%s; it took=%dms\n",__func__,receiver,i,receiver_mac,millis()-s1);
-        // #endif
-        // save successful data
-        g_wifi_channel = i;
-        g_last_gw = receiver;
-        #ifdef DEBUG
-          Serial.printf("[%s]: [ALL CHANNELS] Configuration data stored: receiver=%d, channel=%d\n",__func__,receiver,i);
-        #endif
-        loop_timer=millis(); while(millis() < loop_timer + 1) {}  // unblocking loop for 1ms
-        // save successful data END
-        return true;
-      }
-      #ifdef DEBUG
-        Serial.printf("[%s]: [ALL CHANNELS] FAILED on channel=%d, it took=%dms\n",__func__,i,millis()-s1);
-      #endif
-    }
-  }
-// ======================================================== LOOP THROUGH ALL CHANNELS END ======================================================
-
-// NOTHING WORKED...
-  Serial.printf("[%s]: esp_now_send TOTALLY FAILED, it took=%dms\n",__func__,millis()-s1);
-  set_error_red_led_level(1);
-  delay(100);
-  return false;
-// ======================================================== LOOP THROUGH ALL RECEIVERS END =======================================================
-}
-
-
-void setup_CP_Server()
-{
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest * request)
-  {
-    const char *index_html = cp_html_page.c_str();
-    request->send_P(200, "text/html", index_html);
-    Serial.printf("[%s]: Client Connected\n",__func__);
-  });
-  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request)
-  {
-    String inputMessage;
-    String inputParam;
-
-    if (request->hasParam("ssid"))
-    {
-      inputMessage = request->getParam("ssid")->value();
-      inputParam = "ssid";
-      ssid = inputMessage;
-      Serial.printf("[%s]: SSID received: %s\n",__func__,ssid);
-      if (strlen(ssid.c_str()) == 0)
-      {
-        ssid = old_ssid;
-        Serial.printf("[%s]: SSID is blank, reusing the old value: %s\n",__func__,ssid);
-      } else
-      {
-        ssid = inputMessage;
-      }
-      valid_ssid_received = true;
-    }
-
-    if (request->hasParam("password"))
-    {
-      inputMessage = request->getParam("password")->value();
-      inputParam = "password";
-      password = inputMessage;
-      Serial.printf("[%s]: password received: %s\n",__func__,password.c_str());
-      if (strlen(password.c_str()) == 0)
-      {
-        password = old_password;
-        Serial.printf("[%s]: password is blank, reusing the old value: %s\n",__func__,password.c_str()); 
-      } else
-      {
-        password = inputMessage;
-      }
-      valid_password_received = true;
-    }
-
-
-    if (request->hasParam("sleeptime_s_str"))
-    {
-      inputMessage = request->getParam("sleeptime_s_str")->value();
-      inputParam = "sleeptime_s_str";
-      sleeptime_s_str = inputMessage;
-      Serial.printf("[%s]: sleeptime_s_str received: %s\n",__func__,sleeptime_s_str);
-      uint16_t old_sleeptime_s = sleeptime_s_str.toInt();
-      if ((strlen(sleeptime_s_str.c_str()) == 0) or (old_sleeptime_s <= 0))
-      {
-        sleeptime_s_str = String(SLEEP_TIME_S);
-        Serial.printf("[%s]: sleeptime_s_str is INCORRECT (%ss), reusing the default value: %ss\n",__func__,inputMessage,sleeptime_s_str);
-      } else
-      {
-        sleeptime_s_str = inputMessage;
-      }
-      valid_sleeptime_s_str_received = true;
-    }
-
-    request->send(200, "text/html", "The values entered by you have been successfully sent to the device. It will now attempt WiFi connection");
-  });
-}
-
-
-void WiFiSoftAPSetup()
-{
-  char cp_ssid[32];
-  snprintf(cp_ssid,sizeof(cp_ssid),"%s",HOSTNAME);
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(cp_ssid);
-  Serial.printf("[%s]: AP IP address: %s\n",__func__,WiFi.softAPIP().toString().c_str());
-
-  Serial.printf("[%s]: SSID: %s\n",__func__,cp_ssid);
-  Serial.printf("[%s]: NO PASSWORD\n",__func__);
-}
-
-
+// WiFi related
 void WiFiStationSetup(String rec_ssid, String rec_password, String rec_sleep_s)
 {
   wifi_timeout = false;
@@ -1666,56 +1803,6 @@ void WiFiStationSetup(String rec_ssid, String rec_password, String rec_sleep_s)
   }
 }
 
-
-void StartCaptivePortal() 
-{
-  // blink LEDs in task, if not yet blinking
-  #if defined(ERROR_RED_LED_GPIO) 
-    if (led_blink_handle == NULL)
-    {
-      xReturned_led_blink = xTaskCreate(led_blink, "led_blink", 2000, NULL, 1, &led_blink_handle);
-      if( xReturned_led_blink != pdPASS )
-      {
-        Serial.printf("[%s]: CANNOT create led_blink task\n",__func__);
-      } else
-      {
-        #ifdef DEBUG
-          Serial.printf("[%s]: Task led_blink created\n",__func__);
-        #endif
-      }
-    } else
-    // blink LEDs already blinking
-    {
-      Serial.printf("[%s]: Task led_blink ALREADY created\n",__func__);
-    }
-  #endif
-  
-  // create CP timer if not yet created
-  start_cp_timer(CP_TIMEOUT_S);
-
-  Serial.printf("[%s]: Setting up AP Mode\n",__func__);
-
-  WiFiSoftAPSetup();
-
-  Serial.printf("[%s]: Setting up Async WebServer\n",__func__);
-  setup_CP_Server();
-  Serial.printf("[%s]: Starting DNS Server\n",__func__);
-  dnsServer.start(53, "*", WiFi.softAPIP());
-  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);             //only when requested from AP
-  server.begin();
-  dnsServer.processNextRequest();
-  Serial.printf("[%s]: Captive Portal and AP created, timeout set to %ds\n",__func__,CP_TIMEOUT_S);
-}
-
-
-void cp_timer( TimerHandle_t cp_timer_handle )
-{
-  Serial.printf("[%s]: Timer expired, RESTARTING...\n",__func__);
-  // do_esp_restart();      // panicking in save_config()
-  ESP.restart();
-}
-
-
 bool connect_wifi()
 {
   if (g_wifi_ok == 1) is_setup_done = true; else is_setup_done = false;
@@ -1752,7 +1839,7 @@ bool connect_wifi()
   save_config("wifi connected");
   return true;
 }
-
+// WiFi related END
 
 void led_blink(void *pvParams)
 {
@@ -1797,7 +1884,6 @@ void led_blink(void *pvParams)
   #endif
 }
 
-
 void led_blink_erase(void *pvParams)
 {
   int delay_ms = 20;
@@ -1816,7 +1902,6 @@ void led_blink_erase(void *pvParams)
       vTaskDelay(delay_ms/portTICK_RATE_MS);
     }
 }
-
 
 void erase_all_data()
 {
@@ -1871,28 +1956,6 @@ void erase_all_data()
   delay(20);
 }
 
-
-void do_esp_go_to_sleep()
-{
-  save_config("Config saved before going to sleep");
-  
-  #if (PUSH_BUTTONS == 1)
-    if (button_pressed)
-    {
-      Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_PUSHBUTTON);
-      delay(DEBOUNCE_MS_PUSHBUTTON);
-    }
-  #endif
-
-  #ifdef DEBUG_LIGHT
-    Serial.printf("[%s]: millis=%lums, Bye...\n========= E N D =========\n",__func__,millis());
-  #else 
-    Serial.printf("[%s]: Bye...\n========= E N D =========\n",__func__);
-  #endif
-  esp_deep_sleep_start();
-}
-
-
 bool load_config()
 {
   // function_start = micros();
@@ -1935,8 +1998,6 @@ bool load_config()
   return true;
 }
 
-
-// save config
 void save_config(const char* reason)
 {
   uint16_t extra_reset_time;
@@ -1992,7 +2053,6 @@ void save_config(const char* reason)
   #endif
   // Serial.printf("[%s]: took %uus\n",__func__,(micros()-function_start));
 }
-
 
 void get_old_wifi_credentials()
 {
@@ -2057,7 +2117,6 @@ void change_mac()
   }
 
 }
-// ========================================================================== FUNCTIONS implementation END
 
 void initiate_all_leds()
 {
@@ -2094,13 +2153,13 @@ void set_act_blue_led_level(u_int8_t level)
       {
         ledcWrite(ACT_BLUE_LED_PWM_CHANNEL, g_led_pwm);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: %d\n",__func__,g_led_pwm);
+          Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: %d\n",__func__,g_led_pwm);
         #endif
       } else 
       {
         ledcWrite(ACT_BLUE_LED_PWM_CHANNEL, 0);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: 0\n",__func__);
+          Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: 0\n",__func__);
         #endif
       }
     #else 
@@ -2108,13 +2167,13 @@ void set_act_blue_led_level(u_int8_t level)
       {
         digitalWrite(ACT_BLUE_LED_GPIO,HIGH);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: HIGH\n",__func__);
+          Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: HIGH\n",__func__);
         #endif
       } else 
       {
         digitalWrite(ACT_BLUE_LED_GPIO,LOW);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: LOW\n",__func__);
+          Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: LOW\n",__func__);
         #endif
       }
     #endif
@@ -2135,13 +2194,13 @@ void set_error_red_led_level(u_int8_t level)
           red_level = g_led_pwm;
         ledcWrite(ERROR_RED_LED_PWM_CHANNEL, red_level);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: %d\n",__func__,red_level);
+          Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: %d\n",__func__,red_level);
         #endif
       } else 
       {
         ledcWrite(ERROR_RED_LED_PWM_CHANNEL, 0);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: 0\n",__func__);
+          Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: 0\n",__func__);
         #endif
       }
     #else 
@@ -2149,13 +2208,13 @@ void set_error_red_led_level(u_int8_t level)
       {
           digitalWrite(ERROR_RED_LED_GPIO,HIGH);
           #ifdef DEBUG
-            // Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: HIGH\n",__func__);
+            Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: HIGH\n",__func__);
           #endif
       } else 
       {
         digitalWrite(ERROR_RED_LED_GPIO,LOW);
         #ifdef DEBUG
-          // Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: LOW\n",__func__);
+          Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: LOW\n",__func__);
         #endif
       }
     #endif
@@ -2174,6 +2233,7 @@ void set_new_sleep_time_s(int time_s)
     Serial.printf("[%s]: Received command from gateway to set sleeptime to %ds but it is already the same. NOTHING DONE then.\n",__func__,time_s);
   }
 }
+// ========================================================================== FUNCTIONS definitions END
 
 void setup()
 {
@@ -2188,11 +2248,11 @@ void setup()
   Serial.begin(115200);
   delay(1);
 
+  // #ifdef DEBUG_LIGHT
+  Serial.printf("\n======= S T A R T =======\n");
   // start LEDs  
   initiate_all_leds();
 
-  // #ifdef DEBUG_LIGHT
-  Serial.printf("\n======= S T A R T =======\n");
   #ifdef DEBUG_LIGHT
     Serial.printf("[%s]: millis=%lums, Device: %s, hostname=%s, version=%s, sensor type=%s, MCU type=%s\n",__func__,program_start_time, DEVICE_NAME,HOSTNAME,ZH_PROG_VERSION, sender_type_char[SENSOR_TYPE],MODEL);
   #else 
@@ -2251,7 +2311,9 @@ void setup()
     unsigned long en_3v_start_time = millis();
     while (!digitalRead(ENABLE_3V_GPIO))
     {
-      Serial.printf("[%s]: Waiting for 3V...\n",__func__);
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: Waiting for 3V...\n",__func__);
+      #endif
       while (millis()-en_3v_start_time < 10)
       {
         delay(1);
@@ -2259,7 +2321,7 @@ void setup()
       if (!digitalRead(ENABLE_3V_GPIO))
       {
         Serial.printf("[%s]: Enabling 3V to power sensors on GPIO=%d FAILED\n",__func__,ENABLE_3V_GPIO);
-        Serial.printf("[%s]: Gooing to forced sleep for %d seconds\n",__func__,g_sleeptime_s);
+        Serial.printf("[%s]: Going to forced sleep for %d seconds\n",__func__,g_sleeptime_s);
         hibernate(false,g_sleeptime_s);
       } 
     }
@@ -2270,6 +2332,37 @@ void setup()
     delay(10);
   #endif
   
+  
+  // power for LoRa module from GPIO 
+  #ifdef LORA_GPIO_ENABLE_3V
+    #ifdef DEBUG_LIGHT
+      Serial.printf("[%s]: Enabling 3V to power LoRa on GPIO=%d...\n",__func__,LORA_GPIO_ENABLE_3V);
+    #endif
+    pinMode(LORA_GPIO_ENABLE_3V,OUTPUT);
+    digitalWrite(LORA_GPIO_ENABLE_3V, HIGH);
+    unsigned long en_3v_lora_start_time = millis();
+    while (!digitalRead(LORA_GPIO_ENABLE_3V))
+    {
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: Waiting for 3V for LoRa...\n",__func__);
+      #endif
+      while (millis()-en_3v_lora_start_time < 10)
+      {
+        delay(1);
+      }
+      if (!digitalRead(LORA_GPIO_ENABLE_3V))
+      {
+        Serial.printf("[%s]: Enabling 3V to power LoRa on GPIO=%d FAILED\n",__func__,LORA_GPIO_ENABLE_3V);
+        Serial.printf("[%s]: Gooing to forced sleep for %d seconds\n",__func__,g_sleeptime_s);
+        hibernate(false,g_sleeptime_s);
+      } 
+    }
+    #ifdef DEBUG_LIGHT
+      Serial.printf("[%s]: Enabling 3V to power LoRa on GPIO=%d DONE\n",__func__,LORA_GPIO_ENABLE_3V);
+    #endif
+    // extra 10ms for LoRa to wake up
+    delay(10);
+  #endif  
 
   // start Wire after enabling 3.3V
   #if defined(CUSTOM_SDA_GPIO) and defined(CUSTOM_SCL_GPIO)
@@ -2305,7 +2398,6 @@ void setup()
     case ESP_RST_POWERON:
     {
       Serial.printf("[%s]: Boot cause: power on or reset\n",__func__);
-      set_act_blue_led_level(1);
       set_error_red_led_level(1);
       break;
     }
@@ -2313,7 +2405,6 @@ void setup()
     case ESP_RST_SW:
     {
       Serial.printf("[%s]: Boot cause: software reset via esp_restart\n",__func__);
-      set_act_blue_led_level(1);
       set_error_red_led_level(1);
       break;
     }
@@ -2328,13 +2419,14 @@ void setup()
     default:
     {
       Serial.printf("[%s]: Boot cause: other boot cause=%d\n",__func__);
+      set_error_red_led_level(1);
       break;
     }
   }
 
-  // #ifdef DEBUG_LIGHT
-  //   Serial.printf("[%s]: Wakeup cause=%d\n",__func__,wakeup_reason);
-  // #endif
+  #ifdef DEBUG_LIGHT
+    Serial.printf("[%s]: Wakeup cause=%d\n",__func__,wakeup_reason);
+  #endif
   switch(wakeup_reason)
   {
     // 0 = not deep sleep
@@ -2349,16 +2441,16 @@ void setup()
       Serial.printf("[%s]: Wakeup cause: external signal using RTC_IO (motion detected)\n",__func__);
       break;
     }
-    // 3 = PUSH BUTTONS or fw update (FW_UPGRADE_GPIO) or motion detected (MOTION_SENSOR_GPIO) - not for ESP32-C3!
-    #if (BOARD_TYPE != 4)
-      case ESP_SLEEP_WAKEUP_EXT1:
-      {
-        Serial.printf("[%s]: Wakeup cause: external signal using GPIO_EXT1\n",__func__);
-        Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_ANY_GPIO);
+    // 3 = PUSH BUTTONS or fw update (FW_UPGRADE_GPIO) or motion detected (MOTION_ENABLED) - not for ESP32-C3!
+    case ESP_SLEEP_WAKEUP_EXT1:
+    {
+      #if (BOARD_TYPE != 4)
+        // Serial.printf("[%s]: Wakeup cause: external signal using GPIO_EXT1\n",__func__);
+        // Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_ANY_GPIO);
         delay(DEBOUNCE_MS_ANY_GPIO);
         wakeup_gpio_mask = esp_sleep_get_ext1_wakeup_status();
         wakeup_gpio = log(wakeup_gpio_mask)/log(2);
-        Serial.printf("[%s]: external signal using GPIO=%d, GPIO_MASK=%ju\n",__func__,wakeup_gpio,wakeup_gpio_mask);
+        Serial.printf("[%s]: Wakeup cause: external signal using GPIO=%d, GPIO_MASK=%ju\n",__func__,wakeup_gpio,wakeup_gpio_mask);
         set_error_red_led_level(1);
         #ifdef FW_UPGRADE_GPIO
           if (wakeup_gpio == FW_UPGRADE_GPIO)
@@ -2368,14 +2460,18 @@ void setup()
             break;
           }
         #endif
-        #ifdef MOTION_SENSOR_GPIO
-          if (wakeup_gpio == MOTION_SENSOR_GPIO)
+        #if (MOTION_ENABLED == 1)
+          for (u_int8_t i = 0; i < NUMBER_OF_MOTION_SENSORS; i++)
           {
-            motion = true;
-            break;
+            if (wakeup_gpio == motion_sensors_gpio[i])
+            {
+              motion = true;
+              break;
+            }
           }
         #endif
         #if (PUSH_BUTTONS == 1)
+          set_error_red_led_level(1);
           for (uint8_t i = 0; i < NUMBER_OF_BUTTONS; i++)
           {
             if (wakeup_gpio == button_gpio[i])
@@ -2386,20 +2482,21 @@ void setup()
             }
           }
         #endif
-      }
-    #endif
+      #endif
+      break;
+    }
     // 4 = wake up on timer (SLEEP_TIME_S or COOLING_SLEEP_DURATION_S)
     case ESP_SLEEP_WAKEUP_TIMER:
     {
       #ifdef DEBUG_LIGHT
         Serial.printf("[%s]: Wakeup cause: timer (cooling or heartbeat)\n",__func__);
       #endif
-      set_act_blue_led_level(1);
       break;
     }
     // 5 = not in use
     case ESP_SLEEP_WAKEUP_TOUCHPAD:
     {
+      set_error_red_led_level(1);
       #if (TOUCHPAD_ONLY == 1)
         touch_pad_t touchPin;
         #ifdef DEBUG_LIGHT
@@ -2467,7 +2564,6 @@ void setup()
         }    
         if (wakeup_gpio < 255)
         {
-          set_error_red_led_level(1);
           for (uint8_t i = 0; i < NUMBER_OF_BUTTONS; i++)
           {
             if (i == touchPin)
@@ -2483,15 +2579,16 @@ void setup()
     // 6 = not in use
     case ESP_SLEEP_WAKEUP_ULP:
     {
+      set_error_red_led_level(1);
       #ifdef DEBUG_LIGHT
           Serial.printf("[%s]: Wakeup cause: ESP_SLEEP_WAKEUP_ULP\n",__func__);
       #endif
       break;
     }
     // 7 = for ESP32-C3 - ESP_SLEEP_WAKEUP_GPIO,for others it is from light sleep only (ESP32, S2 and S3) so not programmed
-    #if (BOARD_TYPE == 4)
-      case ESP_SLEEP_WAKEUP_GPIO:
-      {
+    case ESP_SLEEP_WAKEUP_GPIO:
+    {
+      #if (BOARD_TYPE == 4)
         Serial.printf("[%s]: Wakeup cause: external signal ESP_SLEEP_WAKEUP_GPIO on C3\n",__func__);
         Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_ANY_GPIO);
         delay(DEBOUNCE_MS_ANY_GPIO);
@@ -2504,19 +2601,24 @@ void setup()
           {
             fw_update = true;
             Serial.printf("[%s]: woke up on FW button pressed\n",__func__);
-            
+            break;
           }
         #endif
-        #ifdef MOTION_SENSOR_GPIO
-          if (wakeup_gpio == MOTION_SENSOR_GPIO)
+        
+        #if (MOTION_ENABLED == 1)
+          for (u_int8_t i = 0; i < NUMBER_OF_MOTION_SENSORS; i++)
           {
-            motion = true;
+            if (wakeup_gpio == motion_sensors_gpio[i])
+            {
+              motion = true;
+              break;
+            }
           }
-          break;
         #endif
         break;
-      }
-    #endif
+      #endif
+      break;
+  }
     default:
     {
       #ifdef DEBUG_LIGHT
@@ -2532,11 +2634,9 @@ void setup()
     // RED LED ON, BLUE OFF if FW_UPGRADE_GPIO was pressed
     if (fw_update)
     {
-      set_act_blue_led_level(0);
-      set_error_red_led_level(1);
       Serial.printf("[%s]: debouncing for %dms\n",__func__,DEBOUNCE_MS_FW_GPIO);
       delay(DEBOUNCE_MS_FW_GPIO);
-    }
+    } 
     // check if FW_UPGRADE_GPIO is still high after boot
     pinMode(FW_UPGRADE_GPIO,INPUT);
     if ((digitalRead(FW_UPGRADE_GPIO)) and (fw_update))
@@ -2601,11 +2701,13 @@ void setup()
     }
   #endif
 
-  #ifdef MOTION_SENSOR_GPIO
+  #if (MOTION_ENABLED == 1)
+    #ifdef DEBUG
+      Serial.printf("[%s]: motion enabled\n",__func__);
+    #endif
     if (motion)
     {
-      set_error_red_led_level(1);
-      Serial.printf("[%s]: motion DETECTED\n",__func__);
+        Serial.printf("[%s]: motion DETECTED on GPIO=%d\n",__func__,wakeup_gpio);
     } else
     {
       #ifdef DEBUG
@@ -2613,6 +2715,16 @@ void setup()
       #endif
     }
   #endif
+
+  #ifdef FW_UPGRADE_GPIO
+    if ((!motion) and (!fw_update) and (boot_reason != ESP_RST_SW) and (boot_reason != ESP_RST_POWERON) and (wakeup_gpio != FW_UPGRADE_GPIO) )
+  #else 
+    if ((!motion) and (!fw_update) and (boot_reason != ESP_RST_SW) and (boot_reason != ESP_RST_POWERON) )
+  #endif 
+  {
+    set_error_red_led_level(0);
+    set_act_blue_led_level(1);
+  }
 
 // ===============  SENSORS INITIALISATION
 // MAX17048 - fuel gauge
@@ -2756,7 +2868,7 @@ void setup()
   // off 3V
   #ifdef ENABLE_3V_GPIO
     #ifdef DEBUG
-      Serial.printf("[%s]: Disabling 3V on GPIO=%d\n",__func__,ENABLE_3V_GPIO);
+      Serial.printf("[%s]: Disabling 3V for sensors on GPIO=%d\n",__func__,ENABLE_3V_GPIO);
     #endif
     digitalWrite(ENABLE_3V_GPIO, LOW);
   #endif
@@ -2768,254 +2880,290 @@ void setup()
   // wait for command from gateway
   u_int32_t start_waiting = millis();
 
-  if (send_data())
-  {
+
+  // only ESPNOW code
+  #if (ESPNOW_ENABLED ==1)
     #ifdef DEBUG
-      Serial.printf("[%s]: Sendig data to gateway SUCCESSFUL\n",__func__);
+      Serial.printf("[%s]: ESPnow sending function here\n",__func__);
     #endif
-  } else 
-  {
-    Serial.printf("[%s]: Sendig data to gateway FAILED\n",__func__);
-  }
-
-  while(!command_received && micros() <= start_waiting + (WAIT_FOR_COMMAND_MS * 1000))
-  {
-    // give a bit of time to gateway to send command back in case there is a queue in gateway
-    // delayMicroseconds(1);
-  }
-
-  if (command_received) 
-  {
-    #ifdef DEBUG
-      u_int32_t end_waiting = millis();
-      u_int32_t waiting_time = end_waiting - start_waiting;
-      Serial.printf("[%s]: Received command from gateway=%d, it took %lums (including sending to gw).\n",__func__,data_recv.command,waiting_time); 
-    #endif    
-
-    // act on commands here
-    // OTA
-    if (data_recv.command == 1) 
+    if (ESPnow_send_data())
     {
-      fw_update = true;
-      Serial.printf("[%s]: Received command from gateway to perform fw update\n",__func__);
+      #ifdef DEBUG
+        Serial.printf("[%s]: Sendig data to gateway SUCCESSFUL\n",__func__);
+      #endif
+    } else 
+    {
+      Serial.printf("[%s]: Sendig data to gateway FAILED\n",__func__);
     }
-    else 
-    // RESTART
-    if (data_recv.command == 2) 
-    {
-      Serial.printf("[%s]: Received command from gateway to perform RESTART\n",__func__);
-      // reset bootcount, it will increase to 1 on saving config
-      g_bootCount = 0;
-      do_esp_restart();
-    }   
-    else 
-    // CP
-    if (data_recv.command == 3) 
-    {
-      Serial.printf("[%s]: Received command from gateway TO start CAPTIVE PORTAL\n",__func__);
-      get_old_wifi_credentials();
-      g_wifi_ok = 0;
-      connect_wifi();
-      Serial.printf("[%s]: Restarting...\n",__func__);
-      do_esp_restart();
-    }   
-    else 
-    // Factory
-    if (data_recv.command == 4) 
-    {
-      Serial.printf("[%s]: Received command from gateway to perform FACTORY RESET\n",__func__);
-      Serial.printf("[%s]: Erasing ALL stored data on ESP\n",__func__);
-      erase_all_data();
-      Serial.printf("[%s]: RESTARTING ESP\n\n\n",__func__);
-      ESP.restart();  // restart without saving data!
-    }  
-    else 
-    // lux high sensitivity
-    if (data_recv.command == 5) 
-    {
-      if (g_lux_high_sens != 1)
-      {
-        Serial.printf("[%s]: Received command from gateway to set lux measurement to high sensitivity\n",__func__);
-        g_lux_high_sens = 1;
-        do_esp_restart();
-      } else Serial.printf("[%s]: Received command from gateway to set lux measurement to high sensitivity but it is high already\n",__func__);
-    }  
-    else 
-    // lux low sensitivity
-    if (data_recv.command == 6) 
-    {
-      if (g_lux_high_sens != 0)
-      {
-        Serial.printf("[%s]: Received command from gateway to set lux measurement to low sensitivity\n",__func__);
-        g_lux_high_sens = 0;
-        do_esp_restart();
-      } else Serial.printf("[%s]: Received command from gateway to set lux measurement to low sensitivity but it is low already\n",__func__);
-    }      
-    else    
-    // Motion OFF
-    if (data_recv.command == 10) 
-    {
-      if (g_motion != 0)
-      {
-        Serial.printf("[%s]: Received command from gateway to turn OFF motion\n",__func__);
-        g_motion = 0;
-        do_esp_restart();
-      } else Serial.printf("[%s]: Received command from gateway to turn OFF motion but it is OFF already\n",__func__);
-    }  
-    else 
-    // Motion ON
-    if (data_recv.command == 11) 
-    {
-      if (g_motion != 1)
-      {
-        Serial.printf("[%s]: Received command from gateway to turn ON motion\n",__func__);
-        g_motion = 1;
-        do_esp_restart();
-      } else Serial.printf("[%s]: Received command from gateway to turn ON motion but it is ON already\n",__func__);
-    }     
-    else 
-    // gw1
-    if (data_recv.command == 21) 
-    {
-      if (NUMBER_OF_GATEWAYS > 1) // only if there is more than 1 gw, otherwise it makes no sense
-      {
-        if (g_last_gw != 0)
-        {
-          Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 1\n",__func__);
-          g_last_gw = 0;
-          do_esp_restart();
-        } else Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 1 but it is gateway 1 already\n",__func__);
-      }
-    }  
-    else  
-    // gw2
-    if (data_recv.command == 22) 
-    {
-      if (NUMBER_OF_GATEWAYS > 1) // only if there is more than 1 gw, otherwise it makes no sense
-      {
-        if (g_last_gw != 1)
-        {
-          Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 2\n",__func__);
-          g_last_gw = 1;
-          do_esp_restart();
-        } else Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 2 but it is gateway 2 already\n",__func__);
-      }
-    }  
-    else 
-    // gw3
-    if (data_recv.command == 23) 
-    {
-      if (NUMBER_OF_GATEWAYS > 2) // only if there is more than 2 gw, otherwise it makes no sense
-      {
-        if (g_last_gw != 2)
-        {
-          Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 3\n",__func__);
-          g_last_gw = 2;
-          do_esp_restart();
-        } else Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 3 but it is gateway 3 already\n",__func__);
-      }
-    }  
-    else  
-    // reset ontime using charging_int = 10 - workaround as charing_int > 0 will reset ontime in save_config()
-    if (data_recv.command == 24) 
-    {
-      Serial.printf("[%s]: Received command from gateway to reset ontime\n",__func__);
-      charging_int = 10;
-    }  
-    else 
-    // SLEEP_TIME_S=1s   
-    if (data_recv.command == 30)  set_new_sleep_time_s(1);
-    else
-    // SLEEP_TIME_S=3s   
-    if (data_recv.command == 31)  set_new_sleep_time_s(3);
-    else
-    // SLEEP_TIME_S=5s   
-    if (data_recv.command == 32)  set_new_sleep_time_s(5);
-    else
-    // SLEEP_TIME_S=10s   
-    if (data_recv.command == 33)  set_new_sleep_time_s(10);
-    else
-    // SLEEP_TIME_S=15s   
-    if (data_recv.command == 34)  set_new_sleep_time_s(15);
-    else    
-    // SLEEP_TIME_S=30s   
-    if (data_recv.command == 35)  set_new_sleep_time_s(30);         
-    else
-    // SLEEP_TIME_S=60s   
-    if (data_recv.command == 36)  set_new_sleep_time_s(60);    
-    else 
-    // SLEEP_TIME_S=90s   
-    if (data_recv.command == 37)  set_new_sleep_time_s(90);   
-    else  
-    // SLEEP_TIME_S=120s   
-    if (data_recv.command == 38)  set_new_sleep_time_s(120);    
-    else 
-    // SLEEP_TIME_S=180s   
-    if (data_recv.command == 39)  set_new_sleep_time_s(180);    
-    else 
-    // SLEEP_TIME_S=300s   
-    if (data_recv.command == 40)  set_new_sleep_time_s(300);   
-    else 
-    // SLEEP_TIME_S=600s   
-    if (data_recv.command == 41)  set_new_sleep_time_s(600);   
-    else
-    // SLEEP_TIME_S=900s   
-    if (data_recv.command == 42)  set_new_sleep_time_s(900);    
-    else  
-    // SLEEP_TIME_S=1800s   
-    if (data_recv.command == 43)  set_new_sleep_time_s(1800);  
-    else 
-    // SLEEP_TIME_S=3600s   
-    if (data_recv.command == 44)  set_new_sleep_time_s(3600);   
-    else 
-    // LEDs OFF   
-    if (data_recv.command == 200) 
-    {
-      Serial.printf("[%s]: Received command from gateway to perform set LED PMW DC to 0\n",__func__);
-      g_led_pwm = 0;
-    }     
-    else 
-    // LEDs ON
-    if (data_recv.command == 201) 
-    {
-      Serial.printf("[%s]: Received command from gateway to perform set LED PMW DC to 255\n",__func__);
-      g_led_pwm = 255;
-    }   
-    else 
-    // ota web server
-    if (data_recv.command == 202) 
-    {
-      Serial.printf("[%s]: Received command from gateway to start web server\n",__func__);
-      ota_web_server_needed =  true;
-    }        
-    else 
-    // invalid measurements - don't update HA
-    if (data_recv.command == 203) 
-    {
-      if (g_valid != 0)
-        {
-          Serial.printf("[%s]: Received command from gateway to make measurements INVALID\n",__func__);
-          g_valid = 0;
-          do_esp_restart();
-        } else Serial.printf("[%s]: Received command from gateway to make measurements INVALID but is already INVALID.\n",__func__);
-    }  
-    // valid measurements - update HA
-    if (data_recv.command == 204) 
-    {
-      if (g_valid != 1)
-        {
-          Serial.printf("[%s]: Received command from gateway to make measurements VALID\n",__func__);
-          g_valid = 1;
-          do_esp_restart();
-        } else Serial.printf("[%s]: Received command from gateway to make measurements VALID but is already VALID.\n",__func__);
-    }                   
-  } 
-  else 
-  {
-    Serial.printf("[%s]: NOTHING RECEIVED from gateway within %dms\n",__func__,WAIT_FOR_COMMAND_MS);
-  }
 
-  disable_espnow();
+    while(!command_received && micros() <= start_waiting + (WAIT_FOR_COMMAND_MS * 1000))
+    {
+      // give a bit of time to gateway to send command back in case there is a queue in gateway
+      // delayMicroseconds(1);
+    }
+
+    if (command_received) 
+    {
+      #ifdef DEBUG
+        u_int32_t end_waiting = millis();
+        u_int32_t waiting_time = end_waiting - start_waiting;
+        Serial.printf("[%s]: Received command from gateway=%d, it took %lums (including sending to gw).\n",__func__,data_recv.command,waiting_time); 
+      #endif    
+
+      // act on commands here
+      // OTA
+      if (data_recv.command == 1) 
+      {
+        fw_update = true;
+        Serial.printf("[%s]: Received command from gateway to perform fw update\n",__func__);
+      }
+      else 
+      // RESTART
+      if (data_recv.command == 2) 
+      {
+        Serial.printf("[%s]: Received command from gateway to perform RESTART\n",__func__);
+        // reset bootcount, it will increase to 1 on saving config
+        g_bootCount = 0;
+        do_esp_restart();
+      }   
+      else 
+      // CP
+      if (data_recv.command == 3) 
+      {
+        Serial.printf("[%s]: Received command from gateway TO start CAPTIVE PORTAL\n",__func__);
+        get_old_wifi_credentials();
+        g_wifi_ok = 0;
+        connect_wifi();
+        Serial.printf("[%s]: Restarting...\n",__func__);
+        do_esp_restart();
+      }   
+      else 
+      // Factory
+      if (data_recv.command == 4) 
+      {
+        Serial.printf("[%s]: Received command from gateway to perform FACTORY RESET\n",__func__);
+        Serial.printf("[%s]: Erasing ALL stored data on ESP\n",__func__);
+        erase_all_data();
+        Serial.printf("[%s]: RESTARTING ESP\n\n\n",__func__);
+        ESP.restart();  // restart without saving data!
+      }  
+      else 
+      // lux high sensitivity
+      if (data_recv.command == 5) 
+      {
+        if (g_lux_high_sens != 1)
+        {
+          Serial.printf("[%s]: Received command from gateway to set lux measurement to high sensitivity\n",__func__);
+          g_lux_high_sens = 1;
+          do_esp_restart();
+        } else Serial.printf("[%s]: Received command from gateway to set lux measurement to high sensitivity but it is high already\n",__func__);
+      }  
+      else 
+      // lux low sensitivity
+      if (data_recv.command == 6) 
+      {
+        if (g_lux_high_sens != 0)
+        {
+          Serial.printf("[%s]: Received command from gateway to set lux measurement to low sensitivity\n",__func__);
+          g_lux_high_sens = 0;
+          do_esp_restart();
+        } else Serial.printf("[%s]: Received command from gateway to set lux measurement to low sensitivity but it is low already\n",__func__);
+      }      
+      else    
+      // Motion OFF
+      if (data_recv.command == 10) 
+      {
+        if (g_motion != 0)
+        {
+          Serial.printf("[%s]: Received command from gateway to turn OFF motion\n",__func__);
+          g_motion = 0;
+          do_esp_restart();
+        } else Serial.printf("[%s]: Received command from gateway to turn OFF motion but it is OFF already\n",__func__);
+      }  
+      else 
+      // Motion ON
+      if (data_recv.command == 11) 
+      {
+        if (g_motion != 1)
+        {
+          Serial.printf("[%s]: Received command from gateway to turn ON motion\n",__func__);
+          g_motion = 1;
+          do_esp_restart();
+        } else Serial.printf("[%s]: Received command from gateway to turn ON motion but it is ON already\n",__func__);
+      }     
+      else 
+      // gw1
+      if (data_recv.command == 21) 
+      {
+        if (NUMBER_OF_GATEWAYS > 1) // only if there is more than 1 gw, otherwise it makes no sense
+        {
+          if (g_last_gw != 0)
+          {
+            Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 1\n",__func__);
+            g_last_gw = 0;
+            do_esp_restart();
+          } else Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 1 but it is gateway 1 already\n",__func__);
+        }
+      }  
+      else  
+      // gw2
+      if (data_recv.command == 22) 
+      {
+        if (NUMBER_OF_GATEWAYS > 1) // only if there is more than 1 gw, otherwise it makes no sense
+        {
+          if (g_last_gw != 1)
+          {
+            Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 2\n",__func__);
+            g_last_gw = 1;
+            do_esp_restart();
+          } else Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 2 but it is gateway 2 already\n",__func__);
+        }
+      }  
+      else 
+      // gw3
+      if (data_recv.command == 23) 
+      {
+        if (NUMBER_OF_GATEWAYS > 2) // only if there is more than 2 gw, otherwise it makes no sense
+        {
+          if (g_last_gw != 2)
+          {
+            Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 3\n",__func__);
+            g_last_gw = 2;
+            do_esp_restart();
+          } else Serial.printf("[%s]: Received command from gateway to attach sensor to gateway 3 but it is gateway 3 already\n",__func__);
+        }
+      }  
+      else  
+      // reset ontime using charging_int = 10 - workaround as charing_int > 0 will reset ontime in save_config()
+      if (data_recv.command == 24) 
+      {
+        Serial.printf("[%s]: Received command from gateway to reset ontime\n",__func__);
+        charging_int = 10;
+      }  
+      else 
+      // SLEEP_TIME_S=1s   
+      if (data_recv.command == 30)  set_new_sleep_time_s(1);
+      else
+      // SLEEP_TIME_S=3s   
+      if (data_recv.command == 31)  set_new_sleep_time_s(3);
+      else
+      // SLEEP_TIME_S=5s   
+      if (data_recv.command == 32)  set_new_sleep_time_s(5);
+      else
+      // SLEEP_TIME_S=10s   
+      if (data_recv.command == 33)  set_new_sleep_time_s(10);
+      else
+      // SLEEP_TIME_S=15s   
+      if (data_recv.command == 34)  set_new_sleep_time_s(15);
+      else    
+      // SLEEP_TIME_S=30s   
+      if (data_recv.command == 35)  set_new_sleep_time_s(30);         
+      else
+      // SLEEP_TIME_S=60s   
+      if (data_recv.command == 36)  set_new_sleep_time_s(60);    
+      else 
+      // SLEEP_TIME_S=90s   
+      if (data_recv.command == 37)  set_new_sleep_time_s(90);   
+      else  
+      // SLEEP_TIME_S=120s   
+      if (data_recv.command == 38)  set_new_sleep_time_s(120);    
+      else 
+      // SLEEP_TIME_S=180s   
+      if (data_recv.command == 39)  set_new_sleep_time_s(180);    
+      else 
+      // SLEEP_TIME_S=300s   
+      if (data_recv.command == 40)  set_new_sleep_time_s(300);   
+      else 
+      // SLEEP_TIME_S=600s   
+      if (data_recv.command == 41)  set_new_sleep_time_s(600);   
+      else
+      // SLEEP_TIME_S=900s   
+      if (data_recv.command == 42)  set_new_sleep_time_s(900);    
+      else  
+      // SLEEP_TIME_S=1800s   
+      if (data_recv.command == 43)  set_new_sleep_time_s(1800);  
+      else 
+      // SLEEP_TIME_S=3600s   
+      if (data_recv.command == 44)  set_new_sleep_time_s(3600);   
+      else 
+      // LEDs OFF   
+      if (data_recv.command == 200) 
+      {
+        Serial.printf("[%s]: Received command from gateway to perform set LED PMW DC to 0\n",__func__);
+        g_led_pwm = 0;
+      }     
+      else 
+      // LEDs ON
+      if (data_recv.command == 201) 
+      {
+        Serial.printf("[%s]: Received command from gateway to perform set LED PMW DC to 255\n",__func__);
+        g_led_pwm = 255;
+      }   
+      else 
+      // ota web server
+      if (data_recv.command == 202) 
+      {
+        Serial.printf("[%s]: Received command from gateway to start web server\n",__func__);
+        ota_web_server_needed =  true;
+      }        
+      else 
+      // invalid measurements - don't update HA
+      if (data_recv.command == 203) 
+      {
+        if (g_valid != 0)
+          {
+            Serial.printf("[%s]: Received command from gateway to make measurements INVALID\n",__func__);
+            g_valid = 0;
+            do_esp_restart();
+          } else Serial.printf("[%s]: Received command from gateway to make measurements INVALID but is already INVALID.\n",__func__);
+      }  
+      // valid measurements - update HA
+      if (data_recv.command == 204) 
+      {
+        if (g_valid != 1)
+          {
+            Serial.printf("[%s]: Received command from gateway to make measurements VALID\n",__func__);
+            g_valid = 1;
+            do_esp_restart();
+          } else Serial.printf("[%s]: Received command from gateway to make measurements VALID but is already VALID.\n",__func__);
+      }                   
+    } 
+    else 
+    {
+      Serial.printf("[%s]: NOTHING RECEIVED from gateway within %dms\n",__func__,WAIT_FOR_COMMAND_MS);
+    }
+
+    disable_espnow();
+  #endif
+
+  // only LoRa code
+  #if (LORA_ENABLED == 1)
+    // espnow_data_sent = 0;      // for testing if ESPnow failed only
+
+    if (!espnow_data_sent)
+    {
+      #ifdef DEBUG
+        Serial.printf("[%s]: LoRa sending function here as ESPnow FAILED or DISABLED\n",__func__);
+      #endif
+      if (LoRa_send_data())
+      {
+        Serial.printf("[%s]: Sending data over LoRa SUCCESSFUL\n",__func__);
+      } else 
+      {
+        Serial.printf("[%s]: Sending data over LoRa FAILED\n",__func__);
+      }
+    } else 
+    {
+      Serial.printf("[%s]: LoRa sending function NOT NEEDED as ESPnow was SUCCESSFUL \n",__func__);
+    }
+    // off 3V for LoRa
+    #ifdef LORA_GPIO_ENABLE_3V
+      #ifdef DEBUG_LIGHT
+        Serial.printf("[%s]: Disabling 3V for LoRa on GPIO=%d\n",__func__,LORA_GPIO_ENABLE_3V);
+      #endif
+      digitalWrite(LORA_GPIO_ENABLE_3V, LOW);
+    #endif
+  #endif 
 
   if (fw_update)
   {
@@ -3066,7 +3214,11 @@ void setup()
 // LCD
 #if (USE_ST7735_160_80_ALI == 1) 
   // display temperature on: reset, power on, gpio short push AND if not OTA webserver needed!
-  if (((boot_reason == 1) or (boot_reason == 3) or (wakeup_gpio == FW_UPGRADE_GPIO)) and (!ota_web_server_needed))
+  #ifdef FW_UPGRADE_GPIO
+    if (((boot_reason == 1) or (boot_reason == 3) or (wakeup_gpio == FW_UPGRADE_GPIO)) and (!ota_web_server_needed))
+  #else 
+    if (((boot_reason == 1) or (boot_reason == 3)) and (!ota_web_server_needed))
+  #endif
   {
     // power savign features: 
     // before savings: 
@@ -3187,7 +3339,6 @@ void setup()
   if (!ota_web_server_needed)
   hibernate(false, sleeptime_s);
 }
-
 
 // loop is empty - sleep is the only option (or restart if ESPnow is not working)
 void loop() {}

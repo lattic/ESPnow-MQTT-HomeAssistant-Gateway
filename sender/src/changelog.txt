@@ -1,8 +1,40 @@
+TODO:
+1 - feedback and commands to sender while using LoRa
+
+
 button operation:
 1: very short push:   - normal forced run then sleep
 2: very short < x <3s - FW upgrade
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
+
+2023-07-16
+  3.1.b3  - FW_UPGRADE_GPIO IS obligatory AGAIN (otherwise no reset no restart no CP possible from button)
+
+2023-07-16
+  3.1.b2  - corrections for PUSH_BUTTONS_ONLY and FW_UPGRADE_GPIO
+          
+2023-07-16
+  3.1.b1  - added more PIR sensors (multi PIR sensor) to avoid black spots - #define MOTION_ENABLED,  #define NUMBER_OF_MOTION_SENSORS 
+          - improvements in setup() and hibernate()
+          - FW_UPGRADE_GPIO is not obligatory anymore but still compile error in devices_config.h kept
+
+2023-07-14
+  3.0.b5  - some cleaning 
+
+2023-07-11
+  3.0.b4  - some cleaning 
+
+2023-07-11
+  3.0.b3  - delay() are smaller now (inside LED mainly but not only)
+          - changes in send_data_espnow() - print messages
+          
+
+2023-07-09
+  3.0.b2  - testing LoRa
+  
+2023-07-09
+  3.0.b1 - testing LoRa 
 
 2023-07-08
   2.20.6 - another improvements in setup()
