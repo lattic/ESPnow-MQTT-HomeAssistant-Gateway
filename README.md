@@ -383,14 +383,6 @@ All information from sensor device is sent to Home Assistant MQTT broker in one 
 <h2>TODO list</h2>
 Probably nothing at this moment ;)
 
-
-<br><br>
-<h2> Update 2023-07-09: </h2>
-<h3> LoRa is here! </h3>
-<br> Sender can use ESPnow or/and LoRa for long range communication. Time/power penalty applies.</br> 
-<br> Receiver: it shall be separate device (gateway for LoRa) due to long time needed for communication with LoRa transciever </br>
- 
-
 <br><br>
 <h2> Update 2022-12-31:</h2>
 <br>
@@ -457,3 +449,10 @@ ESP32 is too slow (600ms) - only ESP32-S2 does the job properly (100ms)</br></br
 Winner winner chicken dinner - sensor device in Living Room reports 3.73V (16.7%) after 185 days on - that is "OK for me" ;-)
 
 <img width="742" alt="Screenshot 2023-04-13 at 12 12 54" src="https://user-images.githubusercontent.com/46562447/231742020-051a1af2-a520-42f8-b094-59e76f468801.png">
+
+<br><br>
+<h2> Update 2023-07-09: </h2>
+<h3> LoRa is here! </h3>
+Sender can use ESPnow or/and LoRa for long range communication. Time/power penalty applies.</br>
+Receiver: it shall be separate device (gateway for LoRa) due to long time needed for communication with LoRa transciever 
+ 
