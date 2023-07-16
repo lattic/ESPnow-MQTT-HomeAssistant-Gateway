@@ -9,8 +9,11 @@ button operation:
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
 2023-07-16
-  3.1.b2  - corrections for PUSH_BUTTONS_ONLY and FW_UPGRADE_GPIO
+  3.1.b3  - FW_UPGRADE_GPIO IS obligatory AGAIN (otherwise no reset no restart no CP possible from button)
 
+2023-07-16
+  3.1.b2  - corrections for PUSH_BUTTONS_ONLY and FW_UPGRADE_GPIO
+          
 2023-07-16
   3.1.b1  - added more PIR sensors (multi PIR sensor) to avoid black spots - #define MOTION_ENABLED,  #define NUMBER_OF_MOTION_SENSORS 
           - improvements in setup() and hibernate()
