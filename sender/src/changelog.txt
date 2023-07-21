@@ -8,6 +8,10 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
+2023-07-21
+  3.2.b1  - added INA260 (current/volts/power measurements)
+          - set properly WiFi protocols in case other were in use (common library/captive portal)
+
 2023-07-16
   3.1.b3  - FW_UPGRADE_GPIO IS obligatory AGAIN (otherwise no reset no restart no CP possible from button)
 

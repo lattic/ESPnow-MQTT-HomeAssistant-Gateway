@@ -419,18 +419,16 @@
   #define HOSTNAME                    "esp32042"
   #define DEVICE_NAME                 "pushb_6x_desk"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-  #define FW_UPGRADE_GPIO             8   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define FW_UPGRADE_GPIO             1   // fake GPIO=1
   #define SLEEP_TIME_S                3600  // seconds - 
   #define ACT_BLUE_LED_GPIO           38   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          37   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   
-
   #define PUSH_BUTTONS                1   // PULL GPIO DOWN, ACTIVE HIGH as it is programmed like this in the hibernate()
-
-  #define NUMBER_OF_BUTTONS           5
+  #define NUMBER_OF_BUTTONS           6
   uint8_t button_gpio[NUMBER_OF_BUTTONS] =  // put here the GPIO of push buttons
   {
-    3,4,5,6,7
+    3,4,5,6,7,8
   }; 
   uint8_t button_pressed = 0;               // 0 means: not pressed
                                             // 1 means: button_gpio[0] pressed, 2 means: button_gpio[1]
@@ -1136,13 +1134,13 @@
 // ---------------------------------------------------------------------------------------------------
 
 #elif DEVICE_ID == 94
-  #define ESPNOW_ENABLED              0 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
   #define SENSOR_TYPE                 0 // 0 = "env", 1 = "motion", 2 =  "env+mot"
   #define HOSTNAME                    "esp32094"
   #define DEVICE_NAME                 "test94"  // 15 characters maximum
   #define BOARD_TYPE                  2   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3
-  // #define CHARGING_GPIO               39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
-  // #define POWER_GPIO                  38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define CHARGING_GPIO               38  // comment out if not in use - don't use "0" here unless you mean GPIO=0
+  #define POWER_GPIO                  39  // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ACT_BLUE_LED_GPIO           6   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define ERROR_RED_LED_GPIO          5   // comment out if not in use - don't use "0" here unless you mean GPIO=0
   #define FW_UPGRADE_GPIO             2   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
@@ -1151,13 +1149,19 @@
   #define USE_MAX17048                1   // use "0" to disable
   #define USE_SHT31                   0   // use "0" to disable
   #define USE_TSL2561                 0   // use "0" to disable
-  #define SLEEP_TIME_S                5 // seconds - 180
+  #define SLEEP_TIME_S                5   // seconds - 180
+
+  // for INA260
+  #define USE_INA260                  1   // current/volts/power measurement
+  #define INA_260_MEAS_COUNT          INA260_COUNT_1024 // INA260_COUNT_1 // INA260_COUNT_1024 //  INA260_COUNT_64
+  #define INA_260_MEAS_TIME           INA260_TIME_8_244_ms //INA260_TIME_140_us // INA260_TIME_8_244_ms // INA260_TIME_1_1_ms //INA260_TIME_8_244_ms
+
 
   #define CALIBRATE_TEMPERATURE       0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
   #define CALIBRATE_HUMIDITY          0   // fine tuning, positive if sensor shows too low, negative if sensor shows too high
 
   // for LoRa
-  #define LORA_ENABLED                1 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
+  #define LORA_ENABLED                0 // 1-enable LoRa, 0 or nothing - NO LoRa capabilities
   #define LORA_GPIO_ENABLE_3V         19   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
   #define LORA_GPIO_MISO              20  // - BLUE
   #define LORA_GPIO_MOSI              17  // - GREEN

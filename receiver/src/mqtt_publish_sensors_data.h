@@ -165,6 +165,18 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   snprintf(comm_type_conf_topic,sizeof(comm_type_conf_topic),"homeassistant/sensor/%s/comm_type/config",hostname);
   if (debug_mode) Serial.println("comm_type_conf_topic="+String(comm_type_conf_topic));
 
+  char ina_v1_conf_topic[60];
+  snprintf(ina_v1_conf_topic,sizeof(ina_v1_conf_topic),"homeassistant/sensor/%s/ina_v1/config",hostname);
+  if (debug_mode) Serial.println("ina_v1_conf_topic="+String(ina_v1_conf_topic));
+
+  char ina_i1_conf_topic[60];
+  snprintf(ina_i1_conf_topic,sizeof(ina_i1_conf_topic),"homeassistant/sensor/%s/ina_i1/config",hostname);
+  if (debug_mode) Serial.println("ina_i1_conf_topic="+String(ina_i1_conf_topic));
+
+  char ina_p1_conf_topic[60];
+  snprintf(ina_p1_conf_topic,sizeof(ina_p1_conf_topic),"homeassistant/sensor/%s/ina_p1/config",hostname);
+  if (debug_mode) Serial.println("ina_p1_conf_topic="+String(ina_p1_conf_topic));
+
 // sensors/entities names
   char temp_name[30];
   snprintf(temp_name,sizeof(temp_name),"%s_temperature",hostname);
@@ -253,6 +265,18 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   char comm_type_name[60];
   snprintf(comm_type_name,sizeof(comm_type_name),"%s_comm_type",hostname);
   if (debug_mode) Serial.println("comm_type_name="+String(comm_type_name));
+
+  char ina_v1_name[30];
+  snprintf(ina_v1_name,sizeof(ina_v1_name),"%s_ina_v1",hostname);
+  if (debug_mode) Serial.println("ina_v1_name="+String(ina_v1_name));
+
+  char ina_i1_name[30];
+  snprintf(ina_i1_name,sizeof(ina_i1_name),"%s_ina_i1",hostname);
+  if (debug_mode) Serial.println("ina_i1_name="+String(ina_i1_name));
+
+  char ina_p1_name[30];
+  snprintf(ina_p1_name,sizeof(ina_p1_name),"%s_ina_p1",hostname);
+  if (debug_mode) Serial.println("ina_p1_name="+String(ina_p1_name));
 
 // values/state topic
   char sensors_topic_state[60];
@@ -1284,7 +1308,142 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
     Serial.println("============ DEBUG CONFIG comm_type END ========\n");
   }
 
+// INA260
+// ina_v1 config
+  config.clear();
+  config["en"] = false;
+  config["name"] = ina_v1_name;
+  config["dev_cla"] = "voltage";
+  config["stat_cla"] = "measurement";
+  config["stat_t"] = sensors_topic_state;
+  config["unit_of_meas"] = "V";
+  config["val_tpl"] = "{{value_json.ina_v1}}";
+  config["uniq_id"] = ina_v1_name;
+  config["frc_upd"] = "true";
+  config["entity_category"] = "diagnostic";
+  config["exp_aft"] = exp_after_s;
 
+  CREATE_SENSOR_MQTT_DEVICE
+
+  size_c = serializeJson(config, config_json);
+
+  if (!mqttc.publish(ina_v1_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  {
+    publish_status = false; total_publish_status = false;
+    Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,ina_v1_conf_topic);
+  } else
+  {
+    publish_status = true;
+    if (debug_mode) {Serial.printf("[%s]: PUBLISH SUCCESSFULL for %s\n",__func__,ina_v1_conf_topic);}
+  }
+
+  if (debug_mode) {
+    Serial.println("\n============ DEBUG CONFIG ina_v1 ============");
+    Serial.println("Size of battery config="+String(size_c)+" bytes");
+    Serial.println("Serialised config_json:");
+    Serial.println(config_json);
+    Serial.println("serializeJsonPretty");
+    serializeJsonPretty(config, Serial);
+    if (publish_status) {
+      Serial.println("\n ina_v1 CONFIG OK");
+    } else
+    {
+      Serial.println("\n ina_v1 CONFIG UNSUCCESSFULL");
+    }
+    Serial.println("============ DEBUG CONFIG ina_v1 END ========\n");
+  }
+
+
+
+// ina_i1 config
+  config.clear();
+  config["en"] = false;
+  config["name"] = ina_i1_name;
+  config["dev_cla"] = "current";
+  config["stat_cla"] = "measurement";
+  config["stat_t"] = sensors_topic_state;
+  config["unit_of_meas"] = "mA";
+  config["val_tpl"] = "{{value_json.ina_i1}}";
+  config["uniq_id"] = ina_i1_name;
+  config["frc_upd"] = "true";
+  config["entity_category"] = "diagnostic";
+  config["exp_aft"] = exp_after_s;
+
+  CREATE_SENSOR_MQTT_DEVICE
+
+  size_c = serializeJson(config, config_json);
+
+  if (!mqttc.publish(ina_i1_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  {
+    publish_status = false; total_publish_status = false;
+    Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,ina_i1_conf_topic);
+  } else
+  {
+    publish_status = true;
+    if (debug_mode) {Serial.printf("[%s]: PUBLISH SUCCESSFULL for %s\n",__func__,ina_i1_conf_topic);}
+  }
+
+  if (debug_mode) {
+    Serial.println("\n============ DEBUG CONFIG ina_i1 ============");
+    Serial.println("Size of battery config="+String(size_c)+" bytes");
+    Serial.println("Serialised config_json:");
+    Serial.println(config_json);
+    Serial.println("serializeJsonPretty");
+    serializeJsonPretty(config, Serial);
+    if (publish_status) {
+      Serial.println("\n ina_i1 CONFIG OK");
+    } else
+    {
+      Serial.println("\n ina_i1 CONFIG UNSUCCESSFULL");
+    }
+    Serial.println("============ DEBUG CONFIG ina_i1 END ========\n");
+  }
+
+
+// ina_p1 config
+  config.clear();
+  config["en"] = false;
+  config["name"] = ina_p1_name;
+  config["dev_cla"] = "power";
+  config["stat_cla"] = "measurement";
+  config["stat_t"] = sensors_topic_state;
+  config["unit_of_meas"] = "mW";
+  config["val_tpl"] = "{{value_json.ina_p1}}";
+  config["uniq_id"] = ina_p1_name;
+  config["frc_upd"] = "true";
+  config["entity_category"] = "diagnostic";
+  config["exp_aft"] = exp_after_s;
+
+  CREATE_SENSOR_MQTT_DEVICE
+
+  size_c = serializeJson(config, config_json);
+
+  if (!mqttc.publish(ina_p1_conf_topic,(uint8_t*)config_json,strlen(config_json), true))
+  {
+    publish_status = false; total_publish_status = false;
+    Serial.printf("[%s]: PUBLISH FAILED for %s\n",__func__,ina_p1_conf_topic);
+  } else
+  {
+    publish_status = true;
+    if (debug_mode) {Serial.printf("[%s]: PUBLISH SUCCESSFULL for %s\n",__func__,ina_p1_conf_topic);}
+  }
+
+  if (debug_mode) {
+    Serial.println("\n============ DEBUG CONFIG ina_p1 ============");
+    Serial.println("Size of battery config="+String(size_c)+" bytes");
+    Serial.println("Serialised config_json:");
+    Serial.println(config_json);
+    Serial.println("serializeJsonPretty");
+    serializeJsonPretty(config, Serial);
+    if (publish_status) {
+      Serial.println("\n ina_p1 CONFIG OK");
+    } else
+    {
+      Serial.println("\n ina_p1 CONFIG UNSUCCESSFULL");
+    }
+    Serial.println("============ DEBUG CONFIG ina_p1 END ========\n");
+  }
+// INA260 END
 
 // common sensors for all types END
 
@@ -1376,6 +1535,9 @@ bool mqtt_publish_sensors_values()
     Serial.print("\twifi_ok=");Serial.println(myLocalData.wifi_ok);
     Serial.print("\tmotion_enabled=");Serial.println(myLocalData.motion_enabled);
     Serial.print("\tbutton_pressed=");Serial.println(myLocalData.button_pressed);
+    Serial.print("\tina_v1=");Serial.println(myLocalData.ina_v1);
+    Serial.print("\tina_i1=");Serial.println(myLocalData.ina_i1);
+    Serial.print("\tina_p1=");Serial.println(myLocalData.ina_p1);
     Serial.println();
   }
   // debug_mode = 0;
@@ -1479,6 +1641,17 @@ bool mqtt_publish_sensors_values()
   payload["working_time_ms"]    = myLocalData.working_time_ms;
   payload["sleep_time_s"]       = myLocalData.sleep_time_s;
   payload["comm_type"]          = myLocalData_aux.comm_type;
+
+  // rounding floats to %0.xf accordingly
+  snprintf(temp_value,sizeof(temp_value),"%0.2f",myLocalData.ina_v1);
+  payload["ina_v1"]        = temp_value;
+
+  snprintf(temp_value,sizeof(temp_value),"%0.0f",myLocalData.ina_i1);
+  payload["ina_i1"]        = temp_value;
+
+  snprintf(temp_value,sizeof(temp_value),"%0.0f",myLocalData.ina_p1);
+  payload["ina_p1"]        = temp_value;
+
 
   char payload_json[JSON_PAYLOAD_SIZE];
   int size_pl = serializeJson(payload, payload_json);

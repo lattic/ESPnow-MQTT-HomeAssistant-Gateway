@@ -111,6 +111,14 @@ sender.ino
   #include <SPI.h>
   #include <LoRa.h>
 #endif
+
+// INA260
+#if (USE_INA260 == 1)
+  #include <Adafruit_INA260.h>
+  Adafruit_INA260 ina260 = Adafruit_INA260();
+  bool ina260_ok = false;
+  #include "measure-ina260.h"
+#endif
 // ========================================================================== libraries END
 
 // some consistency checks 
@@ -218,6 +226,9 @@ typedef struct struct_message           // 92 bytes
   uint16_t sleep_time_s;                // 
   uint8_t valid = 1;                    // make it invalid in case some info is missing, incorrect or flagged, don't publish to HA if invalid
   char macStr[18];                      // MAC address of sender in "%02x:%02x:%02x:%02x:%02x:%02x" format
+  float ina_v1;                         // INA260 volts
+  float ina_i1;                         // INA260 milliampers
+  float ina_p1;                         // INA260 milliwatts
 } struct_message;
 
 struct_message myData;
@@ -318,6 +329,10 @@ void hibernate(bool force, int final_sleeping_time_s);
   void LoRa_end();
 #endif 
 
+// INA260
+#if (USE_INA260 == 1)
+  void measure_ina260(float *v1, float *i1, float *p1);
+#endif
 
 void do_esp_restart();
 void do_esp_go_to_sleep();
@@ -1708,6 +1723,15 @@ void gather_data()
     Serial.printf("[%s]: sleep_time_s %ds\n",__func__,myData.sleep_time_s);
   #endif
 
+
+// INA260
+  #if (USE_INA260 == 1)
+    measure_ina260(&myData.ina_v1, &myData.ina_i1,&myData.ina_p1);
+    #ifdef DEBUG
+      Serial.printf("[%s]: INA260: v1=%0.2fV, i1=%0.0fmA,p1=%0.0fmW \n",__func__,myData.ina_v1,myData.ina_i1,myData.ina_p1);
+    #endif
+  #endif
+
   #ifdef DEBUG
     Serial.printf("[%s]: Total struct size=%d bytes\n",__func__,sizeof(myData));
   #endif
@@ -2727,7 +2751,40 @@ void setup()
   }
 
 // ===============  SENSORS INITIALISATION
-// MAX17048 - fuel gauge
+
+  
+// INA260 volts/current/power measurement
+  #if (USE_INA260 == 1)
+    if (!ina260.begin(0x40)) 
+    {
+      Serial.printf("[%s]: INA260 NOT detected ... Check your wiring!\n",__func__);
+      ina260_ok = false;
+    } else 
+    {
+      ina260_ok = true;
+      #ifdef DEBUG
+        Serial.printf("[%s]: start USE_INA260\n",__func__);
+      #endif // DEBUG
+
+      // Serial.print("getAveragingCount=");Serial.println(ina260.getAveragingCount());
+      // Serial.print("getVoltageConversionTime=");Serial.println(ina260.getVoltageConversionTime());
+      // Serial.print("getCurrentConversionTime=");Serial.println(ina260.getCurrentConversionTime());
+
+      ina260.setAveragingCount(INA_260_MEAS_COUNT);
+      ina260.setVoltageConversionTime(INA_260_MEAS_TIME);
+      ina260.setCurrentConversionTime(INA_260_MEAS_TIME);
+
+      // Serial.print("getAveragingCount=");Serial.println(ina260.getAveragingCount());
+      // Serial.print("getVoltageConversionTime=");Serial.println(ina260.getVoltageConversionTime());
+      // Serial.print("getCurrentConversionTime=");Serial.println(ina260.getCurrentConversionTime());
+    }
+  #else 
+    #ifdef DEBUG
+        Serial.printf("[%s]: DONT USE_INA260\n",__func__);
+    #endif // DEBUG
+  #endif
+  
+// MAX17048 - LiPo fuel gauge
   #if (USE_MAX17048 == 1)
     #ifdef DEBUG
       lipo.enableDebugging();
@@ -2758,7 +2815,7 @@ void setup()
     #endif
   #endif
 
-//lux
+//lux light
   #if (USE_TSL2561 == 1)
     #ifdef DEBUG
       Serial.printf("[%s]: start USE_TSL2561\n",__func__);
@@ -2780,7 +2837,7 @@ void setup()
     #endif
   #endif
 
-//sht31
+//sht31 temperature/humidity
   #if (USE_SHT31 == 1)
     #ifdef DEBUG
       Serial.printf("[%s]: start USE_SHT31\n",__func__);
@@ -2800,7 +2857,7 @@ void setup()
     #endif
   #endif
 
-//MAX31855
+//MAX31855 temperature thermocouple
   #if (USE_MAX31855 == 1)
     #ifdef DEBUG
       Serial.printf("[%s]: start USE_MAX31855\n",__func__);
@@ -2822,7 +2879,7 @@ void setup()
   #endif
 
 
-  //18B20 Dallas OneWireNg Temperature sensors 
+  //18B20 Dallas OneWireNg temperature (multiple) sensors 
   #if (USE_DALLAS_18B20 == 1) 
     #ifdef DEBUG
       Serial.printf("[%s]: start USE_DALLAS_18B20\n",__func__);
@@ -2844,6 +2901,7 @@ void setup()
       Serial.printf("[%s]: DONT USE_DALLAS_18B20\n",__func__);
     #endif
   #endif
+
 
 // ===============  SENSORS INITIALISATION END
 

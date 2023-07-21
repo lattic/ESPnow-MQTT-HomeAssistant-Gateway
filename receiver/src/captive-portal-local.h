@@ -170,7 +170,10 @@ void CaptivePortalServer()
 
 void StartWiFiAP()
 {
-  WiFi.mode(WIFI_AP);
+  // WiFi.mode(WIFI_AP);
+  // set properly protocols in case other were in use
+  esp_wifi_set_protocol( WIFI_IF_AP, WIFI_PROTOCOL_11B | WIFI_PROTOCOL_11G | WIFI_PROTOCOL_11N );
+
   WiFi.softAP(HOSTNAME);
   Serial.printf("[%s]: SSID: ",__func__); Serial.println(HOSTNAME);
   Serial.printf("[%s]: AP IP address: ",__func__); Serial.println(WiFi.softAPIP());
@@ -220,6 +223,9 @@ void StartWiFiSTA(String rec_ssid, String rec_password)
   esp_netif_t *esp_netif = NULL;
   esp_netif = esp_netif_next(esp_netif);
   esp_netif_set_hostname(esp_netif, HOSTNAME);
+
+  // set properly protocols in case other were in use
+  esp_wifi_set_protocol( WIFI_IF_STA, WIFI_PROTOCOL_11B | WIFI_PROTOCOL_11G | WIFI_PROTOCOL_11N );
 
   WiFi.begin(ssid_arr, password_arr);
 

@@ -1,7 +1,7 @@
 #pragma once
 
 // #define DEBUG
-#define VERSION "3.1.b2"
+#define VERSION "3.2.b1"
 
 // ****************************************
 #pragma message "Compiling VERSION = " VERSION

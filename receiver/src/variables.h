@@ -31,6 +31,9 @@ typedef struct struct_message             // main data struct sent from sender t
   uint16_t sleep_time_s;                  // programmed sleep time s
   uint8_t valid = 1;                      // make it invalid in case some info is missing, incorrect or flagged, don't publish to HA if invalid  
   char macStr[18];                        // MAC address of sender in "%02x:%02x:%02x:%02x:%02x:%02x" format
+  float ina_v1;                           // INA260 volts
+  float ina_i1;                           // INA260 milliampers
+  float ina_p1;                           // INA260 milliwatts  
 } struct_message;
 
 typedef struct struct_message_aux         // auxiliary data structure for sensors - with RSSI and MAC (of sender)
