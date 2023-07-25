@@ -35,15 +35,19 @@ void get_lux(char* lux_char)
         // but very big difference with time needed to measure
         // keep always tsl.enableAutoRange(true); to avoid errors
 
+        tsl.enableAutoRange(true); 
         if (g_lux_high_sens)    // function time from 453ms - 1357ms - depends on amount of light
         {
-            tsl.enableAutoRange(true); 
             tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);
         } else                  // function time from 18ms - 51ms - depends on amount of light
         {
-            tsl.enableAutoRange(true); 
             tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_13MS);
         }
+
+        // #if (DEVICE_ID == 94)
+        //     tsl.enableAutoRange(false); 
+        //     tsl.setGain(TSL2561_GAIN_1X);
+        // #endif 
 
         tsl.getEvent(&event);
 
