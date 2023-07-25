@@ -1,12 +1,16 @@
 TODO:
 1 - feedback and commands to sender while using LoRa
-
+2 - for USE_DALLAS_18B20 don't rely on device id - measure temperature for all sensors connected (even though there is only one temperature sensor on HA) - multisensors later
 
 button operation:
 1: very short push:   - normal forced run then sleep
 2: very short < x <3s - FW upgrade
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
+
+2023-07-25
+  3.2.b2  - don't print anything in DEBUG in set_error_XX_led_level()
+          - print DS18B20 address even without DEBUG
 
 2023-07-21
   3.2.b1  - added INA260 (current/volts/power measurements)

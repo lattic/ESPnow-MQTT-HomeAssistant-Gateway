@@ -474,7 +474,7 @@
   #define COMMON_RES                  (DSTherm::RES_12_BIT) //9-12 bits resolution
   #define CONFIG_DS18S20_EXT_RES
   #define CALIBRATE_TEMPERATURE       0 
-  // 28:30:22:75:D0:1:3C:61 -> DS18B20
+  // 28:AD:16:75:D0:1:3C:1  -> DS18B20
 
   #define USE_ST7735_160_80_ALI       1
   #define SCREEN_ROTATION             1
@@ -1148,7 +1148,7 @@
   #define ENABLE_3V_GPIO              3   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - mandatory for I2C devices on new boards
   #define USE_MAX17048                1   // use "0" to disable
   #define USE_SHT31                   0   // use "0" to disable
-  #define USE_TSL2561                 0   // use "0" to disable
+  #define USE_TSL2561                 1   // use "0" to disable
   #define SLEEP_TIME_S                5   // seconds - 180
 
   // for INA260

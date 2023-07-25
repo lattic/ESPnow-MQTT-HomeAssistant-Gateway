@@ -23,7 +23,7 @@
 
   void get_all_ds18b20_addresses() //this function shows all addresses of the connected DS18B20 sensors
   { 
-    Serial.printf("[%s]: \n",__func__);
+    Serial.printf("[%s]: ",__func__);
     
     DSTherm drv(_ow);
     Placeholder<DSTherm::Scratchpad> _scrpd;
@@ -48,10 +48,10 @@
 
   float get_ds18b20()
   {    
-    float temp_float;
+    float temp_float = -33.33;    // value for error
     
     //uncomment this function to shows all addresses of the connected DS18B20 sensors
-    // get_all_ds18b20_addresses();
+    get_all_ds18b20_addresses();
 
     DSTherm drv(_ow);
     Placeholder<DSTherm::Scratchpad> _scrpd;
@@ -60,15 +60,16 @@
     drv.convertTempAll(DSTherm::SCAN_BUS, PARASITE_POWER);
 
     // put here the address of the sensor
-    OneWireNg::Id id0 = {0x28,0x30,0x22,0x75,0xD0,0x1,0x3C,0x61}; 
+    OneWireNg::Id id0 = {0x28,0xAD,0x16,0x75,0xD0,0x1,0x3C,0x1};
 
     if (drv.readScratchpad(id0, &_scrpd) == OneWireNg::EC_SUCCESS)
     {
       temp_float = (float) scrpd.getTemp()/1000;
-    } else
-    {
-      temp_float = (float) -33.33;
-    }
+    } 
+    // else
+    // {
+    //   temp_float = (float) -33.33;
+    // }
 
     #ifdef DEBUG
       Serial.printf("[%s]: Temperature=%0.2fC\n",__func__,temp_float);

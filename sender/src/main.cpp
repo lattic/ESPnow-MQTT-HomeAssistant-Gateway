@@ -2176,29 +2176,29 @@ void set_act_blue_led_level(u_int8_t level)
       if (level == 1)
       {
         ledcWrite(ACT_BLUE_LED_PWM_CHANNEL, g_led_pwm);
-        #ifdef DEBUG
-          Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: %d\n",__func__,g_led_pwm);
-        #endif
+        // #ifdef DEBUG
+        //   Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: %d\n",__func__,g_led_pwm);
+        // #endif
       } else 
       {
         ledcWrite(ACT_BLUE_LED_PWM_CHANNEL, 0);
-        #ifdef DEBUG
-          Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: 0\n",__func__);
-        #endif
+        // #ifdef DEBUG
+        //   Serial.printf("[%s]: ACT_BLUE_LED_GPIO DC set to: 0\n",__func__);
+        // #endif
       }
     #else 
       if (level == 1)
       {
         digitalWrite(ACT_BLUE_LED_GPIO,HIGH);
-        #ifdef DEBUG
-          Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: HIGH\n",__func__);
-        #endif
+        // #ifdef DEBUG
+        //   Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: HIGH\n",__func__);
+        // #endif
       } else 
       {
         digitalWrite(ACT_BLUE_LED_GPIO,LOW);
-        #ifdef DEBUG
-          Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: LOW\n",__func__);
-        #endif
+        // #ifdef DEBUG
+        //   Serial.printf("[%s]: ACT_BLUE_LED_GPIO set to: LOW\n",__func__);
+        // #endif
       }
     #endif
   #endif
@@ -2217,29 +2217,29 @@ void set_error_red_led_level(u_int8_t level)
         else 
           red_level = g_led_pwm;
         ledcWrite(ERROR_RED_LED_PWM_CHANNEL, red_level);
-        #ifdef DEBUG
-          Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: %d\n",__func__,red_level);
-        #endif
+        // #ifdef DEBUG
+        //   Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: %d\n",__func__,red_level);
+        // #endif
       } else 
       {
         ledcWrite(ERROR_RED_LED_PWM_CHANNEL, 0);
-        #ifdef DEBUG
-          Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: 0\n",__func__);
-        #endif
+        // #ifdef DEBUG
+        //   Serial.printf("[%s]: ERROR_RED_LED_GPIO DC set to: 0\n",__func__);
+        // #endif
       }
     #else 
       if (level == 1)
       {
           digitalWrite(ERROR_RED_LED_GPIO,HIGH);
-          #ifdef DEBUG
-            Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: HIGH\n",__func__);
-          #endif
+          // #ifdef DEBUG
+          //   Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: HIGH\n",__func__);
+          // #endif
       } else 
       {
         digitalWrite(ERROR_RED_LED_GPIO,LOW);
-        #ifdef DEBUG
-          Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: LOW\n",__func__);
-        #endif
+        // #ifdef DEBUG
+        //   Serial.printf("[%s]: ERROR_RED_LED_GPIO set to: LOW\n",__func__);
+        // #endif
       }
     #endif
   #endif
