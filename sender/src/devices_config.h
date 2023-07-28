@@ -21,6 +21,7 @@
   // #define DEVICE_ID  41           // "esp32041" - S,  production - thermocouple  
   // #define DEVICE_ID  42           // "esp32042" - S2, production - pushbuttons 6x desk  
   // #define DEVICE_ID  43           // "esp32043" - S2, production - swimming pool   
+  // #define DEVICE_ID  46           // "esp32046" - C3, production - garden LED right
   // #define DEVICE_ID  49           // "esp32049" - S2, production - kitchen
   // #define DEVICE_ID  55           // "esp32055" - C3, production - TRV3 Toilet Bedroom
   // #define DEVICE_ID  56           // "esp32056" - C3, production - TRV7 Tailor
@@ -438,15 +439,15 @@
   #if (USE_ADC ==1)
     #define BATTERY_FROM_ADC            1     //  to indicate MAX17048 is not in use but ADC, make 0 if ADC is used for other purpose (non battery)
     #define ADC_GPIO                    10    //  int: GPIO for ADC
-    #define ADC_DIVIDER                 6.60f //4.255/0.678 // ((3.949 / 0.58) * (3.9 / 1.5))   //  float: adjust ADC - multiplication/resistors divider factor
+    #define ADC_DIVIDER                 6.60f //4.255/0.678  float: adjust ADC - multiplication/resistors divider factor
     #define ADC_ATTEN                   0     //  int: 0, 2, 6, 11 db
     #define ADC_CALIBRATION             0.86f // difference between measured Volts and real volts on ADC_GPIO
 
     // automatic adjustment of ADC_BITS
-    #if (BOARD_TYPE > 1)                      //  int: 13 for S2, 12 for S
-      #define ADC_BITS                  13      
+    #if ((BOARD_TYPE == 1) or (BOARD_TYPE == 4))                    //  13 bits for S2 or S3, 12 bits for S or C3
+      #define ADC_BITS                  12      
     #else
-      #define ADC_BITS                  12     
+      #define ADC_BITS                  13     
     #endif
   #endif
   // ADC usage END
@@ -495,10 +496,10 @@
     #define ADC_CALIBRATION             0.793f // difference between measured Volts and real volts on ADC_GPIO
 
     // automatic adjustment of ADC_BITS
-    #if (BOARD_TYPE > 1)                      //  int: 13 for S2, 12 for S
-      #define ADC_BITS                  13      
+    #if ((BOARD_TYPE == 1) or (BOARD_TYPE == 4))                    //  13 bits for S2 or S3, 12 bits for S or C3
+      #define ADC_BITS                  12      
     #else
-      #define ADC_BITS                  12     
+      #define ADC_BITS                  13     
     #endif
   #endif
   // ADC usage END  
@@ -535,6 +536,40 @@
   #endif
   #pragma message "compilation for: esp32044-Garage middle m."
 // ---------------------------------------------------------------------------------------------------
+
+
+#elif DEVICE_ID == 46                 
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
+
+  #define SENSOR_TYPE                 3 // 0 = "env", 1 = "motion", 2 =  "env+mot", 3 = battery, 4 = "push_b"
+  #define HOSTNAME                    "esp32046"
+  #define DEVICE_NAME                 "garden LED r."  // 15 characters maximum
+  #define BOARD_TYPE                  4   // 1 = ESP32-S, 2 = ESP32-S2, 3 = ESP32-S3, 4 = ESP32-C3
+  #define FW_UPGRADE_GPIO             1   // comment out if not in use - don't use "0" here unless you mean GPIO=0 - cannot be 8 or 9 on new boards if I2C used
+  #define SLEEP_TIME_S                900  // seconds - 
+
+  // ADC usage
+  // ESP32-C3: ADC1 = 5 channels: GPIO0 - GPIO4, ADC2 = 1 channel: GPIO5
+  #define USE_ADC                       1     // 1 - use, 0 -  don't use - it can be used for many purposes - not only battery measurements
+  #if (USE_ADC ==1)
+    #define BATTERY_FROM_ADC            1     //  to indicate MAX17048 is not in use but ADC, make 0 if ADC is used for other purpose (non battery)
+    #define ADC_GPIO                    0     //  int: GPIO for ADC
+    #define ADC_DIVIDER                 (5.7786f)    //  910k/150k float: adjust ADC - multiplication/resistors divider factor
+    #define ADC_ATTEN                   0     //  int: 0, 2, 6, 11 db
+    #define ADC_CALIBRATION             1     //0.86f // difference between measured Volts and real volts on ADC_GPIO
+
+    // automatic adjustment of ADC_BITS
+    #if ((BOARD_TYPE == 1) or (BOARD_TYPE == 4))                    //  13 bits for S2 or S3, 12 bits for S or C3
+      #define ADC_BITS                  12      
+    #else
+      #define ADC_BITS                  13     
+    #endif
+  #endif
+  // ADC usage END
+
+  #pragma message "compilation for: esp32046-garden LED right"
+// ---------------------------------------------------------------------------------------------------
+
 
 #elif DEVICE_ID == 49
   #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
@@ -1172,6 +1207,8 @@
 
   #pragma message "compilation for: esp32094-test"
 // ---------------------------------------------------------------------------------------------------
+
+
 
 
 
