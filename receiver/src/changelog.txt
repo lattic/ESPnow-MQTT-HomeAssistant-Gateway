@@ -2,6 +2,7 @@ TODO:
 0 - implement send command to sender in LoRa (now there is no feedback from receiver to sender if LoRa in use only)
 1 - implement #ifdef DEBUG instead of if (debug_mode)
 2 - improve CP html, add old values, checking if new are correct etc (check in sender sketch)
+3 - // config["exp_aft"] never expire sensor - to avoid "unavailable" (but how to recognize if something not working?)
 
 
 Webserial:
@@ -10,6 +11,9 @@ Webserial:
 
 OTA:
 - http://HOSTNAME.local:8080/update
+
+2023-07-28
+  3.2.b2  - // config["exp_aft"] = exp_after - never expire sensor - to avoid "unavailable" (but how to recognize if something not working?)
 
 2023-07-15
   3.2.b1  - added INA260 (current/volts/power measurements)
