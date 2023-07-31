@@ -12,6 +12,10 @@ Webserial:
 OTA:
 - http://HOSTNAME.local:8080/update
 
+
+2023-07-31
+  3.2.b3  - change mW to W
+
 2023-07-28
   3.2.b2  - // config["exp_aft"] = exp_after - never expire sensor - to avoid "unavailable" (but how to recognize if something not working?)
 

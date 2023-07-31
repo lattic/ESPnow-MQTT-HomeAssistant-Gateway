@@ -8,6 +8,9 @@ button operation:
 3: 3s< x < 6s         - start CP 
 4: x >6s              - Erasing ALL stored data on ESP, goes to sleep
 
+2023-07-31
+  3.2.b3  - change mW to W
+
 2023-07-25
   3.2.b2  - don't print anything in DEBUG in set_error_XX_led_level()
           - print DS18B20 address even without DEBUG

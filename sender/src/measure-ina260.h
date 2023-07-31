@@ -18,7 +18,7 @@
     {
       *v1 = ina260.readBusVoltage()/1000;
       *i1 = ina260.readCurrent();  //  /1000;
-      *p1 = ina260.readPower();    // /1000;
+      *p1 = ina260.readPower()/1000;
     }
 
      #ifdef DEBUG

@@ -1407,7 +1407,7 @@ bool mqtt_publish_sensors_config(const char* hostname, const char* name, const c
   config["dev_cla"] = "power";
   config["stat_cla"] = "measurement";
   config["stat_t"] = sensors_topic_state;
-  config["unit_of_meas"] = "mW";
+  config["unit_of_meas"] = "W";
   config["val_tpl"] = "{{value_json.ina_p1}}";
   config["uniq_id"] = ina_p1_name;
   config["frc_upd"] = "true";
