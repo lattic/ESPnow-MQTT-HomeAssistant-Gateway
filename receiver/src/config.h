@@ -362,36 +362,39 @@
 //   #pragma message "compilation for: ESPnow_esp32092-gwtest"
 
 
-// // S3 
-// #elif DEVICE_ID == 29
-//   #define BOARD_TYPE                3
-//   #define HOSTNAME                  "esp32029"
-//   #define ROLE_NAME                 "gw1-hall"
-//   #define LED_GPIO_SENSORS          5   // RED
-//   #define LED_GPIO_GATEWAY          6   // GREEN
-//   #define LED_GPIO_STANDBY          7   // BLUE
+// S3 
+#elif DEVICE_ID == 93
+  #define BOARD_TYPE                3
+  #define HOSTNAME                  "esp32093"
+  #define ROLE_NAME                 "093-s3"
+  #define LED_GPIO_SENSORS          5   // RED
+  #define LED_GPIO_GATEWAY          6   // GREEN
+  #define LED_GPIO_STANDBY          7   // BLUE
 
-//   #define LED_GPIO_SENSORS_USE_PWM  1
-//   #define LED_GPIO_SENSORS_PWM_DC   10
+  #define LED_GPIO_SENSORS_USE_PWM  1
+  #define LED_GPIO_SENSORS_PWM_DC   10
 
-//   #define LED_GPIO_GATEWAY_USE_PWM  1
-//   #define LED_GPIO_GATEWAY_PWM_DC   10
+  #define LED_GPIO_GATEWAY_USE_PWM  1
+  #define LED_GPIO_GATEWAY_PWM_DC   10
 
-//   #define LED_GPIO_STANDBY_USE_PWM  1
-//   #define LED_GPIO_STANDBY_PWM_DC   10
+  #define LED_GPIO_STANDBY_USE_PWM  1
+  #define LED_GPIO_STANDBY_PWM_DC   10
 
-//   #define PUSH_BUTTON_GPIO          0  // to control ESP
-//   #define PUSH_BUTTON_GPIO_ACT    LOW  // HIGH or LOW, HIGH = 1, LOW = 0, 0 if not defined (so default)
+  #define PUSH_BUTTON_GPIO          0  // to control ESP
+  #define PUSH_BUTTON_GPIO_ACT    LOW  // HIGH or LOW, HIGH = 1, LOW = 0, 0 if not defined (so default)
 
-//   uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x29};
+  uint8_t FixedMACAddress[] =       {0x2A, 0xFF, 0x01, 0x01, 0x01, 0x93};
   
-//   #define OTA_ACTIVE                1
+  // for ESPnow
+  #define ESPNOW_ENABLED              1 // 1-enable ESPnow, 0 or nothing - NO ESPnow capabilities
 
-//   #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
+  #define OTA_ACTIVE                1
 
-//   #define USE_WEB_SERIAL            1
+  #define COMMAND_QUEUE_TIMEOUT_S   2* 60 * 60  // 2h, in seconds, clear the commands queue for sender after timeout
 
-//   #pragma message "compilation for: ESPnow_esp32093-gwtest"
+  #define USE_WEB_SERIAL            1
+
+  #pragma message "compilation for: ESPnow_esp32093-test"
 
 
 
